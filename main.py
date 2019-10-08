@@ -35,6 +35,8 @@ async def generate_embed(color, title, description, attachment=None):
 		color = 0xcc0099
 	elif color == 'blue':
 		color = 0x3399ff
+	elif color == 'orange':
+		color = 0xff9900
 	embed = discord.Embed(
 		color=color,
 		title=title,
