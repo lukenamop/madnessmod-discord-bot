@@ -1,0 +1,6 @@
+git+https://github.com/Rapptz/discord.py
+git+https://github.com/takluyver/Unidecode.git
+praw
+prawcore
+psycopg2
+requests
