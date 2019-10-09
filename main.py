@@ -295,6 +295,9 @@ async def on_message(message):
 	if isinstance(message.channel, discord.DMChannel):
 		# '.signup' command (DM)
 		if message_content.startswith('.signup'):
+			member = client.get_guild(config.MM_GUILD_ID).get_member(message.author.id)
+			if member is None:
+				return
 			query = 'SELECT template_required FROM settings WHERE guild_id = ' + str(config.MM_GUILD_ID)
 			connect.crsr.execute(query)
 			results = connect.crsr.fetchone()
@@ -333,7 +336,7 @@ async def on_message(message):
 
 						# send template to #signups-and-templates
 						embed_title = 'Template Submission'
-						embed_description = message.author.mention + ' (' + functions.escape_underscores(message.author.display_name) + ', ' + str(message.author.id) + ')'
+						embed_description = member.mention + ' (' + functions.escape_underscores(member.display_name) + ', ' + str(member.id) + ')'
 						# file = discord.File(config.IMAGE_FOLDER + '/' + filename, filename=filename)
 						embed_link = message.attachments[0].url
 						embed = await generate_embed('green', embed_title, embed_description, embed_link)
@@ -366,7 +369,7 @@ async def on_message(message):
 
 					# send signup to #signups-and-templates
 					embed_title = 'Signup Confirmed'
-					embed_description = message.author.mention + ' (' + functions.escape_underscores(message.author.display_name) + ', ' + str(message.author.id) + ')'
+					embed_description = member.mention + ' (' + functions.escape_underscores(member.display_name) + ', ' + str(member.id) + ')'
 					embed = await generate_embed('green', embed_title, embed_description)
 					await client.get_channel(599333803407835147).send(embed=embed)
 					await action_log('signup sent to #signups-and-templates by ' + message.author.name + '#' + message.author.discriminator)
