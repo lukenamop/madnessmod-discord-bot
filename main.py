@@ -766,8 +766,9 @@ async def on_message(message):
 				query = 'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = ' + str(member1.id) + ' AND u2_id = ' + str(member2.id) + ' AND start_time >= ' + str(time.time() - config.MATCH_TIME + 5)
 				connect.crsr.execute(query)
 				result = connect.crsr.fetchone()
-				if result[0] and result[1]:
-					return
+				if result is not None:
+					if result[0] and result[1]:
+						return
 				embed_title = 'Match Reminder'
 				embed_description = '15 minutes remaining.'
 				embed = await generate_embed('yellow', embed_title, embed_description)
@@ -785,8 +786,9 @@ async def on_message(message):
 				query = 'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = ' + str(member1.id) + ' AND u2_id = ' + str(member2.id) + ' AND start_time >= ' + str(time.time() - config.MATCH_TIME + 5)
 				connect.crsr.execute(query)
 				result = connect.crsr.fetchone()
-				if result[0] and result[1]:
-					return
+				if result is not None:
+					if result[0] and result[1]:
+						return
 				embed_title = 'Match Reminder'
 				embed_description = '5 minutes remaining. Make sure to submit your final meme before the time runs out.'
 				embed = await generate_embed('yellow', embed_title, embed_description)
