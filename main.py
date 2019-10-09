@@ -918,7 +918,7 @@ async def on_reaction_add(reaction, user):
 				# create dm channel with the user
 				user_channel = await user.create_dm()
 				# check postgresql for an existing vote by the user in the specified match
-				query = 'SELECT a_vote, b_vote FROM votes WHERE user_id = ' + str(user.id) + ' AND match_id = ' + str(match_id)
+				query = 'SELECT a_vote, b_vote, db_id FROM votes WHERE user_id = ' + str(user.id) + ' AND match_id = ' + str(match_id)
 				connect.crsr.execute(query)
 				result = connect.crsr.fetchone()
 				if result is not None:
@@ -949,6 +949,7 @@ async def on_reaction_add(reaction, user):
 						await user_channel.send(embed=embed)
 						await action_log('vote removed from match by ' + user.name + '#' + user.discriminator)
 						return
+					return
 				# find which image the user voted for
 				if reaction.emoji == '🇦':
 					vote_position = 'A'
