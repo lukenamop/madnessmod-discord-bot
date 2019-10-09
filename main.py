@@ -918,7 +918,7 @@ async def on_reaction_add(reaction, user):
 				# create dm channel with the user
 				user_channel = await user.create_dm()
 				# check postgresql for an existing vote by the user in the specified match
-				query = 'SELECT a_vote, b_vote, db_id FROM votes WHERE user_id = ' + str(user.id) + ' AND match_id = ' + str(match_id)
+				query = 'SELECT a_vote, b_vote FROM votes WHERE user_id = ' + str(user.id) + ' AND match_id = ' + str(match_id)
 				connect.crsr.execute(query)
 				result = connect.crsr.fetchone()
 				if result is not None:
@@ -942,7 +942,7 @@ async def on_reaction_add(reaction, user):
 						embed_description = 'Your vote for image ' + vote_position + ' has been removed.'
 						embed = await generate_embed('yellow', embed_title, embed_description)
 						# remove vote from postgresql
-						query = 'UPDATE votes SET a_vote = False, b_vote = False WHERE user_id = ' + str(user.id) + ' AND match_id = ' + str(match_id)
+						query = 'DELETE FROM votes WHERE user_id = ' + str(user.id) + ' AND match_id = ' + str(match_id)
 						connect.crsr.execute(query)
 						connect.conn.commit()
 						# send embed to the user via dm
