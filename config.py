@@ -12,7 +12,8 @@ CYCLE = 604800 # 7 days
 MATCH_TIME = 1800 # 30 minutes
 MATCH_WARN1_TIME = 900 # 15 minutes
 MATCH_WARN2_TIME = 1500 # 25 minutes
-BASE_POLL_TIME = 7200 # 2 hours
+#BASE_POLL_TIME = 7200 # 2 hours
+BASE_POLL_TIME = 15
 
 # verify.py stuff
 CLIENT_ID = os.environ['REDDIT_CLIENT_ID']
