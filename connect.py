@@ -11,13 +11,12 @@ crsr = conn.cursor()
 print('postgres connection info:')
 print(conn.get_dsn_parameters())
 
+query = "DROP TABLE guild_settings"
+crsr.execute()
+conn.commit()
+
 print('settings:')
 crsr.execute("""SELECT * FROM settings""")
-for row in crsr.fetchall():
-	print(row)
-
-print('guilds:')
-crsr.execute("""SELECT * FROM guild_settings""")
 for row in crsr.fetchall():
 	print(row)
 
@@ -44,12 +43,6 @@ for row in crsr.fetchall():
 # TABLE settings
 # db_id SERIAL PRIMARY KEY
 # guild_id NUMERIC(18) NOT NULL
-# template_required BOOLEAN DEFAULT True
-
-# TABLE guild_settings
-# db_id SERIAL PRIMARY KEY
-# guild_id NUMERIC(18) NOT NULL
-# prefix VARCHAR(4) DEFAULT '.'
 # template_required BOOLEAN DEFAULT True
 
 # TABLE participants
