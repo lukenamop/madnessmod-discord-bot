@@ -12,7 +12,7 @@ print('postgres connection info:')
 print(conn.get_dsn_parameters())
 
 query = "DROP TABLE guild_settings"
-crsr.execute()
+crsr.execute(query)
 conn.commit()
 
 print('settings:')
