@@ -172,7 +172,10 @@ async def on_message(message):
 		if results is not None:
 			if results[4] is not None:
 				embed_title = 'Stats for ' + user.display_name
-				embed_description = 'Total matches: ' + str(results[0]) + '\nMatch wins/losses: ' + str(results[1]) + '/' + str(results[2]) + '\nWin percentage: ' + str(round(float(results[1]) / float(results[0]))) + '%\nTotal votes for your memes: ' + str(results[3]) + '\nAvg. time per meme: ' + strftime("%Mm %Ss", gmtime(results[4]))
+				try:
+					embed_description = 'Total matches: ' + str(results[0]) + '\nMatch wins/losses: ' + str(results[1]) + '/' + str(results[2]) + '\nWin percentage: ' + str(round(float(results[1]) / float(results[0]))) + '%\nTotal votes for your memes: ' + str(results[3]) + '\nAvg. time per meme: ' + strftime("%Mm %Ss", gmtime(results[4]))
+				except ZeroDivisionError:
+					embed_description = 'Total matches: ' + str(results[0]) + '\nMatch wins/losses: ' + str(results[1]) + '/' + str(results[2]) + '\nWin percentage: N/A\nTotal votes for your memes: ' + str(results[3]) + '\nAvg. time per meme: ' + strftime("%Mm %Ss", gmtime(results[4]))
 				embed = await generate_embed('pink', embed_title, embed_description)
 				await message.channel.send(embed=embed)
 				await action_log('stats shared to ' + message.author.name + '#' + message.author.discriminator)
