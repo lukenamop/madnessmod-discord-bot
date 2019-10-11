@@ -7,7 +7,7 @@ DB_URL = os.environ['DATABASE_URL']
 
 # main.py stuff
 TOKEN = os.environ['DISCORD_TOKEN']
-MM_GUILD_ID = 581695290986332160 # MemeMadness guild ID
+MM_GUILD_ID = 581695290986332160 # Meme Madness guild ID
 CYCLE = 604800 # 7 days
 MATCH_TIME = 1800 # 30 minutes
 MATCH_WARN1_TIME = 900 # 15 minutes
