@@ -11,10 +11,6 @@ crsr = conn.cursor()
 print('postgres connection info:')
 print(conn.get_dsn_parameters())
 
-query = "DROP TABLE guild_settings"
-crsr.execute(query)
-conn.commit()
-
 print('settings:')
 crsr.execute("""SELECT * FROM settings""")
 for row in crsr.fetchall():
