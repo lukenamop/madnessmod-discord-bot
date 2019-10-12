@@ -742,6 +742,7 @@ async def on_message(message):
 				u2_channel = await member2.create_dm()
 				start_time = time.time()
 				channel_id = message.channel.id
+
 				# add match info to postgresql
 				query = 'INSERT INTO matches (u1_id, u2_id, start_time, channel_id) VALUES (' + str(member1.id) + ', ' + str(member2.id) + ', ' + str(start_time) + ', ' + str(channel_id) + ')'
 				connect.crsr.execute(query)
@@ -837,6 +838,37 @@ async def on_message(message):
 				embed = await generate_embed('red', embed_title, embed_description)
 				await message.channel.send(embed=embed)
 				await action_log('match participants not specified')
+			return
+
+		# '.splitmatch' command (contest category)
+		if message_content.startswith('.splitmatch '):
+			if len(message.mentions) == 2:
+				# initialize important variables
+				member1 = message.mentions[0]
+				u1_channel = await member1.create_dm()
+				member2 = message.mentions[1]
+				u2_channel = await member2.create_dm()
+				channel_id = message.channel.id
+
+				# add match info to postgresql
+				query = 'INSERT INTO matches (u1_id, u2_id, channel_id) VALUES (' + str(member1.id) + ', ' + str(member2.id) + ', ' + str(channel_id) + ')'
+				connect.crsr.execute(query)
+				connect.conn.commit()
+
+				# respond with confirmation embed
+				embed_title = 'Match Split'
+				embed_description = 'Match between ' + member1.mention + ' and ' + member2.mention + ' has been split. Use `.startsolo @user` to get each user started.'
+				embed = await generate_embed('green', embed_title, embed_description)
+				await message.channel.send(embed=embed)
+				await action_log('match started between ' + member1.name + '#' + member1.discriminator + ' and ' + member2.name + '#' + member2.discriminator)
+				return
+			else:
+				embed_title = 'Participants Not Specified'
+				embed_description = 'The format to use this command is `.startmatch <@user> <@user>`, please be sure you\'re using it correctly.'
+				embed = await generate_embed('red', embed_title, embed_description)
+				await message.channel.send(embed=embed)
+				await action_log('match participants not specified')
+				return
 			return
 
 		# '.showresults' command (contest category)
