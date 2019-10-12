@@ -860,14 +860,27 @@ async def on_message(message):
 				embed_description = 'Match between ' + member1.mention + ' and ' + member2.mention + ' has been split. Use `.startsolo @user` to get each user started.'
 				embed = await generate_embed('green', embed_title, embed_description)
 				await message.channel.send(embed=embed)
-				await action_log('match started between ' + member1.name + '#' + member1.discriminator + ' and ' + member2.name + '#' + member2.discriminator)
+				await action_log('match split between ' + member1.name + '#' + member1.discriminator + ' and ' + member2.name + '#' + member2.discriminator)
 				return
 			else:
 				embed_title = 'Participants Not Specified'
-				embed_description = 'The format to use this command is `.startmatch <@user> <@user>`, please be sure you\'re using it correctly.'
+				embed_description = 'The format to use this command is `.splitmatch <@user> <@user>`, please be sure you\'re using it correctly.'
 				embed = await generate_embed('red', embed_title, embed_description)
 				await message.channel.send(embed=embed)
 				await action_log('match participants not specified')
+				return
+			return
+
+		# '.startsolo ' command (contest category)
+		if message_content.startswith('.startsolo '):
+			if len(message.mentions) == 1:
+				return
+			else:
+				embed_title = 'Participant Not Specified'
+				embed_description = 'The format to use this command is `.startsolo @user`, please be sure you\'re using it correctly.'
+				embed = await generate_embed('red', embed_title, embed_description)
+				await message.channel.send(embed=embed)
+				await action_log('match participant not specified')
 				return
 			return
 
