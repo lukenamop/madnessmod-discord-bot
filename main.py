@@ -251,7 +251,7 @@ async def on_message(message):
 							embed = await generate_embed('red', embed_title, embed_description)
 						await user_channel.send(embed=embed)
 						# send a message to #general welcoming the new user
-						embed_title = 'New User Has Joined'
+						embed_title = 'New User Has Joined: ' + base_member.display_name
 						if base_message.guild.id == 607342998497525808:
 							embed_description = base_member.mention + ', welcome to MEX! Please let a member of the mod team know if you need any help.'
 							embed = await generate_embed('green', embed_title, embed_description)
@@ -841,48 +841,73 @@ async def on_message(message):
 			return
 
 		# '.splitmatch' command (contest category)
-		if message_content.startswith('.splitmatch '):
-			if len(message.mentions) == 2:
-				# initialize important variables
-				member1 = message.mentions[0]
-				u1_channel = await member1.create_dm()
-				member2 = message.mentions[1]
-				u2_channel = await member2.create_dm()
-				channel_id = message.channel.id
+		# if message_content.startswith('.splitmatch '):
+		# 	if len(message.mentions) == 2:
+		# 		# initialize important variables
+		# 		member1 = message.mentions[0]
+		# 		u1_channel = await member1.create_dm()
+		# 		member2 = message.mentions[1]
+		# 		u2_channel = await member2.create_dm()
+		# 		start_time = time.time()
+		# 		channel_id = message.channel.id
 
-				# add match info to postgresql
-				query = 'INSERT INTO matches (u1_id, u2_id, channel_id) VALUES (' + str(member1.id) + ', ' + str(member2.id) + ', ' + str(channel_id) + ')'
-				connect.crsr.execute(query)
-				connect.conn.commit()
+		# 		# add match info to postgresql
+		# 		query = 'INSERT INTO matches (u1_id, u2_id, start_time, channel_id) VALUES (' + str(member1.id) + ', ' + str(member2.id) + ', ' + str(start_time) + ', ' + str(channel_id) + ')'
+		# 		connect.crsr.execute(query)
+		# 		connect.conn.commit()
 
-				# respond with confirmation embed
-				embed_title = 'Match Split'
-				embed_description = 'Match between ' + member1.mention + ' and ' + member2.mention + ' has been split. Use `.startsolo @user` to get each user started.'
-				embed = await generate_embed('green', embed_title, embed_description)
-				await message.channel.send(embed=embed)
-				await action_log('match split between ' + member1.name + '#' + member1.discriminator + ' and ' + member2.name + '#' + member2.discriminator)
-				return
-			else:
-				embed_title = 'Participants Not Specified'
-				embed_description = 'The format to use this command is `.splitmatch <@user> <@user>`, please be sure you\'re using it correctly.'
-				embed = await generate_embed('red', embed_title, embed_description)
-				await message.channel.send(embed=embed)
-				await action_log('match participants not specified')
-				return
-			return
+		# 		# respond with confirmation embed
+		# 		embed_title = 'Match Split'
+		# 		embed_description = 'Match between ' + member1.mention + ' and ' + member2.mention + ' has been split. Use `.startsolo @user` to get each user started.'
+		# 		embed = await generate_embed('green', embed_title, embed_description)
+		# 		await message.channel.send(embed=embed)
+		# 		await action_log('match split between ' + member1.name + '#' + member1.discriminator + ' and ' + member2.name + '#' + member2.discriminator)
+		# 		return
+		# 	else:
+		# 		embed_title = 'Participants Not Specified'
+		# 		embed_description = 'The format to use this command is `.splitmatch <@user> <@user>`, please be sure you\'re using it correctly.'
+		# 		embed = await generate_embed('red', embed_title, embed_description)
+		# 		await message.channel.send(embed=embed)
+		# 		await action_log('match participants not specified')
+		# 		return
+		# 	return
 
 		# '.startsolo ' command (contest category)
-		if message_content.startswith('.startsolo '):
-			if len(message.mentions) == 1:
-				return
-			else:
-				embed_title = 'Participant Not Specified'
-				embed_description = 'The format to use this command is `.startsolo @user`, please be sure you\'re using it correctly.'
-				embed = await generate_embed('red', embed_title, embed_description)
-				await message.channel.send(embed=embed)
-				await action_log('match participant not specified')
-				return
-			return
+		# if message_content.startswith('.startsolo '):
+		# 	if len(message.mentions) == 1:
+		# 		query = 'SELECT start_time, u1_id, u2_id, u1_submitted, u2_submitted, a_meme FROM matches WHERE channel_id = ' + str(message.channel.id)
+		# 		connect.crsr.execute(query)
+		# 		results = connect.crsr.fetchall()
+		# 		result = None
+		# 		if len(results) > 1:
+		# 			result = [0, 0, 0, 0, 0, 0]
+		# 			# find the most recent match by start_time
+		# 			for match in results:
+		# 				if match[0] > result[0]:
+		# 					result = match
+		# 		elif len(results) == 1:
+		# 			result = results[0]
+
+		# 		# verify that a qualifying match was found
+		# 		if result is not None:
+		# 			if result != [0, 0, 0, 0, 0, 0]:
+		# 				return
+
+		# 		# inform the match channel that no qualifying match was found
+		# 		embed_title = 'No Active Match'
+		# 		embed_description = 'There is no match to start solo. To split this match, use the `.splitmatch @user @user` command.'
+		# 		embed = await generate_embed('red', embed_title, embed_description)
+		# 		await message.channel.send(embed=embed)
+		# 		await action_log('no active split match')
+		# 		return
+		# 	else:
+		# 		embed_title = 'Participant Not Specified'
+		# 		embed_description = 'The format to use this command is `.startsolo @user`, please be sure you\'re using it correctly.'
+		# 		embed = await generate_embed('red', embed_title, embed_description)
+		# 		await message.channel.send(embed=embed)
+		# 		await action_log('match participant not specified')
+		# 		return
+		# 	return
 
 		# '.showresults' command (contest category)
 		if message_content.startswith('.showresults'):
@@ -895,7 +920,7 @@ async def on_message(message):
 				result = [0, 0, 0, 0, 0]
 				# find the most recent match by start_time
 				for match in results:
-					if match[4] > result[0]:
+					if match[4] > result[4]:
 						result = match
 			elif len(results) == 1:
 				result = results[0]
