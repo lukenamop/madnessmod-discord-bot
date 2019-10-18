@@ -785,10 +785,37 @@ async def on_message(message):
 			await action_log('signuplist sent to duel-mods')
 			return
 
+		# # '.starttournament' command (duel-mods)
+		# if message_content == '.starttournament':
+		# 	# check to be sure only admin user uses command
+		# 	if message.author.id in config.ADMIN_IDS:
+		# 		# pull all signups from database
+		# 		query = 'SELECT user_id FROM signups WHERE submission_time >= ' + str(time.time() - config.CYCLE)
+		# 		connect.crsr.execute(query)
+		# 		embed_title = 'Signup List'
+		# 		# check to make sure there are signups
+		# 		if connect.crsr is not None:
+		# 			# build signuplist embed
+		# 			embed_description = ''
+		# 			total = 0
+		# 			for entry in connect.crsr:
+		# 				member = message.guild.get_member(entry[0])
+		# 				if member is not None:
+		# 					embed_description += functions.escape_underscores(member.display_name) + '\n'
+		# 					total += 1
+		# 			embed_description += '**Total signups: ' + str(total) + '**'
+		# 		else:
+		# 			embed_description = 'There aren\'t any signups for this cycle in the database yet.'
+		# 		embed = await generate_embed('green', embed_title, embed_description)
+		# 		# send signuplist embed
+		# 		await message.channel.send(embed=embed)
+		# 		await action_log('signuplist sent to duel-mods')
+		# 		return
+
 		# '.toggletemplates' command (duel-mods)
 		if message_content == '.toggletemplates':
 			# check to be sure only admin user uses command
-			if message.author.id == 324273473360887808:
+			if message.author.id in config.ADMIN_IDS:
 				await action_log('signup templates toggled')
 				# check to see if templates are required
 				query = 'SELECT template_required FROM settings WHERE guild_id = ' + str(config.MM_GUILD_ID)
@@ -827,7 +854,7 @@ async def on_message(message):
 		# '.clearparticipantstats' command(duel-mods)
 		if message_content == '.clearparticipantstats':
 			# check to be sure only admin user uses command
-			if message.author.id == 324273473360887808:
+			if message.author.id in config.ADMIN_IDS:
 				# set participant stats to defaults in database
 				query = 'UPDATE participants SET total_matches = DEFAULT, match_wins = DEFAULT, match_losses = DEFAULT, total_votes_for = DEFAULT, avg_final_meme_time = DEFAULT'
 				connect.crsr.execute(query)
@@ -845,7 +872,7 @@ async def on_message(message):
 		# '.clearsignups' command (duel-mods)
 		if message_content == '.clearsignups':
 			# check to be sure only admin user uses command
-			if message.author.id == 324273473360887808:
+			if message.author.id in config.ADMIN_IDS:
 				# delete all rows from signups database
 				query = 'DELETE FROM signups'
 				connect.crsr.execute(query)
@@ -863,7 +890,7 @@ async def on_message(message):
 		# '.clearmatches' command (duel-mods)
 		if message_content == '.clearmatches':
 			# check to be sure only admin user uses command
-			if message.author.id == 324273473360887808:
+			if message.author.id in config.ADMIN_IDS:
 				# delete all rows from matches database
 				query = 'DELETE FROM matches'
 				connect.crsr.execute(query)
@@ -885,7 +912,7 @@ async def on_message(message):
 		# '.help' command (duel-mods)
 		if message_content.startswith('.help'):
 			# check to see who is asking for help
-			if message.author.id == 324273473360887808:
+			if message.author.id in config.ADMIN_IDS:
 				# build admin help embed
 				embed_title = 'Admin Commands'
 				embed_description = help_cmd.admin_help
