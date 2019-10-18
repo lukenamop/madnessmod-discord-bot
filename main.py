@@ -812,7 +812,7 @@ async def on_message(message):
 						member.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[1]))
 						total_added += 1
 					embed_title = 'Tournament Roles Set'
-					embed_description = 'Success! ' + total_removed + ' previous tournament roles removed, ' + total_added + ' new tournament roles added.'
+					embed_description = 'Success! ' + str(total_removed) + ' previous tournament roles removed, ' + str(total_added) + ' new tournament roles added.'
 					embed = await generate_embed('green', embed_title, embed_description)
 					await action_log(str(total_added) + ' roles added')
 				else:
@@ -841,7 +841,7 @@ async def on_message(message):
 							total_removed += 1
 				await action_log(str(total_removed) + ' roles removed')
 				embed_title = 'Tournament Roles Removed'
-				embed_description = 'Success! ' + total_removed + ' previous tournament roles removed.'
+				embed_description = 'Success! ' + str(total_removed) + ' previous tournament roles removed.'
 				await generate_embed('green', embed_title, embed_description)
 				await message.channel.send(embed=embed)
 				return
