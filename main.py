@@ -112,6 +112,14 @@ async def on_message(message):
 					elif (result[3] == 2 and winning_image == 'A') or (result [3] == 1 and winning_image == 'B'):
 						winner = base_channel.guild.get_member(result[2])
 						loser = base_channel.guild.get_member(result[1])
+						# member = message.guild.get_member(entry[0])
+						# if member is not None:
+						# 	for i in range(0, (len(config.ROUND_ROLE_IDS) - 1)):
+						# 		if config.ROUND_ROLE_IDS[i] in member.roles:
+						# 			# remove previous round role
+						# 			await member.remove_roles(message.guild.get_role(config.ROUND_ROLE_IDS[i]))
+						# 			# add next round role
+						# 			await member.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[i + 1]))
 					elif winning_image == 'tie':
 						# build tie embed for match channel
 						embed_title = 'Voting Results'
@@ -844,17 +852,9 @@ async def on_message(message):
 				embed = await generate_embed('green', embed_title, embed_description)
 				await message.channel.send(embed=embed)
 				await action_log(str(total_removed) + ' roles removed')
+				await action_log('removetournamentroles complete')
 				return
 			return
-
-						# member = message.guild.get_member(entry[0])
-						# if member is not None:
-						# 	for i in range(0, (len(config.ROUND_ROLE_IDS) - 1)):
-						# 		if config.ROUND_ROLE_IDS[i] in member.roles:
-						# 			# remove previous round role
-						# 			await member.remove_roles(message.guild.get_role(config.ROUND_ROLE_IDS[i]))
-						# 			# add next round role
-						# 			await member.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[i + 1]))
 
 		# '.toggletemplates' command (duel-mods)
 		if message_content == '.toggletemplates':
