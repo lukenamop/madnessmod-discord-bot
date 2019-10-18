@@ -809,7 +809,7 @@ async def on_message(message):
 					# assign every user to the Round 1 role
 					for entry in connect.crsr:
 						member = message.guild.get_member(entry[0])
-						member.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[1]))
+						await member.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[1]))
 						total_added += 1
 					embed_title = 'Tournament Roles Set'
 					embed_description = 'Success! ' + str(total_removed) + ' previous tournament roles removed, ' + str(total_added) + ' new tournament roles added.'
