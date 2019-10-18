@@ -839,11 +839,11 @@ async def on_message(message):
 							await member.remove_roles(role)
 							# count up
 							total_removed += 1
-				await action_log(str(total_removed) + ' roles removed')
 				embed_title = 'Tournament Roles Removed'
 				embed_description = 'Success! ' + str(total_removed) + ' previous tournament roles removed.'
-				await generate_embed('green', embed_title, embed_description)
+				embed = await generate_embed('green', embed_title, embed_description)
 				await message.channel.send(embed=embed)
+				await action_log(str(total_removed) + ' roles removed')
 				return
 			return
 
