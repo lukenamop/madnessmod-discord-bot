@@ -785,32 +785,76 @@ async def on_message(message):
 			await action_log('signuplist sent to duel-mods')
 			return
 
-		# # '.starttournament' command (duel-mods)
-		# if message_content == '.starttournament':
-		# 	# check to be sure only admin user uses command
-		# 	if message.author.id in config.ADMIN_IDS:
-		# 		# pull all signups from database
-		# 		query = 'SELECT user_id FROM signups WHERE submission_time >= ' + str(time.time() - config.CYCLE)
-		# 		connect.crsr.execute(query)
-		# 		embed_title = 'Signup List'
-		# 		# check to make sure there are signups
-		# 		if connect.crsr is not None:
-		# 			# build signuplist embed
-		# 			embed_description = ''
-		# 			total = 0
-		# 			for entry in connect.crsr:
-		# 				member = message.guild.get_member(entry[0])
-		# 				if member is not None:
-		# 					embed_description += functions.escape_underscores(member.display_name) + '\n'
-		# 					total += 1
-		# 			embed_description += '**Total signups: ' + str(total) + '**'
-		# 		else:
-		# 			embed_description = 'There aren\'t any signups for this cycle in the database yet.'
-		# 		embed = await generate_embed('green', embed_title, embed_description)
-		# 		# send signuplist embed
-		# 		await message.channel.send(embed=embed)
-		# 		await action_log('signuplist sent to duel-mods')
-		# 		return
+		# '.settournamentroles' command (duel-mods)
+		if message_content == '.settournamentroles':
+			# check to be sure only admin user uses command
+			if message.author.id in config.ADMIN_IDS:
+				total_removed = 0
+				# iterate through all members
+				for member in message.guild.members:
+					for role in member.roles:
+						if role.id in config.ROUND_ROLE_IDS:
+							# remove round roles
+							await member.remove_roles(role)
+							# count up
+							total_removed += 1
+				await action_log(str(total_removed) + ' roles removed')
+
+				# pull all signups from database
+				query = 'SELECT user_id FROM signups WHERE submission_time >= ' + str(time.time() - config.CYCLE)
+				connect.crsr.execute(query)
+				# check to make sure there are signups
+				if connect.crsr is not None:
+					total_added = 0
+					# assign every user to the Round 1 role
+					for entry in connect.crsr:
+						member = message.guild.get_member(entry[0])
+						member.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[1]))
+						total_added += 1
+					embed_title = 'Tournament Roles Set'
+					embed_description = 'Success! ' + total_removed + ' previous tournament roles removed, ' + total_added + ' new tournament roles added.'
+					embed = await generate_embed('green', embed_title, embed_description)
+					await action_log(str(total_added) + ' roles added')
+				else:
+					embed_title = 'Start Error'
+					embed_description = 'There aren\'t any signups for this cycle in the database yet.'
+					embed = await generate_embed('red', embed_title, embed_description)
+					await action_log('start error')
+				# send signuplist embed
+				await message.channel.send(embed=embed)
+				await action_log('settournamentroles complete')
+				return
+			return
+
+		# '.removetournamentroles' command (duel-mods)
+		if message_content == '.removetournamentroles':
+			# check to be sure only admin user uses command
+			if message.author.id in config.ADMIN_IDS:
+				total_removed = 0;
+				# iterate through all members
+				for member in message.guild.members:
+					for role in member.roles:
+						if role.id in config.ROUND_ROLE_IDS:
+							# remove round roles
+							await member.remove_roles(role)
+							# count up
+							total_removed += 1
+				await action_log(str(total_removed) + ' roles removed')
+				embed_title = 'Tournament Roles Removed'
+				embed_description = 'Success! ' + total_removed + ' previous tournament roles removed.'
+				await generate_embed('green', embed_title, embed_description)
+				await message.channel.send(embed=embed)
+				return
+			return
+
+						# member = message.guild.get_member(entry[0])
+						# if member is not None:
+						# 	for i in range(0, (len(config.ROUND_ROLE_IDS) - 1)):
+						# 		if config.ROUND_ROLE_IDS[i] in member.roles:
+						# 			# remove previous round role
+						# 			await member.remove_roles(message.guild.get_role(config.ROUND_ROLE_IDS[i]))
+						# 			# add next round role
+						# 			await member.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[i + 1]))
 
 		# '.toggletemplates' command (duel-mods)
 		if message_content == '.toggletemplates':
