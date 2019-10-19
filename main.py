@@ -141,13 +141,13 @@ async def on_message(message):
 				i = 0
 				while i <= (len(config.ROUND_ROLE_IDS) - 1):
 					round_role = message.guild.get_role(config.ROUND_ROLE_IDS[i])
-					i += 1
 					if round_role in winner.roles:
 						# remove previous round role
 						await winner.remove_roles(round_role)
 						# add next round role
 						await winner.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[i + 1]))
 						i = len(config.ROUND_ROLE_IDS)
+					i += 1
 				await action_log('winner round role updated')
 
 				# update participant stats in the database
