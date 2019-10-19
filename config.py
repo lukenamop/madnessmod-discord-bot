@@ -16,6 +16,7 @@ BASE_POLL_TIME = 30 # 2 hours
 ADMIN_IDS = [324273473360887808, 380462665358901268] # admin user IDs (lukenamop, eltoch)
 # round role IDs (Preliminary, Round 1, Round 2, Round 3, Semi-Finalist, Finalist)
 ROUND_ROLE_IDS = [634855120672391188, 634854136268980244, 634854070309355542, 634853838611939347, 634853782815113216, 634853736144961580]
+TESTING = True # if set to true, stats will not be recorded to the database
 
 # verify.py stuff
 CLIENT_ID = os.environ['REDDIT_CLIENT_ID']

@@ -120,14 +120,15 @@ async def on_message(message):
 						await base_channel.send(embed=embed)
 						await action_log('match ended in a tie, results sent in match channel')
 
-						# update participant stats in the databsee (tie)
-						query = 'UPDATE participants SET total_votes_for = total_votes_for + ' + votes + ' WHERE user_id = ' + str(result[1])
-						connect.crsr.execute(query)
-						connect.conn.commit()
-						query = 'UPDATE participants SET total_votes_for = total_votes_for + ' + votes + ' WHERE user_id = ' + str(result[2])
-						connect.crsr.execute(query)
-						connect.conn.commit()
-						await action_log('participant stats updated')
+						if not config.TESTING:
+							# update participant stats in the databsee (tie)
+							query = 'UPDATE participants SET total_votes_for = total_votes_for + ' + votes + ' WHERE user_id = ' + str(result[1])
+							connect.crsr.execute(query)
+							connect.conn.commit()
+							query = 'UPDATE participants SET total_votes_for = total_votes_for + ' + votes + ' WHERE user_id = ' + str(result[2])
+							connect.crsr.execute(query)
+							connect.conn.commit()
+							await action_log('participant stats updated')
 						return
 					else:
 						await action_log('winner not found or a_meme not defined in postgresql')
@@ -146,15 +147,15 @@ async def on_message(message):
 				action_log('winner round role updated')
 
 				# update participant stats in the database
-				query = 'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1, total_votes_for = total_votes_for + ' + str(winning_votes) + ' WHERE user_id = ' + str(winner.id)
-				connect.crsr.execute(query)
-				connect.conn.commit()
-				await action_log('winner participant stats updated')
-				query = 'UPDATE participants SET total_matches = total_matches + 1, match_losses = match_losses + 1, total_votes_for = total_votes_for + ' + str(losing_votes) + ' WHERE user_id = ' + str(loser.id)
-				connect.crsr.execute(query)
-				connect.conn.commit()
-				await action_log('loser participant stats updated')
-				return
+				if not config.TESTING:
+					query = 'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1, total_votes_for = total_votes_for + ' + str(winning_votes) + ' WHERE user_id = ' + str(winner.id)
+					connect.crsr.execute(query)
+					connect.conn.commit()
+					await action_log('winner participant stats updated')
+					query = 'UPDATE participants SET total_matches = total_matches + 1, match_losses = match_losses + 1, total_votes_for = total_votes_for + ' + str(losing_votes) + ' WHERE user_id = ' + str(loser.id)
+					connect.crsr.execute(query)
+					connect.conn.commit()
+					await action_log('loser participant stats updated')
 
 				# build notification embed for match channel (win/loss)
 				embed_title = 'Voting Results'
@@ -582,20 +583,21 @@ async def on_message(message):
 					connect.conn.commit()
 					await action_log('match info updated in postgresql')
 
-				# pull participant info from database
-				query = 'SELECT avg_final_meme_time, total_matches FROM participants WHERE user_id = ' + str(message.author.id)
-				connect.crsr.execute(query)
-				results = connect.crsr.fetchone()
-				# check to see if avg_final_meme_time exists
-				if results[0] is None:
-					new_avg_final_meme_time = time.time() - float(start_time)
-				else:
-					new_avg_final_meme_time = ((float(results[0] * results[1]) + (time.time() - float(start_time))) / float(results[1] + 1))
-				# update participant stats in database
-				query = 'UPDATE participants SET avg_final_meme_time = ' + str(new_avg_final_meme_time) + ' WHERE user_id = ' + str(message.author.id)
-				connect.crsr.execute(query)
-				connect.conn.commit()
-				await action_log('participant stats updated')
+				if not config.TESTING:
+					# pull participant info from database
+					query = 'SELECT avg_final_meme_time, total_matches FROM participants WHERE user_id = ' + str(message.author.id)
+					connect.crsr.execute(query)
+					results = connect.crsr.fetchone()
+					# check to see if avg_final_meme_time exists
+					if results[0] is None:
+						new_avg_final_meme_time = time.time() - float(start_time)
+					else:
+						new_avg_final_meme_time = ((float(results[0] * results[1]) + (time.time() - float(start_time))) / float(results[1] + 1))
+					# update participant stats in database
+					query = 'UPDATE participants SET avg_final_meme_time = ' + str(new_avg_final_meme_time) + ' WHERE user_id = ' + str(message.author.id)
+					connect.crsr.execute(query)
+					connect.conn.commit()
+					await action_log('participant stats updated')
 
 				# pull match info from database
 				query = 'SELECT u1_id, u2_id, u1_submitted, u2_submitted, u1_image_url, u2_image_url, channel_id FROM matches WHERE (u1_id = ' + str(message.author.id) + ' OR u2_id = ' + str(message.author.id) + ') AND start_time >= ' + str(time.time() - (config.MATCH_TIME + 10))
