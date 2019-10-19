@@ -139,13 +139,18 @@ async def on_message(message):
 
 				# update winner's round role
 				i = 0
-				while i <= (len(config.ROUND_ROLE_IDS) - 2):
+				while i <= (len(config.ROUND_ROLE_IDS) - 1):
 					round_role = message.guild.get_role(config.ROUND_ROLE_IDS[i])
 					if round_role in winner.roles:
 						# remove previous round role
 						await winner.remove_roles(round_role)
-						# add next round role
-						await winner.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[i + 1]))
+						# check to see if winner is a finalist
+						if round_role.id == 634853736144961580:
+							# add winning role
+							await winner.add_roles(message.guild.get_role(config.WINNER_ROLE_ID))
+						else:
+							# add next round role
+							await winner.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[i + 1]))
 						i = len(config.ROUND_ROLE_IDS)
 					i += 1
 				await action_log('winner round role updated')
