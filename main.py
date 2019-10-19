@@ -141,7 +141,7 @@ async def on_message(message):
 				i = 0
 				while i <= (len(config.ROUND_ROLE_IDS) - 1):
 					round_role = message.guild.get_role(config.ROUND_ROLE_IDS[i])
-					i++
+					i += 1
 					if round_role in winner.roles:
 						# remove previous round role
 						await winner.remove_roles(round_role)
