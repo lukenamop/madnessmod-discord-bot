@@ -163,7 +163,7 @@ async def on_message(message):
 				embed = await generate_embed('pink', embed_title, embed_description)
 				await base_channel.send(embed=embed)
 				await action_log('voting results sent in match channel')
-
+				return
 			if message.channel.id == 599333803407835147:
 				# add reactions to messages in the #signups-and-templates channel
 				await message.add_reaction('👍')
