@@ -112,14 +112,6 @@ async def on_message(message):
 					elif (result[3] == 2 and winning_image == 'A') or (result [3] == 1 and winning_image == 'B'):
 						winner = base_channel.guild.get_member(result[2])
 						loser = base_channel.guild.get_member(result[1])
-						# member = message.guild.get_member(entry[0])
-						# if member is not None:
-						# 	for i in range(0, (len(config.ROUND_ROLE_IDS) - 1)):
-						# 		if config.ROUND_ROLE_IDS[i] in member.roles:
-						# 			# remove previous round role
-						# 			await member.remove_roles(message.guild.get_role(config.ROUND_ROLE_IDS[i]))
-						# 			# add next round role
-						# 			await member.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[i + 1]))
 					elif winning_image == 'tie':
 						# build tie embed for match channel
 						embed_title = 'Voting Results'
@@ -144,12 +136,14 @@ async def on_message(message):
 					await action_log('member from existing match was not found in the guild')
 					return
 
-				# build notification embed for match channel (win/loss)
-				embed_title = 'Voting Results'
-				embed_description = 'Congratulations to ' + winner.mention + ', you have won this match with image ' + winning_image + '! Thank you for participating ' + loser.mention + '. The final score was ' + str(a_votes) + ' - ' + str(b_votes) + '.'
-				embed = await generate_embed('pink', embed_title, embed_description)
-				await base_channel.send(embed=embed)
-				await action_log('voting results sent in match channel')
+				# update winner's round role
+				for i in range(0, (len(config.ROUND_ROLE_IDS) - 1)):
+					if config.ROUND_ROLE_IDS[i] in winner.roles:
+						# remove previous round role
+						await winner.remove_roles(message.guild.get_role(config.ROUND_ROLE_IDS[i]))
+						# add next round role
+						await winner.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[i + 1]))
+				action_log('winner round role updated')
 
 				# update participant stats in the database
 				query = 'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1, total_votes_for = total_votes_for + ' + str(winning_votes) + ' WHERE user_id = ' + str(winner.id)
@@ -161,6 +155,13 @@ async def on_message(message):
 				connect.conn.commit()
 				await action_log('loser participant stats updated')
 				return
+
+				# build notification embed for match channel (win/loss)
+				embed_title = 'Voting Results'
+				embed_description = 'Congratulations to ' + winner.mention + ', you have won this match with image ' + winning_image + '! Thank you for participating ' + loser.mention + '. The final score was ' + str(a_votes) + ' - ' + str(b_votes) + '.'
+				embed = await generate_embed('pink', embed_title, embed_description)
+				await base_channel.send(embed=embed)
+				await action_log('voting results sent in match channel')
 
 			if message.channel.id == 599333803407835147:
 				# add reactions to messages in the #signups-and-templates channel
