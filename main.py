@@ -702,6 +702,20 @@ async def on_message(message):
 			return
 		return
 
+	# stats-flex specific commands
+	if message.channel.id == 631239602736201728:
+		# '.help' command (stats-flex)
+		if message_content.startswith('.help'):
+			# build help embed
+			embed_title = 'Commands'
+			embed_description = help_cmd.stats_help
+			embed = await generate_embed('yellow', embed_title, embed_description)
+			await message.channel.send(embed=embed)
+			await action_log('help query sent to ' + message.author.name + '#' + message.author.discriminator + ' in stats-flex')
+			return
+		return
+
+
 	# duel-mods specific commands
 	if message.channel.id == 600397545050734612 or message.channel.id == 581728812518080522:
 		# '.resignup' command (duel-mods)

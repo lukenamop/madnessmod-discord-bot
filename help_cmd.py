@@ -3,6 +3,10 @@ dm_help = """`.donate` - shows MadnessMod donation info
 	\n`.signup` - submits a template to the Meme Madness moderators (must be used in the same message as an attachment)
 	\n`.submit` - submits a final meme to your active match"""
 
+stats_help = """`.donate` - shows MadnessMod donation info
+	\n`.help` - returns this help menu
+	\n`.stats` - displays your Meme Madness stats (can also be used like `.stats @<user>`)"""
+
 mod_help = """`.donate` - shows MadnessMod donation info
 	\n`.help` - returns this help menu
 	\n`.resignup <user ID> <reason>` - deletes a user's template and DMs them with `<reason>`, prompting them to re-signup
