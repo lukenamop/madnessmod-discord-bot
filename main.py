@@ -71,7 +71,8 @@ async def on_message(message):
 				await message.add_reaction('🇧')
 				await action_log('added reactions to poll message')
 				vote_pings_role = message.channel.guild.get_role(600356303033860106)
-				await message.channel.send(vote_pings_role.mention + ' @here')
+				if not config.TESTING:
+					await message.channel.send(vote_pings_role.mention + ' @here')
 
 				# sleep for 2 hours (config.BASE_POLL_TIME)
 				await asyncio.sleep(config.BASE_POLL_TIME)
