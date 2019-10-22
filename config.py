@@ -17,7 +17,10 @@ ADMIN_IDS = [324273473360887808, 380462665358901268] # admin user IDs (lukenamop
 # round role IDs (Preliminary, Round 1, Round 2, Round 3, Semi-Finalist, Finalist)
 ROUND_ROLE_IDS = [634855120672391188, 634854136268980244, 634854070309355542, 634853838611939347, 634853782815113216, 634853736144961580]
 WINNER_ROLE_ID = 600857122032451594 # Past Winner role ID
-TESTING = False # if set to true, stats will not be recorded to the database
+ARCHIVE_CHAN_ID = 636263404444844062 # channel ID for archiving winning images
+TESTING = True # if set to true, stats will not be recorded to the database
+if TESTING:
+	BASE_POLL_TIME = 30
 
 # verify.py stuff
 CLIENT_ID = os.environ['REDDIT_CLIENT_ID']

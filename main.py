@@ -1201,11 +1201,11 @@ async def on_message(message):
 		if message_content.startswith('.showresults'):
 			await action_log('showresults command in match channel')
 			# check to see who submitted each meme
-			query = 'SELECT db_id, u1_id, u2_id, a_meme, start_time FROM matches WHERE channel_id = ' + str(message.channel.id)
+			query = 'SELECT db_id, u1_id, u2_id, a_meme, start_time, u1_image_url, u2_image_url FROM matches WHERE channel_id = ' + str(message.channel.id)
 			connect.crsr.execute(query)
 			results = connect.crsr.fetchall()
 			if len(results) > 1:
-				result = [0, 0, 0, 0, 0]
+				result = [0, 0, 0, 0, 0, 0, 0]
 				# find the most recent match by start_time
 				for match in results:
 					if match[4] > result[4]:
@@ -1236,14 +1236,17 @@ async def on_message(message):
 				winning_image = 'B'
 			elif a_votes == b_votes:
 				winning_image = 'tie'
+
 			# alert match channel of poll results
 			# AttributeError triggers if participant is no longer in the guild
 			try:
 				if (result[3] == 1 and winning_image == 'A') or (result[3] == 2 and winning_image == 'B'):
 					winner = message.channel.guild.get_member(result[1])
+					winning_image_url = result[5]
 					loser = message.channel.guild.get_member(result[2])
 				elif (result[3] == 2 and winning_image == 'A') or (result [3] == 1 and winning_image == 'B'):
 					winner = message.channel.guild.get_member(result[2])
+					winning_image_url = result[6]
 					loser = message.channel.guild.get_member(result[1])
 				elif winning_image == 'tie':
 					# build tie embed for match channel
@@ -1259,12 +1262,21 @@ async def on_message(message):
 			except AttributeError:
 				await action_log('member from existing match was not found in the guild')
 				return
+
 			# build notification embed for match channel
 			embed_title = 'Voting Results'
 			embed_description = 'Congratulations to ' + winner.mention + ', you have won this match with image ' + winning_image + '! Thank you for participating ' + loser.mention + '. The final score was ' + str(a_votes) + ' - ' + str(b_votes) + '.'
 			embed = await generate_embed('pink', embed_title, embed_description)
 			await message.channel.send(embed=embed)
 			await action_log('voting results sent in match channel')
+
+			# build winning image embed for match archive
+			embed_title = winner.display_name
+			embed_description = datetime.date.today().strftime("%B %d")
+			embed_link = winning_image_url
+			embed = await generate_embed('pink', embed_title, embed_description, embed_link)
+			await client.get_channel(config.ARCHIVE_CHAN_ID).send(embed=embed)
+			await action_log('winning image sent to archive channel')
 			return
 		return
 
