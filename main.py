@@ -80,7 +80,7 @@ async def on_message(message):
 				await message.delete()
 
 				# check to see who submitted each meme
-				query = 'SELECT db_id, u1_id, u2_id, a_meme FROM matches WHERE channel_id = ' + str(message.channel.id) + ' AND start_time >= ' + str(time.time() - (config.BASE_POLL_TIME + config.MATCH_TIME + 30))
+				query = 'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url FROM matches WHERE channel_id = ' + str(message.channel.id) + ' AND start_time >= ' + str(time.time() - (config.BASE_POLL_TIME + config.MATCH_TIME + 30))
 				connect.crsr.execute(query)
 				result = connect.crsr.fetchone()
 				# check how many votes image A got
@@ -109,9 +109,11 @@ async def on_message(message):
 				try:
 					if (result[3] == 1 and winning_image == 'A') or (result[3] == 2 and winning_image == 'B'):
 						winner = base_channel.guild.get_member(result[1])
+						winning_image_url = result[5]
 						loser = base_channel.guild.get_member(result[2])
 					elif (result[3] == 2 and winning_image == 'A') or (result [3] == 1 and winning_image == 'B'):
 						winner = base_channel.guild.get_member(result[2])
+						winning_image_url = result[6]
 						loser = base_channel.guild.get_member(result[1])
 					elif winning_image == 'tie':
 						# build tie embed for match channel
@@ -173,6 +175,14 @@ async def on_message(message):
 				embed = await generate_embed('pink', embed_title, embed_description)
 				await base_channel.send(embed=embed)
 				await action_log('voting results sent in match channel')
+
+				# build winning image embed for match archive
+				embed_title = winner.display_name
+				embed_description = datetime.date.today().strftime("%B %d")
+				embed_link = winning_image_url
+				embed = await generate_embed('pink', embed_title, embed_description, embed_link)
+				await client.get_channel(config.ARCHIVE_CHAN_ID).send(embed=embed)
+				await action_log('winning image sent to archive channel')
 				return
 			if message.channel.id == 599333803407835147:
 				# add reactions to messages in the #signups-and-templates channel
@@ -1202,11 +1212,11 @@ async def on_message(message):
 		if message_content.startswith('.showresults'):
 			await action_log('showresults command in match channel')
 			# check to see who submitted each meme
-			query = 'SELECT db_id, u1_id, u2_id, a_meme, start_time, u1_image_url, u2_image_url FROM matches WHERE channel_id = ' + str(message.channel.id)
+			query = 'SELECT db_id, u1_id, u2_id, a_meme, start_time FROM matches WHERE channel_id = ' + str(message.channel.id)
 			connect.crsr.execute(query)
 			results = connect.crsr.fetchall()
 			if len(results) > 1:
-				result = [0, 0, 0, 0, 0, 0, 0]
+				result = [0, 0, 0, 0, 0]
 				# find the most recent match by start_time
 				for match in results:
 					if match[4] > result[4]:
@@ -1243,11 +1253,9 @@ async def on_message(message):
 			try:
 				if (result[3] == 1 and winning_image == 'A') or (result[3] == 2 and winning_image == 'B'):
 					winner = message.channel.guild.get_member(result[1])
-					winning_image_url = result[5]
 					loser = message.channel.guild.get_member(result[2])
 				elif (result[3] == 2 and winning_image == 'A') or (result [3] == 1 and winning_image == 'B'):
 					winner = message.channel.guild.get_member(result[2])
-					winning_image_url = result[6]
 					loser = message.channel.guild.get_member(result[1])
 				elif winning_image == 'tie':
 					# build tie embed for match channel
@@ -1270,14 +1278,6 @@ async def on_message(message):
 			embed = await generate_embed('pink', embed_title, embed_description)
 			await message.channel.send(embed=embed)
 			await action_log('voting results sent in match channel')
-
-			# build winning image embed for match archive
-			embed_title = winner.display_name
-			embed_description = datetime.date.today().strftime("%B %d")
-			embed_link = winning_image_url
-			embed = await generate_embed('pink', embed_title, embed_description, embed_link)
-			await client.get_channel(config.ARCHIVE_CHAN_ID).send(embed=embed)
-			await action_log('winning image sent to archive channel')
 			return
 		return
 
