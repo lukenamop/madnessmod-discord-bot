@@ -73,6 +73,8 @@ async def on_message(message):
 				vote_pings_role = message.channel.guild.get_role(600356303033860106)
 				if not config.TESTING:
 					await message.channel.send(vote_pings_role.mention + ' @here')
+				else:
+					await message.channel.send('This is just a test match, not pinging `Vote Pings` or `here`.')
 
 				# sleep for 2 hours (config.BASE_POLL_TIME)
 				await asyncio.sleep(config.BASE_POLL_TIME)
