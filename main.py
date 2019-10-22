@@ -111,11 +111,11 @@ async def on_message(message):
 				try:
 					if (result[3] == 1 and winning_image == 'A') or (result[3] == 2 and winning_image == 'B'):
 						winner = base_channel.guild.get_member(result[1])
-						winning_image_url = result[5]
+						winning_image_url = result[4]
 						loser = base_channel.guild.get_member(result[2])
 					elif (result[3] == 2 and winning_image == 'A') or (result [3] == 1 and winning_image == 'B'):
 						winner = base_channel.guild.get_member(result[2])
-						winning_image_url = result[6]
+						winning_image_url = result[5]
 						loser = base_channel.guild.get_member(result[1])
 					elif winning_image == 'tie':
 						# build tie embed for match channel
