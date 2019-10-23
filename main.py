@@ -142,26 +142,26 @@ async def on_message(message):
 					await action_log('member from existing match was not found in the guild')
 					return
 
-				# update winner's round role
-				i = 0
-				while i <= (len(config.ROUND_ROLE_IDS) - 1):
-					round_role = message.guild.get_role(config.ROUND_ROLE_IDS[i])
-					if round_role in winner.roles:
-						# remove previous round role
-						await winner.remove_roles(round_role)
-						# check to see if winner is a finalist
-						if round_role.id == 634853736144961580:
-							# add winning role
-							await winner.add_roles(message.guild.get_role(config.WINNER_ROLE_ID))
-						else:
-							# add next round role
-							await winner.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[i + 1]))
-						i = len(config.ROUND_ROLE_IDS)
-					i += 1
-				await action_log('winner round role updated')
-
-				# update participant stats in the database
 				if not config.TESTING:
+					# update winner's round role
+					i = 0
+					while i <= (len(config.ROUND_ROLE_IDS) - 1):
+						round_role = message.guild.get_role(config.ROUND_ROLE_IDS[i])
+						if round_role in winner.roles:
+							# remove previous round role
+							await winner.remove_roles(round_role)
+							# check to see if winner is a finalist
+							if round_role.id == 634853736144961580:
+								# add winning role
+								await winner.add_roles(message.guild.get_role(config.WINNER_ROLE_ID))
+							else:
+								# add next round role
+								await winner.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[i + 1]))
+							i = len(config.ROUND_ROLE_IDS)
+						i += 1
+					await action_log('winner round role updated')
+
+					# update participant stats in the database
 					query = 'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1, total_votes_for = total_votes_for + ' + str(winning_votes) + ' WHERE user_id = ' + str(winner.id)
 					connect.crsr.execute(query)
 					connect.conn.commit()
