@@ -971,7 +971,7 @@ async def on_message(message):
 				# split message apart and find user from ID
 				message_split = message_content.split(' ', 1)
 				user_id = int(message_split[1])
-				member = client.get_server(config.MM_GUILD_ID).get_member(user_id)
+				member = client.get_guild(config.MM_GUILD_ID).get_member(user_id)
 
 				passed = False
 				if member is not None:
