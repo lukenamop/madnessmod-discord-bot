@@ -470,11 +470,12 @@ async def on_message(message):
 						# send template to #signups-and-templates
 						embed_title = 'Template Submission'
 						embed_description = member.mention + ' (' + functions.escape_underscores(member.display_name) + ', ' + str(member.id) + ')'
-						# file = discord.File(config.IMAGE_FOLDER + '/' + filename, filename=filename)
 						embed_link = message.attachments[0].url
 						embed = await generate_embed('green', embed_title, embed_description, embed_link)
-						# await client.get_channel(599333803407835147).send(file=file, embed=embed)
-						await client.get_channel(599333803407835147).send(embed=embed)
+						template_chan = client.get_channel(config.TEMPLATE_CHAN_ID)
+						template_message = await template_chan.send(embed=embed, nonce='template')
+						await template_message.pin()
+						await template_chan.last_message.delete()
 						await action_log('signup attachment sent to #signups-and-templates by ' + message.author.name + '#' + message.author.discriminator)
 
 						# add signup info to postgresql
@@ -508,9 +509,7 @@ async def on_message(message):
 					embed_description = member.mention + ' (' + functions.escape_underscores(member.display_name) + ', ' + str(member.id) + ')'
 					embed = await generate_embed('green', embed_title, embed_description)
 					template_chan = client.get_channel(config.TEMPLATE_CHAN_ID)
-					template_message = await template_chan.send(embed=embed, nonce='template')
-					await template_message.pin()
-					await template_chan.last_message.delete()
+					template_message = await template_chan.send(embed=embed)
 					await action_log('signup sent to #signups-and-templates by ' + message.author.name + '#' + message.author.discriminator)
 
 					# add signup info to postgresql
