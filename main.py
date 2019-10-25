@@ -766,7 +766,7 @@ async def on_message(message):
 					await action_log('no existing user, new user added to participants table in postgresql')
 				else:
 					# update participant stats if they already exist
-					query = 'UPDATE participants SET templates_submitted = ' + result[0] + ' WHERE user_id = ' + str(message.author.id)
+					query = 'UPDATE participants SET templates_submitted = ' + str(result[0] + 1) + ' WHERE user_id = ' + str(message.author.id)
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('user already existed, participant stats updated in postgresql')
