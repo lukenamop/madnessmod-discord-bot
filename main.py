@@ -1155,8 +1155,7 @@ async def on_message(message):
 				template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).pins()
 				if len(template_list) >= 1:
 					template_message = random.choice(template_list)
-					template_url = template_message.attachments[0]
-					await action_log(template_url)
+					template_url = template_message.attachments[0].url
 					embed_title = 'Template'
 					embed_description = 'Here\'s one:'
 					embed = await generate_embed('green', embed_title, embed_description, template_url)
