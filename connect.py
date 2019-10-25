@@ -16,11 +16,6 @@ crsr.execute("""SELECT * FROM settings""")
 for row in crsr.fetchall():
 	print(row)
 
-query = """ALTER TABLE participants
-ADD templates_submitted NUMERIC(7) DEFAULT 0"""
-crsr.execute(query)
-conn.commit()
-
 print('participants:')
 crsr.execute("""SELECT * FROM participants""")
 for row in crsr.fetchall():
