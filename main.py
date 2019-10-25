@@ -62,7 +62,7 @@ async def on_message(message):
 	if message.author.bot:
 		# except for MadnessMod itself
 		if message.author.id == 622139031756734492:
-			if message.nonce == 'poll_message':
+			if message.nonce == 'poll':
 				# get base match channel
 				base_channel = message.channel
 
@@ -186,7 +186,7 @@ async def on_message(message):
 				await client.get_channel(config.ARCHIVE_CHAN_ID).send(embed=embed)
 				await action_log('winning image sent to archive channel')
 				return
-			if message.channel.id == 599333803407835147:
+			if message.channel.id == 599333803407835147 and message.nonce == 'template':
 				# add reactions to messages in the #signups-and-templates channel
 				await message.add_reaction('👍')
 				await message.add_reaction('🤷')
@@ -508,7 +508,7 @@ async def on_message(message):
 					embed_description = member.mention + ' (' + functions.escape_underscores(member.display_name) + ', ' + str(member.id) + ')'
 					embed = await generate_embed('green', embed_title, embed_description)
 					template_chan = client.get_channel(config.TEMPLATE_CHAN_ID)
-					template_message = await template_chan.send(embed=embed)
+					template_message = await template_chan.send(embed=embed, nonce='template')
 					await template_message.pin()
 					await template_chan.last_message.delete()
 					await action_log('signup sent to #signups-and-templates by ' + message.author.name + '#' + message.author.discriminator)
@@ -700,7 +700,7 @@ async def on_message(message):
 					embed_title = 'Match Voting'
 					embed_description = '**Vote for your favorite!** Results will be sent to this channel when voting ends in 2 hours.\n🇦 First image\n🇧 Second image'
 					embed = await generate_embed('pink', embed_title, embed_description)
-					await match_channel.send(embed=embed, nonce='poll_message')
+					await match_channel.send(embed=embed, nonce='poll')
 				return
 			else:
 				# build submission error embed (no active match)
@@ -754,7 +754,7 @@ async def on_message(message):
 			embed_link = message.attachments[0].url
 			embed = await generate_embed('green', embed_title, embed_description, embed_link)
 			template_chan = client.get_channel(config.TEMPLATE_CHAN_ID)
-			template_message = await template_chan.send(embed=embed)
+			template_message = await template_chan.send(embed=embed, nonce='template')
 			await template_message.pin()
 			await template_chan.last_message.delete()
 			await action_log('template attachment sent to #signups-and-templates by ' + message.author.name + '#' + message.author.discriminator)
@@ -1153,6 +1153,18 @@ async def on_message(message):
 				start_time = time.time()
 				channel_id = message.channel.id
 
+				template_list = client.get_channel(config.TEMPLATE_CHAN_ID).pins()
+				if len(template_list) >= 1:
+					return
+				else:
+					# build startmatch error (no templates)
+					embed_title = 'Match Error'
+					embed_description = 'No templates in #signups-and-templates!'
+					embed = await generate_embed('red',embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log('no templates for .startmatch')
+					return
+
 				# add match info to postgresql
 				query = 'INSERT INTO matches (u1_id, u2_id, start_time, channel_id) VALUES (' + str(member1.id) + ', ' + str(member2.id) + ', ' + str(start_time) + ', ' + str(channel_id) + ')'
 				connect.crsr.execute(query)
@@ -1536,8 +1548,8 @@ async def on_message(message):
 async def on_reaction_add(reaction, user):
 	# create variable for base message
 	message = reaction.message
-	# only act on poll_messages
-	if message.nonce == 'poll_message':
+	# only act on polls
+	if message.nonce == 'poll':
 		if not user.bot:
 			# remove the user's reaction from the bot (anonymous polling)
 			await reaction.remove(user)
