@@ -706,6 +706,9 @@ async def on_message(message):
 
 		# '.template' command (DM)
 		if message_content.startswith('.template'):
+			# assign base member
+			member = client.get_guild(config.MM_GUILD_ID).get_member(message.author.id)
+			
 			# check for an attachment
 			if len(message.attachments) != 1:
 				# build template embed
