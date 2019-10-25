@@ -16,6 +16,11 @@ crsr.execute("""SELECT * FROM settings""")
 for row in crsr.fetchall():
 	print(row)
 
+query = """ALTER TABLE participants
+ADD templates_submitted NUMERIC(7) DEFAULT 0"""
+crsr.execute(query)
+conn.commit()
+
 print('participants:')
 crsr.execute("""SELECT * FROM participants""")
 for row in crsr.fetchall():
@@ -49,6 +54,7 @@ for row in crsr.fetchall():
 # match_losses NUMERIC(5) DEFAULT 0
 # total_votes_for NUMERIC(7) DEFAULT 0
 # avg_final_meme_time NUMERIC(4) DEFAULT NULL
+# templates_submitted NUMERIC(7) DEFAULT 0
 
 # TABLE signups
 # db_id SERIAL PRIMARY KEY
