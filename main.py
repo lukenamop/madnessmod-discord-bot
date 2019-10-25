@@ -507,7 +507,10 @@ async def on_message(message):
 					embed_title = 'Signup Confirmed'
 					embed_description = member.mention + ' (' + functions.escape_underscores(member.display_name) + ', ' + str(member.id) + ')'
 					embed = await generate_embed('green', embed_title, embed_description)
-					await client.get_channel(config.TEMPLATE_CHAN_ID).send(embed=embed)
+					template_chan = client.get_channel(config.TEMPLATE_CHAN_ID)
+					template_message = await template_chan.send(embed=embed)
+					await template_message.pin()
+					await template_chan.last_message.delete()
 					await action_log('signup sent to #signups-and-templates by ' + message.author.name + '#' + message.author.discriminator)
 
 					# add signup info to postgresql
