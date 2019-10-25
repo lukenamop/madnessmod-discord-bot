@@ -746,7 +746,7 @@ async def on_message(message):
 			await message.channel.send(embed=embed)
 
 			# send template to #signups-and-templates
-			embed_title = 'Template Submission'
+			embed_title = 'Voluntary Template Submission'
 			embed_description = member.mention + ' (' + functions.escape_underscores(member.display_name) + ', ' + str(member.id) + ')'
 			embed_link = message.attachments[0].url
 			embed = await generate_embed('green', embed_title, embed_description, embed_link)
