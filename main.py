@@ -1167,7 +1167,10 @@ async def on_message(message):
 				duelmods_chan = client.get_channel(config.DUELMODS_CHAN_ID)
 				if len(template_list) >= 1:
 					template_message = random.choice(template_list)
-					template_url = template_message.attachments[0].url
+					if len(template_message.embeds) == 1:
+						template_url = template_message.embeds[0].url
+					else:
+						template_url = template_message.attachments[0].url
 					embed_title = 'Template'
 					embed_description = 'Here\'s one:'
 					embed = await generate_embed('green', embed_title, embed_description, template_url)
