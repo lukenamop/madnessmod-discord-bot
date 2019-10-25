@@ -186,7 +186,7 @@ async def on_message(message):
 				await client.get_channel(config.ARCHIVE_CHAN_ID).send(embed=embed)
 				await action_log('winning image sent to archive channel')
 				return
-			if message.channel.id == 599333803407835147 and message.nonce == 'template':
+			if message.channel.id == config.TEMPLATE_CHAN_ID and message.nonce == 'template':
 				# add reactions to messages in the #signups-and-templates channel
 				await message.add_reaction('👍')
 				await message.add_reaction('🤷')
@@ -197,6 +197,11 @@ async def on_message(message):
 				connect.crsr.execute(query)
 				connect.conn.commit()
 				await action_log('message_id added to postgresql signup info')
+				return
+			if message.channel.id == config.DUELMODS_CHAN_ID and message.nonce == 'template_confirmation':
+				# add reactions to message confirmations in #duel-mods
+				await message.add_reaction('<:check_mark:637394596472815636>')
+				await message.add_reaction('<:x_mark:637394622200676396>')
 				return
 			return
 		return
@@ -1153,13 +1158,14 @@ async def on_message(message):
 				channel_id = message.channel.id
 
 				template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).pins()
+				duelmods_chan = client.get_channel(config.DUELMODS_CHAN_ID)
 				if len(template_list) >= 1:
 					template_message = random.choice(template_list)
 					template_url = template_message.attachments[0].url
 					embed_title = 'Template'
 					embed_description = 'Here\'s one:'
 					embed = await generate_embed('green', embed_title, embed_description, template_url)
-					await message.channel.send(embed=embed)
+					await duelmods_chan.send(embed=embed, nonce='template_confirmation')
 					return
 				else:
 					# build startmatch error (no templates)
