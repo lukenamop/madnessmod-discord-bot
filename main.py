@@ -1152,7 +1152,7 @@ async def on_message(message):
 				start_time = time.time()
 				channel_id = message.channel.id
 
-				template_list = client.get_channel(config.TEMPLATE_CHAN_ID).pins()
+				template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).pins()
 				if len(template_list) >= 1:
 					return
 				else:
