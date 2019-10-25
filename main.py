@@ -235,7 +235,7 @@ async def on_message(message):
 			# build stats embed
 			embed_title = 'Stats for ' + user.display_name
 			try:
-				embed_description = '**Total matches:** ' + str(results[0]) + '\n**Match wins/losses:** ' + str(results[1]) + '/' + str(results[2]) + '\n**Win percentage:** ' + str(round((float(results[1]) / float(results[0])) * 100)) + '%\n**Total votes for your memes:** ' + str(results[3]) + '\n**Avg. time per meme:** ' + avg_time + '\n**Templates submitted:** ' + str(results[5])
+				embed_description = '**Total matches:** `' + str(results[0]) + '`\n**Match wins/losses:** `' + str(results[1]) + '/' + str(results[2]) + '`\n**Win percentage:** `' + str(round((float(results[1]) / float(results[0])) * 100)) + '%`\n**Total votes for your memes:** `' + str(results[3]) + '`\n**Avg. time per meme:** `' + avg_time + '`\n**Templates submitted:** `' + str(results[5]) + '`'
 			except ZeroDivisionError:
 				embed_description = 'Total matches: ' + str(results[0]) + '\nMatch wins/losses: ' + str(results[1]) + '/' + str(results[2]) + '\nWin percentage: N/A\nTotal votes for your memes: ' + str(results[3]) + '\nAvg. time per meme: ' + avg_time + '\nTemplates submitted: ' + str(results[5])
 			embed = await generate_embed('pink', embed_title, embed_description)
