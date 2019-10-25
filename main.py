@@ -1157,6 +1157,12 @@ async def on_message(message):
 				start_time = time.time()
 				channel_id = message.channel.id
 
+				embed_title = 'Starting Match'
+				embed_description = 'Randomly selecting template...'
+				embed = await generate_embed('green', embed_title, embed_description)
+				await message.channel.send(embed=embed)
+				await action_log('\'selecting template\' sent to match channel')
+
 				template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).pins()
 				duelmods_chan = client.get_channel(config.DUELMODS_CHAN_ID)
 				if len(template_list) >= 1:
@@ -1626,6 +1632,32 @@ async def on_reaction_add(reaction, user):
 				embed = await generate_embed('green', embed_title, embed_description)
 				await user_channel.send(embed=embed)
 				await action_log('vote confirmation sent to user')
+		return
+		# only act on template confirmations for matches
+	if message.nonce == 'template_confirmation':
+		if not user.bot:
+			# find which reaction was added
+			if reaction.emoji == '<:check_mark:637394596472815636>':
+				# send template to match channel
+				await action_log(message.content)
+				# build template accepted embed
+				embed_title = 'Template Accepted'
+				embed_description = 'The randomized template was accepted and sent in the match channel!'
+				embed = await generate_embed('green', embed_title, embed_description)
+				await message.channel.send(embed=embed)
+				await action_log('randomized template accepted')
+				# delete original message
+				await message.delete()
+			elif reaction.emoji == '<:x_mark:637394622200676396>':
+				# build template rejected embed
+				embed_title = 'Template Rejected'
+				embed_description = 'The randomized template was rejected. Please try `.startmatch` again.'
+				embed = await generate_embed('red', embed_title, embed_description)
+				await message.channel.send(embed=embed)
+				await action_log('randomized template rejected')
+				# delete original message
+				await message.delete()
+		return
 	return
 
 # client event triggers on any discord channel creation
