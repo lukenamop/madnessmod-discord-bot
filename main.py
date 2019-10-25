@@ -831,7 +831,7 @@ async def on_message(message):
 					message_id = result[0]
 					# error triggers if template/signup message does not exist
 					try:
-						msg = await client.get_channel(599333803407835147).fetch_message(message_id)
+						msg = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(message_id)
 						print(msg.content)
 						await msg.delete()
 						await action_log('submission message deleted')
@@ -962,6 +962,57 @@ async def on_message(message):
 				await action_log('removetournamentroles complete')
 				return
 			return
+
+		# '.prelim' command (duel-mods)
+		if message_content.startswith('.prelim '):
+			await action_log('prelim command in #duel-mods')
+			# ValueError triggers if a string is used instead of a number
+			try:
+				# split message apart and find user from ID
+				message_split = message_content.split(' ', 1)
+				user_id = int(message_split[1])
+				member = client.get_server(config.MM_GUILD_ID).get_member(user_id)
+
+				passed = False
+				if member is not None:
+					for role in member.roles:
+						if role.id == config.ROUND_ROLE_IDS[1]:
+							# remove round 1 role
+							await member.remove_roles(role)
+							# add prelim role
+							await member.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[0]))
+							passed = True
+					if passed:
+						# build prelim success embed
+						embed_title = 'Role Set to Prelim'
+						embed_description = 'The tournament role for ' + member.mention + ' has been set to prelim.'
+						embed = await generate_embed('green', embed_title, embed_description)
+						await message.channel.send(embed=embed)
+						await action_log('prelim set for ' + member.name + '#' + member.discriminator)
+					else:
+						# build prelim error embed (user did not have tournament role)
+						embed_title = 'Error: Specified User Not Valid'
+						embed_description = 'The specified user did not have a `Round 1` role.'
+						embed = await generate_embed('red', embed_title, embed_description)
+						await message.channel.send(embed=embed)
+						await action_log('user not valid')
+					return
+				else:
+					# build prelim error embed (no matching signup)
+					embed_title = 'Error: No Matching Signup'
+					embed_description = 'Double check that you\'ve copied the user\'s exact 18 digit ID (e.g. `622139031756734492`).'
+					embed = await generate_embed('red', embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log('no matching submission error with prelim')
+					return
+			except ValueError:
+				# build prelim error embed (no matching signup)
+				embed_title = 'Error: No Matching Signup'
+				embed_description = 'Double check that you\'ve copied the user\'s exact 18 digit ID (e.g. `622139031756734492`).'
+				embed = await generate_embed('red', embed_title, embed_description)
+				await message.channel.send(embed=embed)
+				await action_log('non-int passed to prelim')
+				return
 
 		# '.toggletemplates' command (duel-mods)
 		if message_content == '.toggletemplates':
