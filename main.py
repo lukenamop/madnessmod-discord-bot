@@ -228,20 +228,24 @@ async def on_message(message):
 		results = connect.crsr.fetchone()
 		if results is not None:
 			if results[4] is not None:
-				# build stats embed
-				embed_title = 'Stats for ' + user.display_name
-				try:
-					embed_description = 'Total matches: ' + str(results[0]) + '\nMatch wins/losses: ' + str(results[1]) + '/' + str(results[2]) + '\nWin percentage: ' + str(round((float(results[1]) / float(results[0])) * 100)) + '%\nTotal votes for your memes: ' + str(results[3]) + '\nAvg. time per meme: ' + strftime("%Mm %Ss", gmtime(results[4])) + '\nTemplates submitted: ' + str(results[5])
-				except ZeroDivisionError:
-					embed_description = 'Total matches: ' + str(results[0]) + '\nMatch wins/losses: ' + str(results[1]) + '/' + str(results[2]) + '\nWin percentage: N/A\nTotal votes for your memes: ' + str(results[3]) + '\nAvg. time per meme: ' + strftime("%Mm %Ss", gmtime(results[4])) + '\nTemplates submitted: ' + str(results[5])
-				embed = await generate_embed('pink', embed_title, embed_description)
-				await message.channel.send(embed=embed)
-				await action_log('stats shared to ' + message.author.name + '#' + message.author.discriminator)
-				return
+				avg_time = strftime("%Mm %Ss", gmtime(results[4]))
+			else:
+				avg_time = 'N/A'
+
+			# build stats embed
+			embed_title = 'Stats for ' + user.display_name
+			try:
+				embed_description = 'Total matches: ' + str(results[0]) + '\nMatch wins/losses: ' + str(results[1]) + '/' + str(results[2]) + '\nWin percentage: ' + str(round((float(results[1]) / float(results[0])) * 100)) + '%\nTotal votes for your memes: ' + str(results[3]) + '\nAvg. time per meme: ' + avg_time + '\nTemplates submitted: ' + str(results[5])
+			except ZeroDivisionError:
+				embed_description = 'Total matches: ' + str(results[0]) + '\nMatch wins/losses: ' + str(results[1]) + '/' + str(results[2]) + '\nWin percentage: N/A\nTotal votes for your memes: ' + str(results[3]) + '\nAvg. time per meme: ' + avg_time + '\nTemplates submitted: ' + str(results[5])
+			embed = await generate_embed('pink', embed_title, embed_description)
+			await message.channel.send(embed=embed)
+			await action_log('stats shared to ' + message.author.name + '#' + message.author.discriminator)
+			return
 
 		# if no record of specified user, build no-stats embed
 		embed_title = 'No Stats Available'
-		embed_description = user.display_name + ' needs to compete in a match to start recording stats.'
+		embed_description = user.display_name + ' needs to sign up for a tournament to start recording stats.'
 		embed = await generate_embed('red', embed_title, embed_description)
 		await message.channel.send(embed=embed)
 		await action_log('stats not able to be shared')
@@ -708,7 +712,7 @@ async def on_message(message):
 		if message_content.startswith('.template'):
 			# assign base member
 			member = client.get_guild(config.MM_GUILD_ID).get_member(message.author.id)
-			
+
 			# check for an attachment
 			if len(message.attachments) != 1:
 				# build template embed
