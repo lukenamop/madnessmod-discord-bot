@@ -1639,6 +1639,7 @@ async def on_reaction_add(reaction, user):
 		# only act on template confirmations for matches
 	if message.nonce == 'template_confirmation':
 		if not user.bot:
+			await action_log('reaction')
 			# find which reaction was added
 			if reaction.emoji == '<:check_mark:637394596472815636>':
 				# send template to match channel
