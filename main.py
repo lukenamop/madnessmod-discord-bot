@@ -223,7 +223,7 @@ async def on_message(message):
 			user = message.author
 
 		# check participants database for the specified user
-		query = 'SELECT total_matches, match_wins, match_losses, total_votes_for, avg_final_meme_time FROM participants WHERE user_id = ' + str(user.id)
+		query = 'SELECT total_matches, match_wins, match_losses, total_votes_for, avg_final_meme_time, templates_submitted FROM participants WHERE user_id = ' + str(user.id)
 		connect.crsr.execute(query)
 		results = connect.crsr.fetchone()
 		if results is not None:
@@ -231,9 +231,9 @@ async def on_message(message):
 				# build stats embed
 				embed_title = 'Stats for ' + user.display_name
 				try:
-					embed_description = 'Total matches: ' + str(results[0]) + '\nMatch wins/losses: ' + str(results[1]) + '/' + str(results[2]) + '\nWin percentage: ' + str(round((float(results[1]) / float(results[0])) * 100)) + '%\nTotal votes for your memes: ' + str(results[3]) + '\nAvg. time per meme: ' + strftime("%Mm %Ss", gmtime(results[4]))
+					embed_description = 'Total matches: ' + str(results[0]) + '\nMatch wins/losses: ' + str(results[1]) + '/' + str(results[2]) + '\nWin percentage: ' + str(round((float(results[1]) / float(results[0])) * 100)) + '%\nTotal votes for your memes: ' + str(results[3]) + '\nAvg. time per meme: ' + strftime("%Mm %Ss", gmtime(results[4])) + '\nTemplates submitted: ' + str(results[5])
 				except ZeroDivisionError:
-					embed_description = 'Total matches: ' + str(results[0]) + '\nMatch wins/losses: ' + str(results[1]) + '/' + str(results[2]) + '\nWin percentage: N/A\nTotal votes for your memes: ' + str(results[3]) + '\nAvg. time per meme: ' + strftime("%Mm %Ss", gmtime(results[4]))
+					embed_description = 'Total matches: ' + str(results[0]) + '\nMatch wins/losses: ' + str(results[1]) + '/' + str(results[2]) + '\nWin percentage: N/A\nTotal votes for your memes: ' + str(results[3]) + '\nAvg. time per meme: ' + strftime("%Mm %Ss", gmtime(results[4])) + '\nTemplates submitted: ' + str(results[5])
 				embed = await generate_embed('pink', embed_title, embed_description)
 				await message.channel.send(embed=embed)
 				await action_log('stats shared to ' + message.author.name + '#' + message.author.discriminator)
