@@ -19,6 +19,7 @@ admin_help = """`.clearmatches` - clears all matches and votes from the database
 	\n`.clearsignups` - clears all signups from the database (**admin only**)
 	\n`.donate` - shows MadnessMod donation info
 	\n`.help` - returns this help menu
+	\n`.prelim <user ID>` - sets a user's tournament role to `Preliminary`
 	\n`.removetournamentroles` - remove past participants' round roles (**admin only**)
 	\n`.resignup <user ID> <reason>` - deletes a user's template and DMs them with `<reason>`, prompting them to re-signup
 	\n`.settournamentroles` - initializes the tournament's participants' round roles (sets them to Round 1) (**admin only**)
