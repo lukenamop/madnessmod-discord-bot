@@ -985,7 +985,7 @@ async def on_message(message):
 					if passed:
 						# build prelim success embed
 						embed_title = 'Role Set to Prelim'
-						embed_description = 'The tournament role for ' + member.mention + ' has been set to prelim.'
+						embed_description = 'The tournament role for ' + member.mention + ' has been set to `Preliminary`.'
 						embed = await generate_embed('green', embed_title, embed_description)
 						await message.channel.send(embed=embed)
 						await action_log('prelim set for ' + member.name + '#' + member.discriminator)
