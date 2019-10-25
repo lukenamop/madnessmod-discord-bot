@@ -235,7 +235,7 @@ async def on_message(message):
 			# build stats embed
 			embed_title = 'Stats for ' + user.display_name
 			try:
-				embed_description = 'Total matches: ' + str(results[0]) + '\nMatch wins/losses: ' + str(results[1]) + '/' + str(results[2]) + '\nWin percentage: ' + str(round((float(results[1]) / float(results[0])) * 100)) + '%\nTotal votes for your memes: ' + str(results[3]) + '\nAvg. time per meme: ' + avg_time + '\nTemplates submitted: ' + str(results[5])
+				embed_description = '**Total matches:** ' + str(results[0]) + '\n**Match wins/losses:** ' + str(results[1]) + '/' + str(results[2]) + '\n**Win percentage:** ' + str(round((float(results[1]) / float(results[0])) * 100)) + '%\n**Total votes for your memes:** ' + str(results[3]) + '\n**Avg. time per meme:** ' + avg_time + '\n**Templates submitted:** ' + str(results[5])
 			except ZeroDivisionError:
 				embed_description = 'Total matches: ' + str(results[0]) + '\nMatch wins/losses: ' + str(results[1]) + '/' + str(results[2]) + '\nWin percentage: N/A\nTotal votes for your memes: ' + str(results[3]) + '\nAvg. time per meme: ' + avg_time + '\nTemplates submitted: ' + str(results[5])
 			embed = await generate_embed('pink', embed_title, embed_description)
@@ -965,54 +965,57 @@ async def on_message(message):
 
 		# '.prelim' command (duel-mods)
 		if message_content.startswith('.prelim '):
-			await action_log('prelim command in #duel-mods')
-			# ValueError triggers if a string is used instead of a number
-			try:
-				# split message apart and find user from ID
-				message_split = message_content.split(' ', 1)
-				user_id = int(message_split[1])
-				member = client.get_guild(config.MM_GUILD_ID).get_member(user_id)
+			# check to be sure only admin user uses command
+			if message.author.id in config.ADMIN_IDS:
+				await action_log('prelim command in #duel-mods')
+				# ValueError triggers if a string is used instead of a number
+				try:
+					# split message apart and find user from ID
+					message_split = message_content.split(' ', 1)
+					user_id = int(message_split[1])
+					member = client.get_guild(config.MM_GUILD_ID).get_member(user_id)
 
-				passed = False
-				if member is not None:
-					for role in member.roles:
-						if role.id == config.ROUND_ROLE_IDS[1]:
-							# remove round 1 role
-							await member.remove_roles(role)
-							# add prelim role
-							await member.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[0]))
-							passed = True
-					if passed:
-						# build prelim success embed
-						embed_title = 'Role Set to Prelim'
-						embed_description = 'The tournament role for ' + member.mention + ' has been set to `Preliminary`.'
-						embed = await generate_embed('green', embed_title, embed_description)
-						await message.channel.send(embed=embed)
-						await action_log('prelim set for ' + member.name + '#' + member.discriminator)
+					passed = False
+					if member is not None:
+						for role in member.roles:
+							if role.id == config.ROUND_ROLE_IDS[1]:
+								# remove round 1 role
+								await member.remove_roles(role)
+								# add prelim role
+								await member.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[0]))
+								passed = True
+						if passed:
+							# build prelim success embed
+							embed_title = 'Role Set to Prelim'
+							embed_description = 'The tournament role for ' + member.mention + ' has been set to `Preliminary`.'
+							embed = await generate_embed('green', embed_title, embed_description)
+							await message.channel.send(embed=embed)
+							await action_log('prelim set for ' + member.name + '#' + member.discriminator)
+						else:
+							# build prelim error embed (user did not have tournament role)
+							embed_title = 'Error: Specified User Not Valid'
+							embed_description = 'The specified user did not have a `Round 1` role.'
+							embed = await generate_embed('red', embed_title, embed_description)
+							await message.channel.send(embed=embed)
+							await action_log('user not valid')
+						return
 					else:
-						# build prelim error embed (user did not have tournament role)
-						embed_title = 'Error: Specified User Not Valid'
-						embed_description = 'The specified user did not have a `Round 1` role.'
+						# build prelim error embed (no matching signup)
+						embed_title = 'Error: No Matching Signup'
+						embed_description = 'Double check that you\'ve copied the user\'s exact 18 digit ID (e.g. `622139031756734492`).'
 						embed = await generate_embed('red', embed_title, embed_description)
 						await message.channel.send(embed=embed)
-						await action_log('user not valid')
-					return
-				else:
+						await action_log('no matching submission error with prelim')
+						return
+				except ValueError:
 					# build prelim error embed (no matching signup)
 					embed_title = 'Error: No Matching Signup'
 					embed_description = 'Double check that you\'ve copied the user\'s exact 18 digit ID (e.g. `622139031756734492`).'
 					embed = await generate_embed('red', embed_title, embed_description)
 					await message.channel.send(embed=embed)
-					await action_log('no matching submission error with prelim')
+					await action_log('non-int passed to prelim')
 					return
-			except ValueError:
-				# build prelim error embed (no matching signup)
-				embed_title = 'Error: No Matching Signup'
-				embed_description = 'Double check that you\'ve copied the user\'s exact 18 digit ID (e.g. `622139031756734492`).'
-				embed = await generate_embed('red', embed_title, embed_description)
-				await message.channel.send(embed=embed)
-				await action_log('non-int passed to prelim')
-				return
+			return
 
 		# '.toggletemplates' command (duel-mods)
 		if message_content == '.toggletemplates':
