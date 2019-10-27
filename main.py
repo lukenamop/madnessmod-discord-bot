@@ -198,6 +198,12 @@ async def on_message(message):
 				connect.conn.commit()
 				await action_log('message_id added to postgresql signup info')
 				return
+			if message.channel.id == config.TEMPLATE_CHAN_ID and message.nonce == 'voluntary_template':
+				# add reactions to messages in the #signups-and-templates channel
+				await message.add_reaction('👍')
+				await message.add_reaction('🤷')
+				await message.add_reaction('👎')
+				return
 			if message.channel.id == config.DUELMODS_CHAN_ID and message.nonce == 'template_confirmation':
 				# add reactions to message confirmations in #duel-mods
 				await message.add_reaction('<:check_mark:637394596472815636>')
@@ -758,7 +764,7 @@ async def on_message(message):
 			embed_link = message.attachments[0].url
 			embed = await generate_embed('green', embed_title, embed_description, embed_link)
 			template_chan = client.get_channel(config.TEMPLATE_CHAN_ID)
-			template_message = await template_chan.send(embed=embed, nonce='template')
+			template_message = await template_chan.send(embed=embed, nonce='voluntary_template')
 			await template_message.pin()
 			await template_chan.last_message.delete()
 			await action_log('template attachment sent to #signups-and-templates by ' + message.author.name + '#' + message.author.discriminator)
