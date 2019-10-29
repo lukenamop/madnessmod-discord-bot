@@ -1651,7 +1651,7 @@ async def on_reaction_add(reaction, user):
 	if message.nonce == 'template_confirmation':
 		if not user.bot:
 			# find match channel
-			query = 'SELECT channel_id, db_id FROM matches WHERE start_time = NULL'
+			query = 'SELECT channel_id, db_id FROM matches WHERE start_time IS NULL'
 			connect.crsr.execute(query)
 			result = connect.crsr.fetchone()
 			match_channel = client.get_channel(result[0])
@@ -1681,7 +1681,7 @@ async def on_reaction_add(reaction, user):
 				# delete original message
 				# await message.delete()
 				# update match start_time in database
-				query = 'UPDATE matches SET start_time = ' + str(time.time()) + ' WHERE channel_id = ' + str(match_channel.id) + ' AND start_time = NULL'
+				query = 'UPDATE matches SET start_time = ' + str(time.time()) + ' WHERE channel_id = ' + str(match_channel.id) + ' AND start_time IS NULL'
 				connect.crsr.execute(query)
 				connect.conn.commit()
 				await action_log('match start_time updated in database')
@@ -1694,7 +1694,7 @@ async def on_reaction_add(reaction, user):
 				await action_log('randomized template rejected')
 
 				# remove match from database
-				query = 'DELETE FROM matches WHERE start_time = NULL'
+				query = 'DELETE FROM matches WHERE start_time IS NULL'
 				connect.crsr.execute(query)
 				connect.conn.commit()
 				await action_log('match removed from database')
