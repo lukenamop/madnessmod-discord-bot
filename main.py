@@ -1651,7 +1651,7 @@ async def on_reaction_add(reaction, user):
 	if message.nonce == 'template_confirmation':
 		if not user.bot:
 			# find match channel
-			query = 'SELECT channel_id FROM matches WHERE start_time = NULL'
+			query = 'SELECT channel_id, db_id FROM matches WHERE start_time = NULL'
 			connect.crsr.execute(query)
 			result = connect.crsr.fetchone()
 			match_channel = client.get_channel(result[0])
