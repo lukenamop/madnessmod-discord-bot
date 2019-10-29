@@ -485,8 +485,6 @@ async def on_message(message):
 						embed = await generate_embed('green', embed_title, embed_description, embed_link)
 						template_chan = client.get_channel(config.TEMPLATE_CHAN_ID)
 						template_message = await template_chan.send(embed=embed, nonce='template')
-						await template_message.pin()
-						await template_chan.last_message.delete()
 						await action_log('signup attachment sent to #signups-and-templates by ' + message.author.name + '#' + message.author.discriminator)
 
 						# add signup info to postgresql
@@ -765,8 +763,6 @@ async def on_message(message):
 			embed = await generate_embed('green', embed_title, embed_description, embed_link)
 			template_chan = client.get_channel(config.TEMPLATE_CHAN_ID)
 			template_message = await template_chan.send(embed=embed, nonce='voluntary_template')
-			await template_message.pin()
-			await template_chan.last_message.delete()
 			await action_log('template attachment sent to #signups-and-templates by ' + message.author.name + '#' + message.author.discriminator)
 
 			if not config.TESTING:
