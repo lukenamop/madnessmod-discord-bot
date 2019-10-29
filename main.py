@@ -1174,6 +1174,14 @@ async def on_message(message):
 						template_url = template_message.embeds[0].image.url
 					else:
 						template_url = template_message.attachments[0].url
+
+					# add match info to postgresql
+					query = 'INSERT INTO matches (u1_id, u2_id, channel_id) VALUES (' + str(member1.id) + ', ' + str(member2.id) + ', ' + str(channel_id) + ')'
+					connect.crsr.execute(query)
+					connect.conn.commit()
+					await action_log('match added to database')
+
+					# build random template embed
 					embed_title = 'Template'
 					embed_description = 'Here\'s one:'
 					embed = await generate_embed('green', embed_title, embed_description, template_url)
@@ -1642,10 +1650,28 @@ async def on_reaction_add(reaction, user):
 		# only act on template confirmations for matches
 	if message.nonce == 'template_confirmation':
 		if not user.bot:
-			# find which reaction was added
-			if reaction.emoji == '<:check_mark:637394596472815636>':
+			# find match channel
+			query = 'SELECT channel_id FROM matches WHERE start_time = NULL'
+			connect.crsr.execute(query)
+			result = connect.crsr.fetchone()
+			match_channel = client.get_channel(result[0])
+
+			# get custom emojis from discord
+			check_emoji = client.get_emoji(637394596472815636)
+			x_emoji = client.get_emoji(637394622200676396)
+			if check_emoji == None or x_emoji == None:
+				await action_log('ERROR IN TEMPLATE RANDOMIZATION -- EMOJI NOT FOUND')
+				return
+
+			#  find which reaction was added
+			if reaction.emoji == check_emoji:
 				# send template to match channel
 				await action_log(message.content)
+				embed_title = 'Match Started'
+				embed_description = member1.mention + ' and ' + member2.mention + ' have 30 minutes to hand in their final memes. Good luck!'
+				embed = await generate_embed('green', embed_title, embed_description, message.embed[0].image.url)
+				await match_channel.send(embed=embed)
+				await action_log('match started between ' + member1.name + '#' + member1.discriminator + ' and ' + member2.name + '#' + member2.discriminator)
 				# build template accepted embed
 				embed_title = 'Template Accepted'
 				embed_description = 'The randomized template was accepted and sent in the match channel!'
@@ -1654,13 +1680,24 @@ async def on_reaction_add(reaction, user):
 				await action_log('randomized template accepted')
 				# delete original message
 				# await message.delete()
-			elif reaction.emoji == '<:x_mark:637394622200676396>':
+				# update match start_time in database
+				query = 'UPDATE matches SET start_time = ' + str(time.time()) + ' WHERE channel_id = ' + str(match_channel.id) + ' AND start_time = NULL'
+				connect.crsr.execute(query)
+				connect.conn.commit()
+				await action_log('match start_time updated in database')
+			elif reaction.emoji == x_emoji:
 				# build template rejected embed
 				embed_title = 'Template Rejected'
 				embed_description = 'The randomized template was rejected. Please try `.startmatch` again.'
 				embed = await generate_embed('red', embed_title, embed_description)
 				await message.channel.send(embed=embed)
 				await action_log('randomized template rejected')
+
+				# remove match from database
+				query = 'DELETE FROM matches WHERE start_time = NULL'
+				connect.crsr.execute(query)
+				connect.conn.commit()
+				await action_log('match removed from database')
 		return
 	return
 
