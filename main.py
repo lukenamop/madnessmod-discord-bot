@@ -1668,7 +1668,6 @@ async def on_reaction_add(reaction, user):
 			#  find which reaction was added
 			if reaction.emoji == check_emoji:
 				# send template to match channel
-				await action_log(message.content)
 				embed_title = 'Match Started'
 				embed_description = member1.mention + ' and ' + member2.mention + ' have 30 minutes to hand in their final memes. Good luck!'
 				embed = await generate_embed('green', embed_title, embed_description, message.embeds[0].image.url)
