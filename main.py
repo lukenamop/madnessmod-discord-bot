@@ -1671,7 +1671,7 @@ async def on_reaction_add(reaction, user):
 				await action_log(message.content)
 				embed_title = 'Match Started'
 				embed_description = member1.mention + ' and ' + member2.mention + ' have 30 minutes to hand in their final memes. Good luck!'
-				embed = await generate_embed('green', embed_title, embed_description, message.embed[0].image.url)
+				embed = await generate_embed('green', embed_title, embed_description, message.embeds[0].image.url)
 				await match_channel.send(embed=embed)
 				await action_log('match started between ' + member1.name + '#' + member1.discriminator + ' and ' + member2.name + '#' + member2.discriminator)
 				# build template accepted embed
