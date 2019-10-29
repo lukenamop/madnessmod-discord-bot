@@ -1681,7 +1681,7 @@ async def on_reaction_add(reaction, user):
 				await message.channel.send(embed=embed)
 				await action_log('randomized template accepted')
 				# delete original message
-				# await message.delete()
+				await message.delete()
 				# update match start_time in database
 				query = 'UPDATE matches SET start_time = ' + str(time.time()) + ' WHERE channel_id = ' + str(match_channel.id) + ' AND start_time IS NULL'
 				connect.crsr.execute(query)
@@ -1694,6 +1694,8 @@ async def on_reaction_add(reaction, user):
 				embed = await generate_embed('red', embed_title, embed_description)
 				await message.channel.send(embed=embed)
 				await action_log('randomized template rejected')
+				# delete original message
+				await message.delete()
 
 				# remove match from database
 				query = 'DELETE FROM matches WHERE start_time IS NULL'
