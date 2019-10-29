@@ -187,7 +187,7 @@ async def on_message(message):
 				await action_log('winning image sent to archive channel')
 				return
 			if message.channel.id == config.TEMPLATE_CHAN_ID and message.nonce == 'template':
-				# add reactions to messages in the #signups-and-templates channel
+				# add reactions to messages in the #templates channel
 				await message.add_reaction('👍')
 				await message.add_reaction('🤷')
 				await message.add_reaction('👎')
@@ -199,7 +199,7 @@ async def on_message(message):
 				await action_log('message_id added to postgresql signup info')
 				return
 			if message.channel.id == config.TEMPLATE_CHAN_ID and message.nonce == 'voluntary_template':
-				# add reactions to messages in the #signups-and-templates channel
+				# add reactions to messages in the #templates channel
 				await message.add_reaction('👍')
 				await message.add_reaction('🤷')
 				await message.add_reaction('👎')
@@ -478,14 +478,14 @@ async def on_message(message):
 						embed = await generate_embed('green', embed_title, embed_description)
 						await message.channel.send(embed=embed)
 
-						# send template to #signups-and-templates
+						# send template to #templates
 						embed_title = 'Template Submission'
 						embed_description = member.mention + ' (' + functions.escape_underscores(member.display_name) + ', ' + str(member.id) + ')'
 						embed_link = message.attachments[0].url
 						embed = await generate_embed('green', embed_title, embed_description, embed_link)
 						template_chan = client.get_channel(config.TEMPLATE_CHAN_ID)
 						template_message = await template_chan.send(embed=embed, nonce='template')
-						await action_log('signup attachment sent to #signups-and-templates by ' + message.author.name + '#' + message.author.discriminator)
+						await action_log('signup attachment sent to #templates by ' + message.author.name + '#' + message.author.discriminator)
 
 						# add signup info to postgresql
 						query = 'INSERT INTO signups (user_id, message_id, submission_time) VALUES (' + str(message.author.id) + ', 0, ' + str(time.time()) + ')'
@@ -513,13 +513,13 @@ async def on_message(message):
 					embed = await generate_embed('green', embed_title, embed_description)
 					await message.channel.send(embed=embed)
 
-					# send signup to #signups-and-templates
+					# send signup to #templates
 					embed_title = 'Signup Confirmed'
 					embed_description = member.mention + ' (' + functions.escape_underscores(member.display_name) + ', ' + str(member.id) + ')'
 					embed = await generate_embed('green', embed_title, embed_description)
 					template_chan = client.get_channel(config.SIGNUP_CHAN_ID)
 					template_message = await template_chan.send(embed=embed)
-					await action_log('signup sent to #signups-and-templates by ' + message.author.name + '#' + message.author.discriminator)
+					await action_log('signup sent to #templates by ' + message.author.name + '#' + message.author.discriminator)
 
 					# add signup info to postgresql
 					query = 'INSERT INTO signups (user_id, message_id, submission_time) VALUES (' + str(message.author.id) + ', 0, ' + str(time.time()) + ')'
@@ -756,14 +756,14 @@ async def on_message(message):
 			embed = await generate_embed('green', embed_title, embed_description)
 			await message.channel.send(embed=embed)
 
-			# send template to #signups-and-templates
+			# send template to #templates
 			embed_title = 'Voluntary Template Submission'
 			embed_description = member.mention + ' (' + functions.escape_underscores(member.display_name) + ', ' + str(member.id) + ')'
 			embed_link = message.attachments[0].url
 			embed = await generate_embed('green', embed_title, embed_description, embed_link)
 			template_chan = client.get_channel(config.TEMPLATE_CHAN_ID)
 			template_message = await template_chan.send(embed=embed, nonce='voluntary_template')
-			await action_log('template attachment sent to #signups-and-templates by ' + message.author.name + '#' + message.author.discriminator)
+			await action_log('template attachment sent to #templates by ' + message.author.name + '#' + message.author.discriminator)
 
 			if not config.TESTING:
 				# check for existing participant in database
@@ -839,7 +839,7 @@ async def on_message(message):
 					await user_channel.send(embed=embed)
 					await action_log('DM sent to user')
 
-					# remove template/signup message from the #signups-and-templates channel
+					# remove template/signup message from the #signups or #templates channel
 					message_id = result[0]
 					# error triggers if template/signup message does not exist
 					try:
@@ -1165,12 +1165,13 @@ async def on_message(message):
 				await message.channel.send(embed=embed)
 				await action_log('\'selecting template\' sent to match channel')
 
-				template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).pins()
+				template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).history(limit=100).flatten()
+				await action_log('list of ' + str(len(template_list)) + ' templates compiled from #templates')
 				duelmods_chan = client.get_channel(config.DUELMODS_CHAN_ID)
 				if len(template_list) >= 1:
 					template_message = random.choice(template_list)
 					if len(template_message.embeds) == 1:
-						template_url = template_message.embeds[0].url
+						template_url = template_message.embeds[0].image.url
 					else:
 						template_url = template_message.attachments[0].url
 					embed_title = 'Template'
@@ -1181,7 +1182,7 @@ async def on_message(message):
 				else:
 					# build startmatch error (no templates)
 					embed_title = 'Match Error'
-					embed_description = 'No templates in #signups-and-templates!'
+					embed_description = 'No templates in #templates!'
 					embed = await generate_embed('red',embed_title, embed_description)
 					await message.channel.send(embed=embed)
 					await action_log('no templates for .startmatch')
