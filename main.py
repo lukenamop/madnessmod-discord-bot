@@ -1651,10 +1651,12 @@ async def on_reaction_add(reaction, user):
 	if message.nonce == 'template_confirmation':
 		if not user.bot:
 			# find match channel
-			query = 'SELECT channel_id, db_id FROM matches WHERE start_time IS NULL'
+			query = 'SELECT channel_id, u1_id, u2_id FROM matches WHERE start_time IS NULL'
 			connect.crsr.execute(query)
 			result = connect.crsr.fetchone()
 			match_channel = client.get_channel(result[0])
+			member1 = message.guild.get_member(result[1])
+			member2 = message.guild.get_member(result[2])
 
 			# get custom emojis from discord
 			check_emoji = client.get_emoji(637394596472815636)
