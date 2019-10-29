@@ -519,7 +519,7 @@ async def on_message(message):
 					embed_title = 'Signup Confirmed'
 					embed_description = member.mention + ' (' + functions.escape_underscores(member.display_name) + ', ' + str(member.id) + ')'
 					embed = await generate_embed('green', embed_title, embed_description)
-					template_chan = client.get_channel(config.TEMPLATE_CHAN_ID)
+					template_chan = client.get_channel(config.SIGNUP_CHAN_ID)
 					template_message = await template_chan.send(embed=embed)
 					await action_log('signup sent to #signups-and-templates by ' + message.author.name + '#' + message.author.discriminator)
 
