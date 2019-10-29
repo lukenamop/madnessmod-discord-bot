@@ -1642,8 +1642,6 @@ async def on_reaction_add(reaction, user):
 		# only act on template confirmations for matches
 	if message.nonce == 'template_confirmation':
 		if not user.bot:
-			await action_log('reaction')
-			await action_log(reaction.emoji)
 			# find which reaction was added
 			if reaction.emoji == '<:check_mark:637394596472815636>':
 				# send template to match channel
@@ -1655,7 +1653,7 @@ async def on_reaction_add(reaction, user):
 				await message.channel.send(embed=embed)
 				await action_log('randomized template accepted')
 				# delete original message
-				await message.delete()
+				# await message.delete()
 			elif reaction.emoji == '<:x_mark:637394622200676396>':
 				# build template rejected embed
 				embed_title = 'Template Rejected'
@@ -1663,8 +1661,6 @@ async def on_reaction_add(reaction, user):
 				embed = await generate_embed('red', embed_title, embed_description)
 				await message.channel.send(embed=embed)
 				await action_log('randomized template rejected')
-				# delete original message
-				await message.delete()
 		return
 	return
 
