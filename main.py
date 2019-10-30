@@ -421,6 +421,17 @@ async def on_message(message):
 
 	# DM specific commands
 	if isinstance(message.channel, discord.DMChannel):
+		# testing nonce length limits
+		if message_content == 'luke-testing':
+			i = 1
+			my_nonce = ''
+			while i <= 40:
+				my_nonce += str(i)
+				i++
+
+			message.channel.send('hello there!',nonce=my_nonce)
+			return
+
 		# '.signup' command (DM)
 		if message_content.startswith('.signup'):
 			# get member from Meme Madness server
