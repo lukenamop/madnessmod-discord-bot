@@ -423,11 +423,15 @@ async def on_message(message):
 	if isinstance(message.channel, discord.DMChannel):
 		# testing nonce length limits
 		if message_content == 'luke-testing':
-			i = 1
+			i = 0
+			i2 = 1
 			my_nonce = ''
-			while i <= 40:
+			while i2 <= 4:
 				my_nonce += str(i)
 				i += 1
+				if i >= 10:
+					i = i - 10
+					i2 += 1
 
 			message.channel.send('hello there!',nonce=my_nonce)
 			return
