@@ -1579,7 +1579,7 @@ async def on_reaction_add(reaction, user):
 				await action_log('randomized template accepted')
 
 				# update match start_time in database
-				query = 'UPDATE matches SET start_time = ' + str(time.time()) + ', template_message_id = NULL WHERE channel_id = ' + str(match_channel.id) + ' AND start_time IS NULL'
+				query = 'UPDATE matches SET start_time = ' + str(time.time()) + ', template_message_id = NULL WHERE channel_id = ' + str(match_channel.id) + ' AND start_time IS NULL AND template_message_id IS NOT NULL'
 				connect.crsr.execute(query)
 				connect.conn.commit()
 				await action_log('match start_time updated in database')
@@ -1694,7 +1694,7 @@ async def on_reaction_add(reaction, user):
 				await action_log('match channel notified')
 
 				# remove match from database
-				query = 'DELETE FROM matches WHERE start_time IS NULL'
+				query = 'DELETE FROM matches WHERE channel_id = ' + str(match_channel.id) + ' AND start_time IS NULL AND template_message_id IS NOT NULL'
 				connect.crsr.execute(query)
 				connect.conn.commit()
 				await action_log('match removed from database')
