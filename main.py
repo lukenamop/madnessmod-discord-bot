@@ -1554,9 +1554,9 @@ async def on_reaction_add(reaction, user):
 			result = connect.crsr.fetchone()
 			match_channel = client.get_channel(result[0])
 			member1 = message.guild.get_member(result[1])
-			u1_channel = member1.create_dm()
+			u1_channel = await member1.create_dm()
 			member2 = message.guild.get_member(result[2])
-			u2_channel = member2.create_dm()
+			u2_channel = await member2.create_dm()
 
 			# get custom emojis from discord
 			check_emoji = client.get_emoji(637394596472815636)
