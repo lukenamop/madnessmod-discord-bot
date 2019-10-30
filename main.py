@@ -1182,7 +1182,7 @@ async def on_message(message):
 
 					# build random template embed
 					embed_title = 'Template for #' + message.channel.name
-					embed_description = 'Here\'s a random template! If neither of the participants submitted this template, click the check mark emoji below. This template was submitted by ' + author_string
+					embed_description = 'Here\'s a random template! This template was submitted by ' + author_string
 					embed = await generate_embed('green', embed_title, embed_description, template_url)
 					await duelmods_chan.send(embed=embed, nonce='template_confirmation')
 					return
