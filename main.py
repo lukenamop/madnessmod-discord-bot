@@ -1562,14 +1562,11 @@ async def on_reaction_add(reaction, user):
 				query = 'SELECT u1_id, u2_id, template_message_id FROM matches WHERE start_time IS NULL AND template_message_id IS NOT NULL AND channel_id = ' + str(match_channel.id)
 				connect.crsr.execute(query)
 				result = connect.crsr.fetchone()
-				try:
-					# save match data to variables and start DM channels with participants
-					member1 = message.guild.get_member(result[0])
-					u1_channel = await member1.create_dm()
-					member2 = message.guild.get_member(result[1])
-					u2_channel = await member2.create_dm()
-				except discord.errors.Forbidden:
-
+				# save match data to variables and start DM channels with participants
+				member1 = message.guild.get_member(result[0])
+				u1_channel = await member1.create_dm()
+				member2 = message.guild.get_member(result[1])
+				u2_channel = await member2.create_dm()
 
 				# get custom emojis from discord
 				check_emoji = client.get_emoji(637394596472815636)
@@ -1604,10 +1601,13 @@ async def on_reaction_add(reaction, user):
 					embed_title = 'Match Started'
 					embed_description = 'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.** Here is your template:'
 					embed = await generate_embed('yellow', embed_title, embed_description, template_url)
-					await u1_channel.send(embed=embed)
-					await u2_channel.send(embed=embed)
-					await action_log('users notified of match')
-
+					try:
+						await u1_channel.send(embed=embed)
+						await u2_channel.send(embed=embed)
+						await action_log('users notified of match')
+					except discord.errors.Forbidden:
+						await action_log('one of the participants has DMs turned off')
+						return
 
 					# delete message from match channel
 					await match_channel.last_message.delete()
