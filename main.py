@@ -1553,7 +1553,7 @@ async def on_reaction_add(reaction, user):
 		# don't act on bot reactions
 		if not user.bot:
 			# find match channel
-			match_channel = await client.get_channel(message.nonce.lstrip('tempcon'))
+			match_channel = await client.get_channel(int(message.nonce.lstrip('tempcon')))
 			# pull match data from database
 			query = 'SELECT u1_id, u2_id, template_message_id FROM matches WHERE start_time IS NULL AND template_message_id IS NOT NULL AND channel_id = ' + str(match_channel.id)
 			connect.crsr.execute(query)
