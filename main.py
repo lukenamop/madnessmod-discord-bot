@@ -1607,7 +1607,8 @@ async def on_reaction_add(reaction, user):
 
 				if not config.TESTING:
 					# delete template from #templates channel
-					await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id).delete()
+					template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
+					await template_message.delete()
 
 				# sleep for 15 minutes (config.MATCH_WARN1_TIME seconds)
 				await asyncio.sleep(config.MATCH_WARN1_TIME)
