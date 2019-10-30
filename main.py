@@ -1601,11 +1601,17 @@ async def on_reaction_add(reaction, user):
 					embed_title = 'Match Started'
 					embed_description = 'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.** Here is your template:'
 					embed = await generate_embed('yellow', embed_title, embed_description, template_url)
+					# discord.errors.Forbidden triggers if u_channel.send() is stopped
 					try:
 						await u1_channel.send(embed=embed)
 						await u2_channel.send(embed=embed)
 						await action_log('users notified of match')
 					except discord.errors.Forbidden:
+						# build template confirmation error embed (user has DMs turned off)
+						embed_title = 'Match Error'
+						embed_description = 'One of the match participants has DMs disabled! The match could not be started.'
+						embed = await generate_embed('red', embed_title, embed_description)
+						await match_channel.send(embed=embed)
 						await action_log('one of the participants has DMs turned off')
 						return
 
