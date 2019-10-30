@@ -1554,9 +1554,11 @@ async def on_reaction_add(reaction, user):
 		if not user.bot:
 			# find match channel
 			match_channel = client.get_channel(message.nonce.lstrip('tempcon'))
+			# pull match data from database
 			query = 'SELECT u1_id, u2_id, template_message_id FROM matches WHERE start_time IS NULL AND template_message_id IS NOT NULL AND channel_id = ' + str(match_channel.id)
 			connect.crsr.execute(query)
 			result = connect.crsr.fetchone()
+			# save match data to variables and start DM channels with participants
 			member1 = message.guild.get_member(result[0])
 			u1_channel = await member1.create_dm()
 			member2 = message.guild.get_member(result[1])
