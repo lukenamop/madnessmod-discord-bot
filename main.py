@@ -433,7 +433,7 @@ async def on_message(message):
 					i = i - 10
 					i2 += 1
 
-			await action_log('nonce length: ' + len(my_nonce))
+			await action_log('nonce length: ' + str(len(my_nonce)))
 			message.channel.send('hello there!',nonce=my_nonce)
 			return
 
