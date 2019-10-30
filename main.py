@@ -1185,6 +1185,8 @@ async def on_message(message):
 					embed_description = 'Here\'s a random template! This template was submitted by ' + author_string
 					embed = await generate_embed('green', embed_title, embed_description, template_url)
 					await duelmods_chan.send(embed=embed, nonce='template_confirmation')
+					await duelmods_chan.send(message.author.mention)
+					await action_log('template confirmation sent to duel-mods')
 					return
 				else:
 					# build startmatch error (no templates)
