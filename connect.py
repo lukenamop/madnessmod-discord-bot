@@ -13,24 +13,24 @@ print(conn.get_dsn_parameters())
 
 crsr.execute("""SELECT * FROM settings""")
 for row in crsr.fetchall():
-	print('settings' + str(row))
+	print('settings: ' + str(row))
 
 crsr.execute("""SELECT COUNT(*) FROM participants""")
 result = crsr.fetchone()
-print('participants:' + str(result[0]))
+print('participants: ' + str(result[0]))
 
 crsr.execute("""SELECT COUNT(*) FROM matches""")
 result = crsr.fetchone()
-print('matches:' + str(result[0]))
+print('matches: ' + str(result[0]))
 
 crsr.execute("""SELECT COUNT(*) FROM votes""")
 result = crsr.fetchone()
-print('votes:' + str(result[0]))
+print('votes: ' + str(result[0]))
 
 # TABLE settings
 # db_id SERIAL PRIMARY KEY
-# guild_id NUMERIC(18) NOT NULL
 # template_required BOOLEAN DEFAULT True
+# guild_id NUMERIC(18) NOT NULL
 
 # TABLE participants
 # db_id SERIAL PRIMARY KEY
