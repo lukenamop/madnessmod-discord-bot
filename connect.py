@@ -17,15 +17,15 @@ for row in crsr.fetchall():
 
 crsr.execute("""SELECT COUNT(*) FROM participants""")
 result = crsr.fetchone()
-print('participants:' + result[0])
+print('participants:' + str(result[0]))
 
 crsr.execute("""SELECT COUNT(*) FROM matches""")
 result = crsr.fetchone()
-print('matches:' + result[0])
+print('matches:' + str(result[0]))
 
 crsr.execute("""SELECT COUNT(*) FROM votes""")
 result = crsr.fetchone()
-print('votes:' + result[0])
+print('votes:' + str(result[0]))
 
 # TABLE settings
 # db_id SERIAL PRIMARY KEY
