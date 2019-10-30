@@ -1571,6 +1571,7 @@ async def on_reaction_add(reaction, user):
 				await action_log('ERROR IN TEMPLATE RANDOMIZATION -- EMOJI NOT FOUND')
 				return
 
+			# get url information from the base message
 			template_url = message.embeds[0].image.url
 			template_message_id = result[2]
 			template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
