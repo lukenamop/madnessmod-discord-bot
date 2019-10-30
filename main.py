@@ -1548,8 +1548,9 @@ async def on_reaction_add(reaction, user):
 				await user_channel.send(embed=embed)
 				await action_log('vote confirmation sent to user')
 		return
-		# only act on template confirmations for matches
+	# act on template confirmations for matches
 	if message.nonce.startswith('tempcon'):
+		# don't act on bot reactions
 		if not user.bot:
 			# find match channel
 			match_channel = client.get_channel(message.nonce.lstrip('tempcon'))
