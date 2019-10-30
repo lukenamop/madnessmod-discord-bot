@@ -204,7 +204,7 @@ async def on_message(message):
 				await message.add_reaction('🤷')
 				await message.add_reaction('👎')
 				return
-			if message.channel.id == config.DUELMODS_CHAN_ID and message.nonce == 'template_confirmation':
+			if message.channel.id == config.DUELMODS_CHAN_ID and message.nonce.startswith('tempcon'):
 				# add reactions to message confirmations in #duel-mods
 				await message.add_reaction('<:check_mark:637394596472815636>')
 				await message.add_reaction('<:x_mark:637394622200676396>')
@@ -1184,7 +1184,8 @@ async def on_message(message):
 					embed_title = 'Template for #' + message.channel.name
 					embed_description = 'Here\'s a random template! This template was submitted by ' + author_string
 					embed = await generate_embed('green', embed_title, embed_description, template_url)
-					await duelmods_chan.send(embed=embed, nonce='template_confirmation')
+					nonce = 'tempcon' + str(channel_id)
+					await duelmods_chan.send(embed=embed, nonce=nonce)
 					await duelmods_chan.send(message.author.mention)
 					await action_log('template confirmation sent to duel-mods')
 					return
@@ -1548,16 +1549,16 @@ async def on_reaction_add(reaction, user):
 				await action_log('vote confirmation sent to user')
 		return
 		# only act on template confirmations for matches
-	if message.nonce == 'template_confirmation':
+	if message.nonce.startswith('tempcon'):
 		if not user.bot:
 			# find match channel
-			query = 'SELECT channel_id, u1_id, u2_id, template_message_id FROM matches WHERE start_time IS NULL AND template_message_id IS NOT NULL'
+			match_channel = client.get_channel(message.nonce.lstrip('tempcon'))
+			query = 'SELECT u1_id, u2_id, template_message_id FROM matches WHERE start_time IS NULL AND template_message_id IS NOT NULL AND channel_id = ' + str(match_channel.id)
 			connect.crsr.execute(query)
 			result = connect.crsr.fetchone()
-			match_channel = client.get_channel(result[0])
-			member1 = message.guild.get_member(result[1])
+			member1 = message.guild.get_member(result[0])
 			u1_channel = await member1.create_dm()
-			member2 = message.guild.get_member(result[2])
+			member2 = message.guild.get_member(result[1])
 			u2_channel = await member2.create_dm()
 
 			# get custom emojis from discord
@@ -1568,7 +1569,7 @@ async def on_reaction_add(reaction, user):
 				return
 
 			template_url = message.embeds[0].image.url
-			template_message_id = result[3]
+			template_message_id = result[2]
 			template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
 
 			#  find which reaction was added
