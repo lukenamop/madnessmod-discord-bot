@@ -204,10 +204,12 @@ async def on_message(message):
 				await message.add_reaction('🤷')
 				await message.add_reaction('👎')
 				return
-			if message.channel.id == config.DUELMODS_CHAN_ID and message.nonce.startswith('tempcon'):
-				# add reactions to message confirmations in #duel-mods
-				await message.add_reaction('<:check_mark:637394596472815636>')
-				await message.add_reaction('<:x_mark:637394622200676396>')
+			if message.channel.id == config.DUELMODS_CHAN_ID and message.nonce is not None:
+				if message.nonce.startswith('tempcon'):
+					# add reactions to message confirmations in #duel-mods
+					await message.add_reaction('<:check_mark:637394596472815636>')
+					await message.add_reaction('<:x_mark:637394622200676396>')
+					return
 				return
 			return
 		return
@@ -1548,169 +1550,175 @@ async def on_reaction_add(reaction, user):
 				await user_channel.send(embed=embed)
 				await action_log('vote confirmation sent to user')
 		return
-	# act on template confirmations for matches
-	if message.nonce.startswith('tempcon'):
-		# don't act on bot reactions
-		if not user.bot:
-			# find match channel
-			match_channel = client.get_channel(int(message.nonce.lstrip('tempcon')))
-			# pull match data from database
-			query = 'SELECT u1_id, u2_id, template_message_id FROM matches WHERE start_time IS NULL AND template_message_id IS NOT NULL AND channel_id = ' + str(match_channel.id)
-			connect.crsr.execute(query)
-			result = connect.crsr.fetchone()
-			# save match data to variables and start DM channels with participants
-			member1 = message.guild.get_member(result[0])
-			u1_channel = await member1.create_dm()
-			member2 = message.guild.get_member(result[1])
-			u2_channel = await member2.create_dm()
 
-			# get custom emojis from discord
-			check_emoji = client.get_emoji(637394596472815636)
-			x_emoji = client.get_emoji(637394622200676396)
-			if check_emoji == None or x_emoji == None:
-				await action_log('ERROR IN TEMPLATE RANDOMIZATION -- EMOJI NOT FOUND')
-				return
-
-			# get url information from the base message
-			template_url = message.embeds[0].image.url
-			template_message_id = result[2]
-			template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
-
-			#  find which reaction was added
-			if reaction.emoji == check_emoji:
-				# delete original message
-				await message.delete()
-				# build template accepted embed
-				embed_title = 'Template Accepted'
-				embed_description = 'The randomized template was accepted and sent in the match channel!'
-				embed = await generate_embed('green', embed_title, embed_description)
-				await message.channel.send(embed=embed)
-				await action_log('randomized template accepted')
-
-				# update match start_time in database
-				query = 'UPDATE matches SET start_time = ' + str(time.time()) + ', template_message_id = NULL WHERE channel_id = ' + str(match_channel.id) + ' AND start_time IS NULL AND template_message_id IS NOT NULL'
-				connect.crsr.execute(query)
-				connect.conn.commit()
-				await action_log('match start_time updated in database')
-
-				# send notifying DMs to participants
-				embed_title = 'Match Started'
-				embed_description = 'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.** Here is your template:'
-				embed = await generate_embed('yellow', embed_title, embed_description, template_url)
-				await u1_channel.send(embed=embed)
-				await u2_channel.send(embed=embed)
-				await action_log('users notified of match')
-
-
-				# delete message from match channel
-				await match_channel.last_message.delete()
-				# send template to match channel
-				embed_title = 'Match Started'
-				embed_description = member1.mention + ' and ' + member2.mention + ' have 30 minutes to hand in their final memes. Good luck! (thanks to ' + template_message.embeds[0].description.split(' (')[0] + ' for the template)'
-				embed = await generate_embed('green', embed_title, embed_description, template_url)
-				await match_channel.send(embed=embed)
-				await action_log('match started between ' + member1.name + '#' + member1.discriminator + ' and ' + member2.name + '#' + member2.discriminator)
-
-				if not config.TESTING:
-					# delete template from #templates channel
-					await template_message.delete()
-					await action_log('template deleted from templates channel')
-
-				# sleep for 15 minutes (config.MATCH_WARN1_TIME seconds)
-				await asyncio.sleep(config.MATCH_WARN1_TIME)
-
-				await action_log('checking submission status')
-				# check for submissions, remind users to submit if they haven't yet
-				query = 'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = ' + str(member1.id) + ' AND u2_id = ' + str(member2.id) + ' AND start_time >= ' + str(time.time() - config.MATCH_TIME + 5)
+	if message.nonce is not None:	
+		# act on template confirmations for matches
+		if message.nonce.startswith('tempcon'):
+			# don't act on bot reactions
+			if not user.bot:
+				# find match channel
+				match_channel = client.get_channel(int(message.nonce.lstrip('tempcon')))
+				# pull match data from database
+				query = 'SELECT u1_id, u2_id, template_message_id FROM matches WHERE start_time IS NULL AND template_message_id IS NOT NULL AND channel_id = ' + str(match_channel.id)
 				connect.crsr.execute(query)
 				result = connect.crsr.fetchone()
-				if result is not None:
-					if result[0] and result[1]:
-						return
-				# build reminder embed
-				embed_title = 'Match Reminder'
-				embed_description = '15 minutes remaining.'
-				embed = await generate_embed('yellow', embed_title, embed_description)
-				# executes if member1 has not submitted
-				if not result[0]:
-					await u1_channel.send(embed=embed)
-				# executes if member2 has not submitted
-				if not result[1]:
-					await u2_channel.send(embed=embed)
+				try:
+					# save match data to variables and start DM channels with participants
+					member1 = message.guild.get_member(result[0])
+					u1_channel = await member1.create_dm()
+					member2 = message.guild.get_member(result[1])
+					u2_channel = await member2.create_dm()
+				except discord.errors.Forbidden:
 
-				# sleep for 10 minutes (config.MATCH_WARN2_TIME - config.MATCH_WARN1_TIME seconds)
-				await asyncio.sleep(config.MATCH_WARN2_TIME - config.MATCH_WARN1_TIME)
 
-				await action_log('checking submission status')
-				# check for submissions, remind users to submit if they haven't yet
-				query = 'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = ' + str(member1.id) + ' AND u2_id = ' + str(member2.id) + ' AND start_time >= ' + str(time.time() - config.MATCH_TIME + 5)
-				connect.crsr.execute(query)
-				result = connect.crsr.fetchone()
-				if result is not None:
-					if result[0] and result[1]:
-						return
-				# build reminder embed
-				embed_title = 'Match Reminder'
-				embed_description = '5 minutes remaining. Make sure to submit your final meme before the time runs out.'
-				embed = await generate_embed('yellow', embed_title, embed_description)
-				# executes if member1 has not submitted
-				if not result[0]:
-					await u1_channel.send(embed=embed)
-				# executes if member2 has not submitted
-				if not result[1]:
-					await u2_channel.send(embed=embed)
-
-				# sleep for 5 minutes (config.MATCH_TIME - config.MATCH_WARN2_TIME seconds)
-				await asyncio.sleep(config.MATCH_TIME - config.MATCH_WARN2_TIME)
-
-				await action_log('checking submission status')
-				# check for submissions, remind users to submit if they haven't yet
-				query = 'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = ' + str(member1.id) + ' AND u2_id = ' + str(member2.id) + ' AND start_time >= ' + str(time.time() - (config.MATCH_TIME + 5))
-				connect.crsr.execute(query)
-				result = connect.crsr.fetchone()
-				if result[0] and result[1]:
+				# get custom emojis from discord
+				check_emoji = client.get_emoji(637394596472815636)
+				x_emoji = client.get_emoji(637394622200676396)
+				if check_emoji == None or x_emoji == None:
+					await action_log('ERROR IN TEMPLATE RANDOMIZATION -- EMOJI NOT FOUND')
 					return
-				# build match end embed
-				embed_title = 'Match Closed'
-				embed_description = 'Your match has ended without your submission resulting in your disqualification. Next time, please be sure to submit your final meme before the time runs out!'
-				embed1 = await generate_embed('red', embed_title, embed_description)
-				await action_log('closing match')
-				embed_title = 'Competitor Missed Deadline'
-				# executes if member1 has not submitted
-				if not result[0]:
-					await u1_channel.send(embed=embed1)
-					# build missed deadline embed
-					embed_description = member1.mention + ' has missed their submission deadline.'
-					embed2 = await generate_embed('red', embed_title, embed_description)
-					await client.get_channel(config.SUBMISSION_CHAN_ID).send(embed=embed2)
-				# executes if member2 has not submitted
-				if not result[1]:
-					await u2_channel.send(embed=embed1)
-					# build missed deadline embed
-					embed_description = member2.mention + ' has missed their submission deadline.'
-					embed2 = await generate_embed('red', embed_title, embed_description)
-					await client.get_channel(config.SUBMISSION_CHAN_ID).send(embed=embed2)
-			elif reaction.emoji == x_emoji:
-				# delete original message
-				await message.delete()
-				# build template rejected embed
-				embed_title = 'Template Rejected'
-				embed_description = 'The randomized template was rejected. Please try `.startmatch` again.'
-				embed = await generate_embed('red', embed_title, embed_description)
-				await message.channel.send(embed=embed)
-				await action_log('randomized template rejected')
 
-				# delete message from match channel
-				await match_channel.last_message.delete()
-				# send embed in match channel
-				await match_channel.send(embed=embed)
-				await action_log('match channel notified')
+				# get url information from the base message
+				template_url = message.embeds[0].image.url
+				template_message_id = result[2]
+				template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
 
-				# remove match from database
-				query = 'DELETE FROM matches WHERE channel_id = ' + str(match_channel.id) + ' AND start_time IS NULL AND template_message_id IS NOT NULL'
-				connect.crsr.execute(query)
-				connect.conn.commit()
-				await action_log('match removed from database')
+				#  find which reaction was added
+				if reaction.emoji == check_emoji:
+					# delete original message
+					await message.delete()
+					# build template accepted embed
+					embed_title = 'Template Accepted'
+					embed_description = 'The randomized template was accepted and sent in the match channel!'
+					embed = await generate_embed('green', embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log('randomized template accepted')
+
+					# update match start_time in database
+					query = 'UPDATE matches SET start_time = ' + str(time.time()) + ', template_message_id = NULL WHERE channel_id = ' + str(match_channel.id) + ' AND start_time IS NULL AND template_message_id IS NOT NULL'
+					connect.crsr.execute(query)
+					connect.conn.commit()
+					await action_log('match start_time updated in database')
+
+					# send notifying DMs to participants
+					embed_title = 'Match Started'
+					embed_description = 'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.** Here is your template:'
+					embed = await generate_embed('yellow', embed_title, embed_description, template_url)
+					await u1_channel.send(embed=embed)
+					await u2_channel.send(embed=embed)
+					await action_log('users notified of match')
+
+
+					# delete message from match channel
+					await match_channel.last_message.delete()
+					# send template to match channel
+					embed_title = 'Match Started'
+					embed_description = member1.mention + ' and ' + member2.mention + ' have 30 minutes to hand in their final memes. Good luck! (thanks to ' + template_message.embeds[0].description.split(' (')[0] + ' for the template)'
+					embed = await generate_embed('green', embed_title, embed_description, template_url)
+					await match_channel.send(embed=embed)
+					await action_log('match started between ' + member1.name + '#' + member1.discriminator + ' and ' + member2.name + '#' + member2.discriminator)
+
+					if not config.TESTING:
+						# delete template from #templates channel
+						await template_message.delete()
+						await action_log('template deleted from templates channel')
+
+					# sleep for 15 minutes (config.MATCH_WARN1_TIME seconds)
+					await asyncio.sleep(config.MATCH_WARN1_TIME)
+
+					await action_log('checking submission status')
+					# check for submissions, remind users to submit if they haven't yet
+					query = 'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = ' + str(member1.id) + ' AND u2_id = ' + str(member2.id) + ' AND start_time >= ' + str(time.time() - config.MATCH_TIME + 5)
+					connect.crsr.execute(query)
+					result = connect.crsr.fetchone()
+					if result is not None:
+						if result[0] and result[1]:
+							return
+					# build reminder embed
+					embed_title = 'Match Reminder'
+					embed_description = '15 minutes remaining.'
+					embed = await generate_embed('yellow', embed_title, embed_description)
+					# executes if member1 has not submitted
+					if not result[0]:
+						await u1_channel.send(embed=embed)
+					# executes if member2 has not submitted
+					if not result[1]:
+						await u2_channel.send(embed=embed)
+
+					# sleep for 10 minutes (config.MATCH_WARN2_TIME - config.MATCH_WARN1_TIME seconds)
+					await asyncio.sleep(config.MATCH_WARN2_TIME - config.MATCH_WARN1_TIME)
+
+					await action_log('checking submission status')
+					# check for submissions, remind users to submit if they haven't yet
+					query = 'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = ' + str(member1.id) + ' AND u2_id = ' + str(member2.id) + ' AND start_time >= ' + str(time.time() - config.MATCH_TIME + 5)
+					connect.crsr.execute(query)
+					result = connect.crsr.fetchone()
+					if result is not None:
+						if result[0] and result[1]:
+							return
+					# build reminder embed
+					embed_title = 'Match Reminder'
+					embed_description = '5 minutes remaining. Make sure to submit your final meme before the time runs out.'
+					embed = await generate_embed('yellow', embed_title, embed_description)
+					# executes if member1 has not submitted
+					if not result[0]:
+						await u1_channel.send(embed=embed)
+					# executes if member2 has not submitted
+					if not result[1]:
+						await u2_channel.send(embed=embed)
+
+					# sleep for 5 minutes (config.MATCH_TIME - config.MATCH_WARN2_TIME seconds)
+					await asyncio.sleep(config.MATCH_TIME - config.MATCH_WARN2_TIME)
+
+					await action_log('checking submission status')
+					# check for submissions, remind users to submit if they haven't yet
+					query = 'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = ' + str(member1.id) + ' AND u2_id = ' + str(member2.id) + ' AND start_time >= ' + str(time.time() - (config.MATCH_TIME + 5))
+					connect.crsr.execute(query)
+					result = connect.crsr.fetchone()
+					if result[0] and result[1]:
+						return
+					# build match end embed
+					embed_title = 'Match Closed'
+					embed_description = 'Your match has ended without your submission resulting in your disqualification. Next time, please be sure to submit your final meme before the time runs out!'
+					embed1 = await generate_embed('red', embed_title, embed_description)
+					await action_log('closing match')
+					embed_title = 'Competitor Missed Deadline'
+					# executes if member1 has not submitted
+					if not result[0]:
+						await u1_channel.send(embed=embed1)
+						# build missed deadline embed
+						embed_description = member1.mention + ' has missed their submission deadline.'
+						embed2 = await generate_embed('red', embed_title, embed_description)
+						await client.get_channel(config.SUBMISSION_CHAN_ID).send(embed=embed2)
+					# executes if member2 has not submitted
+					if not result[1]:
+						await u2_channel.send(embed=embed1)
+						# build missed deadline embed
+						embed_description = member2.mention + ' has missed their submission deadline.'
+						embed2 = await generate_embed('red', embed_title, embed_description)
+						await client.get_channel(config.SUBMISSION_CHAN_ID).send(embed=embed2)
+				elif reaction.emoji == x_emoji:
+					# delete original message
+					await message.delete()
+					# build template rejected embed
+					embed_title = 'Template Rejected'
+					embed_description = 'The randomized template was rejected. Please try `.startmatch` again.'
+					embed = await generate_embed('red', embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log('randomized template rejected')
+
+					# delete message from match channel
+					await match_channel.last_message.delete()
+					# send embed in match channel
+					await match_channel.send(embed=embed)
+					await action_log('match channel notified')
+
+					# remove match from database
+					query = 'DELETE FROM matches WHERE channel_id = ' + str(match_channel.id) + ' AND start_time IS NULL AND template_message_id IS NOT NULL'
+					connect.crsr.execute(query)
+					connect.conn.commit()
+					await action_log('match removed from database')
+			return
 		return
 	return
 
