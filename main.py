@@ -434,7 +434,7 @@ async def on_message(message):
 					i2 += 1
 
 			await action_log('nonce length: ' + str(len(my_nonce)))
-			message.channel.send('hello there!',nonce=my_nonce)
+			await message.channel.send('hello there!',nonce=my_nonce)
 			return
 
 		# '.signup' command (DM)
