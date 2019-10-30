@@ -1590,7 +1590,6 @@ async def on_reaction_add(reaction, user):
 				# send notifying DMs to participants
 				embed_title = 'Match Started'
 				embed_description = 'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.** Here is your template:'
-				embed_link = message.attachments[0].url
 				embed = await generate_embed('yellow', embed_title, embed_description, template_url)
 				await u1_channel.send(embed=embed)
 				await u2_channel.send(embed=embed)
