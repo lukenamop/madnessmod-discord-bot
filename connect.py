@@ -11,6 +11,10 @@ crsr = conn.cursor()
 print('postgres connection info:')
 print(conn.get_dsn_parameters())
 
+query = 'ALTER TABLE matches ADD template_message_id NUMERIC(18) DEFAULT NULL'
+crsr.execute(query)
+conn.commit()
+
 print('settings:')
 crsr.execute("""SELECT * FROM settings""")
 for row in crsr.fetchall():
@@ -68,6 +72,7 @@ for row in crsr.fetchall():
 # u1_image_url VARCHAR(200) DEFAULT NULL
 # u2_image_url VARCHAR(200) DEFAULT NULL
 # a_meme NUMERIC(1) DEFAULT NULL
+# template_message_id NUMERIC(18) DEFAULT NULL
 
 # TABLE votes
 # db_id SERIAL PRIMARY KEY
