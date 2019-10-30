@@ -427,7 +427,7 @@ async def on_message(message):
 			my_nonce = ''
 			while i <= 40:
 				my_nonce += str(i)
-				i++
+				i += 1
 
 			message.channel.send('hello there!',nonce=my_nonce)
 			return
