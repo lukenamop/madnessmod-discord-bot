@@ -11,30 +11,21 @@ crsr = conn.cursor()
 print('postgres connection info:')
 print(conn.get_dsn_parameters())
 
-print('settings:')
 crsr.execute("""SELECT * FROM settings""")
 for row in crsr.fetchall():
-	print(row)
+	print('settings' + str(row))
 
-print('participants:')
 crsr.execute("""SELECT COUNT(*) FROM participants""")
 result = crsr.fetchone()
-print(result)
+print('participants:' + result[0])
 
-# print('signups:')
-# crsr.execute("""SELECT * FROM signups""")
-# for row in crsr.fetchall():
-# 	print(row)
+crsr.execute("""SELECT COUNT(*) FROM matches""")
+result = crsr.fetchone()
+print('matches:' + result[0])
 
-# print('matches:')
-# crsr.execute("""SELECT * FROM matches""")
-# for row in crsr.fetchall():
-# 	print(row)
-
-# print('votes:')
-# crsr.execute("""SELECT * FROM votes""")
-# for row in crsr.fetchall():
-# 	print(row)
+crsr.execute("""SELECT COUNT(*) FROM votes""")
+result = crsr.fetchone()
+print('votes:' + result[0])
 
 # TABLE settings
 # db_id SERIAL PRIMARY KEY
