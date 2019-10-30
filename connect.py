@@ -17,9 +17,9 @@ for row in crsr.fetchall():
 	print(row)
 
 print('participants:')
-crsr.execute("""SELECT * FROM participants""")
-for row in crsr.fetchall():
-	print(row)
+crsr.execute("""SELECT COUNT(*) FROM participants""")
+result = crsr.fetchone()
+print(result)
 
 # print('signups:')
 # crsr.execute("""SELECT * FROM signups""")
