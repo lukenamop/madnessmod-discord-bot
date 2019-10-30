@@ -1569,6 +1569,7 @@ async def on_reaction_add(reaction, user):
 
 			template_url = message.embeds[0].image.url
 			template_message_id = result[3]
+			template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
 
 			#  find which reaction was added
 			if reaction.emoji == check_emoji:
@@ -1600,14 +1601,13 @@ async def on_reaction_add(reaction, user):
 				await match_channel.last_message.delete()
 				# send template to match channel
 				embed_title = 'Match Started'
-				embed_description = member1.mention + ' and ' + member2.mention + ' have 30 minutes to hand in their final memes. Good luck! Here is their template:'
+				embed_description = member1.mention + ' and ' + member2.mention + ' have 30 minutes to hand in their final memes. Good luck! Here is their template: (Template from ' + template_message.embeds[0].description.mentions[0] + ')'
 				embed = await generate_embed('green', embed_title, embed_description, template_url)
 				await match_channel.send(embed=embed)
 				await action_log('match started between ' + member1.name + '#' + member1.discriminator + ' and ' + member2.name + '#' + member2.discriminator)
 
 				if not config.TESTING:
 					# delete template from #templates channel
-					template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
 					await template_message.delete()
 					await action_log('template deleted from templates channel')
 
