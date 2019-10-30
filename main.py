@@ -1549,7 +1549,7 @@ async def on_reaction_add(reaction, user):
 	if message.nonce == 'template_confirmation':
 		if not user.bot:
 			# find match channel
-			query = 'SELECT channel_id, u1_id, u2_id FROM matches WHERE start_time IS NULL AND template_message_id IS NOT NULL'
+			query = 'SELECT channel_id, u1_id, u2_id, template_message_id FROM matches WHERE start_time IS NULL AND template_message_id IS NOT NULL'
 			connect.crsr.execute(query)
 			result = connect.crsr.fetchone()
 			match_channel = client.get_channel(result[0])
@@ -1566,6 +1566,7 @@ async def on_reaction_add(reaction, user):
 				return
 
 			template_url = message.embeds[0].image.url
+			template_message_id = result[3]
 
 			#  find which reaction was added
 			if reaction.emoji == check_emoji:
@@ -1602,6 +1603,10 @@ async def on_reaction_add(reaction, user):
 				embed = await generate_embed('green', embed_title, embed_description, template_url)
 				await match_channel.send(embed=embed)
 				await action_log('match started between ' + member1.name + '#' + member1.discriminator + ' and ' + member2.name + '#' + member2.discriminator)
+
+				if not config.TESTING:
+					# delete template from #templates channel
+					await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id).delete()
 
 				# sleep for 15 minutes (config.MATCH_WARN1_TIME seconds)
 				await asyncio.sleep(config.MATCH_WARN1_TIME)
