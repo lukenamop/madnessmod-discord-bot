@@ -1162,7 +1162,6 @@ async def on_message(message):
 				embed_description = 'Randomly selecting template...'
 				embed = await generate_embed('green', embed_title, embed_description)
 				await message.channel.send(embed=embed)
-				await action_log('\'selecting template\' sent to match channel')
 
 				template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).history(limit=100).flatten()
 				await action_log('list of ' + str(len(template_list)) + ' templates compiled from #templates')
@@ -1613,6 +1612,12 @@ async def on_reaction_add(reaction, user):
 						embed = await generate_embed('red', embed_title, embed_description)
 						await match_channel.send(embed=embed)
 						await action_log('one of the participants has DMs turned off')
+
+						# remove match from database
+						query = 'DELETE FROM matches WHERE channel_id = ' + str(match_channel.id) + ' AND start_time IS NULL AND template_message_id IS NOT NULL'
+						connect.crsr.execute(query)
+						connect.conn.commit()
+						await action_log('match removed from database')
 						return
 
 					# delete message from match channel
