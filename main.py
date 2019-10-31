@@ -920,6 +920,12 @@ async def on_message(message):
 		if message_content == '.settournamentroles':
 			# check to be sure only admin user uses command
 			if message.author.id in config.ADMIN_IDS:
+				# build processing embed
+				embed_title = 'Processing...'
+				embed_description = 'Setting tournament roles...'
+				embed = await generate_embed('yellow', embed_title, embed_description)
+				await message.channel.send(embed=embed)
+
 				total_removed = 0
 				# iterate through all members
 				for member in message.guild.members:
@@ -962,6 +968,12 @@ async def on_message(message):
 		if message_content == '.removetournamentroles':
 			# check to be sure only admin user uses command
 			if message.author.id in config.ADMIN_IDS:
+				# build processing embed
+				embed_title = 'Processing...'
+				embed_description = 'Removing tournament roles...'
+				embed = await generate_embed('yellow', embed_title, embed_description)
+				await message.channel.send(embed=embed)
+
 				total_removed = 0;
 				# iterate through all members
 				for member in message.guild.members:
@@ -1163,7 +1175,7 @@ async def on_message(message):
 
 				embed_title = 'Starting Match'
 				embed_description = 'Randomly selecting template...'
-				embed = await generate_embed('green', embed_title, embed_description)
+				embed = await generate_embed('yellow', embed_title, embed_description)
 				await message.channel.send(embed=embed)
 
 				template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).history(limit=100).flatten()
