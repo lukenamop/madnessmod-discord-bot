@@ -922,12 +922,11 @@ async def on_message(message):
 			if message.author.id in config.ADMIN_IDS:
 				# build processing embed
 				embed_title = 'Processing...'
-				embed_description = 'Setting tournament roles...'
+				embed_description = 'Setting tournament roles... This could take a few minutes...'
 				embed = await generate_embed('yellow', embed_title, embed_description)
 				processing_message = await message.channel.send(embed=embed)
 
 				total_removed = 0
-				total_checked = 0
 				# iterate through all members
 				for member in message.guild.members:
 					for role in member.roles:
@@ -936,13 +935,6 @@ async def on_message(message):
 							await member.remove_roles(role)
 							# count up
 							total_removed += 1
-					# count up
-					total_checked += 1
-					# edit processing embed
-					new_embed_description = 'Setting tournament roles... ' + str(total_checked) + ' users checked...'
-					new_embed = await generate_embed('yellow', embed_title, new_embed_description)
-					await processing_message.edit(embed=new_embed)
-
 				await action_log(str(total_removed) + ' roles removed')
 
 				# pull all signups from database
@@ -958,12 +950,6 @@ async def on_message(message):
 						await member.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[1]))
 						# count up
 						total_added += 1
-
-						# edit processing embed
-						new_embed_description = 'Setting tournament roles... ' + str(total_checked) + ' users checked... ' + str(total_added) + ' roles added...'
-						new_embed = await generate_embed('yellow', embed_title, new_embed_description)
-						await processing_message.edit(embed=new_embed)
-
 					await processing_message.delete()
 					embed_title = 'Tournament Roles Set'
 					embed_description = 'Success! ' + str(total_removed) + ' previous tournament roles removed, ' + str(total_added) + ' new tournament roles added.'
@@ -986,7 +972,7 @@ async def on_message(message):
 			if message.author.id in config.ADMIN_IDS:
 				# build processing embed
 				embed_title = 'Processing...'
-				embed_description = 'Removing tournament roles...'
+				embed_description = 'Removing tournament roles... This could take a few minutes...'
 				embed = await generate_embed('yellow', embed_title, embed_description)
 				await message.channel.send(embed=embed)
 
