@@ -1,4 +1,4 @@
-pip
+-u pip
 praw
 prawcore
 psycopg2
