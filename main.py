@@ -895,13 +895,14 @@ async def on_message(message):
 			# pull all signups from database
 			query = 'SELECT user_id FROM signups WHERE submission_time >= ' + str(time.time() - config.CYCLE)
 			connect.crsr.execute(query)
+			results = connect.crsr.fetchall()
 			embed_title = 'Signup List'
 			# check to make sure there are signups
-			if connect.crsr is not None:
+			if results is not None:
 				# build signuplist embed
 				embed_description = ''
 				total = 0
-				for entry in connect.crsr:
+				for entry in results:
 					member = message.guild.get_member(entry[0])
 					if member is not None:
 						embed_description += functions.escape_underscores(member.display_name) + '\n'
@@ -933,11 +934,12 @@ async def on_message(message):
 				# pull all signups from database
 				query = 'SELECT user_id FROM signups WHERE submission_time >= ' + str(time.time() - config.CYCLE)
 				connect.crsr.execute(query)
+				results = connect.crsr.fetchall()
 				# check to make sure there are signups
-				if connect.crsr is not None:
+				if results is not None:
 					total_added = 0
 					# assign every user to the Round 1 role
-					for entry in connect.crsr:
+					for entry in results:
 						member = message.guild.get_member(entry[0])
 						await member.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[1]))
 						total_added += 1
