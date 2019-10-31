@@ -12,7 +12,7 @@ TOKEN = os.environ['DISCORD_TOKEN']
 TESTING = False # if set to true, stats will not be recorded to the database
 MM_GUILD_ID = 581695290986332160 # Meme Madness guild ID
 ADMIN_IDS = [324273473360887808, 380462665358901268] # admin user IDs (lukenamop, eltoch)
-CYCLE = 604800 # 7 days
+CYCLE = 1209600 # 14 days
 
 MATCH_TIME = 1800 # 30 minutes
 MATCH_WARN1_TIME = 900 # 15 minutes

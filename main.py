@@ -1747,6 +1747,8 @@ async def on_ready():
 	await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name='Meme Madness'))
 	# send ready confirmation to command line
 	print('Logged in as ' + client.user.name + ' - ' + str(client.user.id))
+	if config.TESTING:
+		print('Currently in TESTING MODE')
 	print('------')
 
 # starts instance of discord bot client
