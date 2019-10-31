@@ -1,7 +1,7 @@
-git+https://github.com/Rapptz/discord.py
-git+https://github.com/takluyver/Unidecode.git
-git+http://github.com/russ-/pychallonge#egg=pychallonge
+iso8601
 praw
 prawcore
 psycopg2
-requests
+requestsgit+https://github.com/Rapptz/discord.py
+git+https://github.com/takluyver/Unidecode.git
+git+http://github.com/russ-/pychallonge#egg=pychallonge
