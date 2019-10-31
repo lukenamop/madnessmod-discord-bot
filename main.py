@@ -1166,7 +1166,7 @@ async def on_message(message):
 				return
 
 	# contest category specific commands
-	if message.channel.category_id == 581876790172319767:
+	if message.channel.category_id == 639599353526485034:
 		# '.startmatch' command (contest category)
 		if message_content.startswith('.startmatch '):
 			if len(message.mentions) == 2:
