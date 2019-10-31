@@ -15,8 +15,8 @@ from time import gmtime
 from time import strftime
 
 # import additional files
-import connect
 import config
+import connect
 import verify
 import functions
 import help_cmd

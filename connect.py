@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import config
+# import libraries
 import psycopg2
 import os
 

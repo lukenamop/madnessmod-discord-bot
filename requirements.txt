@@ -1,5 +1,6 @@
 git+https://github.com/Rapptz/discord.py
 git+https://github.com/takluyver/Unidecode.git
+git+http://github.com/russ-/pychallonge#egg=pychallonge
 praw
 prawcore
 psycopg2
