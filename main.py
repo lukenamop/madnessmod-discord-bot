@@ -20,6 +20,7 @@ import connect
 import verify
 import functions
 import help_cmd
+import tourney_manager
 
 # intitialize discord client
 client = discord.Client()
