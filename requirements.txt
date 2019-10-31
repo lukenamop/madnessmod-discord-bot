@@ -1,4 +1,4 @@
--u pip
+--upgrade pip
 praw
 prawcore
 psycopg2
