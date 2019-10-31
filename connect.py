@@ -3,6 +3,7 @@
 # import libraries
 import psycopg2
 import os
+import config
 
 conn = psycopg2.connect(config.DB_URL)
 crsr = conn.cursor()
