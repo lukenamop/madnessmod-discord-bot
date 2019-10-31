@@ -1,8 +1,8 @@
-setup.py
 praw
 prawcore
 psycopg2
 requests
+git+https://bitbucket.org/micktwomey/pyiso8601
 git+https://github.com/Rapptz/discord.py
 git+https://github.com/takluyver/Unidecode.git
 git+http://github.com/russ-/pychallonge#egg=pychallonge
