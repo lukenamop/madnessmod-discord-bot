@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 
 # import libraries
-import config
 import praw
 import re
+
+# import additional files
+import config
 
 def send_message(username, key, username_discriminator, mex=False):
 	if not bool(re.match('^[a-zA-Z0-9\_\-]+$', username)) or len(username) > 20:
 		return None
-	reddit = praw.Reddit(client_id=config.CLIENT_ID,
-		client_secret=config.CLIENT_SECRET,
+	reddit = praw.Reddit(client_id=config.R_CLIENT_ID,
+		client_secret=config.R_CLIENT_SECRET,
 		password=config.R_PASSWORD,
 		username=config.R_USERNAME,
-		user_agent=config.USER_AGENT)
+		user_agent=config.R_USER_AGENT)
 	message_title = 'Discord Verification'
 	if mex:
 		contact = 'u/lukenamop or u/l3dar'

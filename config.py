@@ -35,8 +35,13 @@ DUELMODS_CHAN_ID = 600397545050734612 # channel ID for #duel-mods
 
 
 ##### verify.py stuff
-CLIENT_ID = os.environ['REDDIT_CLIENT_ID']
-CLIENT_SECRET = os.environ['REDDIT_CLIENT_SECRET']
+R_CLIENT_ID = os.environ['REDDIT_CLIENT_ID']
+R_CLIENT_SECRET = os.environ['REDDIT_CLIENT_SECRET']
 R_PASSWORD = os.environ['REDDIT_PASSWORD']
 R_USERNAME = os.environ['REDDIT_USERNAME']
-USER_AGENT = 'heroku:madnessmod-discord-bot (by /u/lukenamop)'
+R_USER_AGENT = 'heroku:madnessmod-discord-bot (by /u/lukenamop)'
+
+
+##### tourney_manager.py stuff
+C_USERNAME = os.environ['CHALLONGE_USERNAME']
+C_API_KEY = os.environ['CHALLONGE_API_KEY']
