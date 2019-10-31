@@ -1,3 +1,4 @@
+iso8601==0.1.11
 praw
 prawcore
 psycopg2
