@@ -939,7 +939,7 @@ async def on_message(message):
 					# count up
 					total_checked += 1
 					# edit processing embed
-					new_embed_description = 'Setting tournament roles... ' + total_checked + ' users checked...'
+					new_embed_description = 'Setting tournament roles... ' + str(total_checked) + ' users checked...'
 					new_embed = await generate_embed('yellow', embed_title, new_embed_description)
 					await processing_message.edit(embed=new_embed)
 
@@ -960,10 +960,11 @@ async def on_message(message):
 						total_added += 1
 
 						# edit processing embed
-						new_embed_description = 'Setting tournament roles... ' + total_checked + ' users checked... ' + total_added + ' roles added...'
+						new_embed_description = 'Setting tournament roles... ' + str(total_checked) + ' users checked... ' + str(total_added) + ' roles added...'
 						new_embed = await generate_embed('yellow', embed_title, new_embed_description)
 						await processing_message.edit(embed=new_embed)
 
+					await processing_message.delete()
 					embed_title = 'Tournament Roles Set'
 					embed_description = 'Success! ' + str(total_removed) + ' previous tournament roles removed, ' + str(total_added) + ' new tournament roles added.'
 					embed = await generate_embed('green', embed_title, embed_description)
