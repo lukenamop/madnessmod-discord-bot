@@ -8,3 +8,5 @@ import config
 
 # set challonge API credentials
 challonge.set_credentials(config.C_USERNAME, config.C_API_KEY)
+
+print(challonge.participants.index('mmcycle9'))
