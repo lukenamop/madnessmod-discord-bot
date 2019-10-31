@@ -1,3 +1,4 @@
+HGPYTHON3=1 Mercurial
 praw
 prawcore
 psycopg2
