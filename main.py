@@ -891,7 +891,7 @@ async def on_message(message):
 				return
 
 		# '.signuplist' command (duel-mods)
-		if message_content.startswith('.signuplist') or message_content.startswith('signups'):
+		if message_content.startswith('.signuplist') or message_content.startswith('.signups'):
 			# pull all signups from database
 			query = 'SELECT user_id FROM signups WHERE submission_time >= ' + str(time.time() - config.CYCLE)
 			connect.crsr.execute(query)
