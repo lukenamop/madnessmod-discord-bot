@@ -932,7 +932,7 @@ async def on_message(message):
 					if member is not None:
 						embed_description += functions.escape_underscores(member.display_name) + '\n'
 						total += 1
-				embed_description += '**Total signups: ' + str(total) + '**'
+				embed_description += '**Total signups: `' + str(total) + '`**'
 			else:
 				embed_description = 'There aren\'t any signups for this cycle in the database yet.'
 			embed = await generate_embed('green', embed_title, embed_description)
