@@ -814,6 +814,32 @@ async def on_message(message):
 
 	# duel-mods specific commands
 	if message.channel.id == 600397545050734612 or message.channel.id == 581728812518080522:
+		# '.activematches' command (duel-mods)
+		if message_content == '.activematches':
+			query = 'SELECT channel_id FROM matches WHERE start_time = ' + str(time.time() - config.MATCH_TIME + 5)
+			connect.crsr.execute(query)
+			results = connect.crsr.fetchall()
+			embed_title = 'Active Matches'
+			# check to make sure there are active matches
+			if results is not None:
+				# build activematches embed
+				embed_description_bottom = ''
+				total = 0
+				for match in results:
+					channel = message.guild.get_channel(match[0])
+					if channel is not None:
+						embed_description_bottom += channel.mention + '\n'
+						total += 1
+				embed_description_top += '**Total active matches: `' + '`**'
+				embed_description = embed_description_top + '\n' + embed_description_bottom.rstrip('\n')
+			else:
+				embed_description = '**Total active matches: `0`**'
+			embed = await generate_embed('green', embed_title, embed_description)
+			# send activematches embed
+			await message.channel.send(embed=embed)
+			await action_log('activematches sent to duel-mods')
+			return
+
 		# '.resignup' command (duel-mods)
 		if message_content.startswith('.resignup '):
 			await action_log('resignup command in #duel-mods')
