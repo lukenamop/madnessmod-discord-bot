@@ -823,15 +823,14 @@ async def on_message(message):
 			# check to make sure there are active matches
 			if results is not None:
 				# build activematches embed
-				embed_description_bottom = ''
+				embed_description = ''
 				total = 0
 				for match in results:
 					channel = message.guild.get_channel(match[0])
 					if channel is not None:
-						embed_description_bottom += channel.mention + '\n'
+						embed_description += channel.mention + '\n'
 						total += 1
-				embed_description_top += '**Total active matches: `' + '`**'
-				embed_description = embed_description_top + '\n' + embed_description_bottom.rstrip('\n')
+				embed_description += '**Total active matches: `' + str(total) + '`**'
 			else:
 				embed_description = '**Total active matches: `0`**'
 			embed = await generate_embed('green', embed_title, embed_description)
