@@ -816,17 +816,17 @@ async def on_message(message):
 	if message.channel.id == 600397545050734612 or message.channel.id == 581728812518080522:
 		# '.activematches' command (duel-mods)
 		if message_content == '.activematches':
-			query = 'SELECT channel_id FROM matches WHERE start_time = ' + str(time.time() - config.MATCH_TIME + 5)
+			query = 'SELECT channel_id FROM matches WHERE start_time >= ' + str(time.time() - (config.MATCH_TIME + config.BASE_POLL_TIME))
 			connect.crsr.execute(query)
 			results = connect.crsr.fetchall()
 			embed_title = 'Active Matches'
 			# check to make sure there are active matches
 			if results is not None:
 				# build activematches embed
-				embed_description = ''
+				embed_descriptioon = ''
 				total = 0
 				for match in results:
-					channel = message.guild.get_channel(match[0])
+					channel = client.get_channel(match[0])
 					if channel is not None:
 						embed_description += channel.mention + '\n'
 						total += 1
