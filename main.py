@@ -823,7 +823,7 @@ async def on_message(message):
 			# check to make sure there are active matches
 			if results is not None:
 				# build activematches embed
-				embed_descriptioon = ''
+				embed_description = ''
 				total = 0
 				for match in results:
 					channel = client.get_channel(match[0])
