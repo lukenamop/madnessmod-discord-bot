@@ -7,28 +7,35 @@ import os
 # import additional files
 import config
 
-conn = psycopg2.connect(config.DB_URL)
-crsr = conn.cursor()
+def db_connect():
+	# establish database connection
+	conn = psycopg2.connect(config.DB_URL)
+	crsr = conn.cursor()
+	print('database connected')
 
-# print connection properties
-print('postgres connection info:')
-print(conn.get_dsn_parameters())
+	# print connection properties
+	print('postgres connection info:')
+	print(conn.get_dsn_parameters())
 
-crsr.execute("""SELECT * FROM settings""")
-for row in crsr.fetchall():
-	print('settings: ' + str(row))
+	crsr.execute("""SELECT * FROM settings""")
+	for row in crsr.fetchall():
+		print('settings: ' + str(row))
 
-crsr.execute("""SELECT COUNT(*) FROM participants""")
-result = crsr.fetchone()
-print('participants: ' + str(result[0]))
+	crsr.execute("""SELECT COUNT(*) FROM participants""")
+	result = crsr.fetchone()
+	print('participants: ' + str(result[0]))
 
-crsr.execute("""SELECT COUNT(*) FROM matches""")
-result = crsr.fetchone()
-print('matches: ' + str(result[0]))
+	crsr.execute("""SELECT COUNT(*) FROM matches""")
+	result = crsr.fetchone()
+	print('matches: ' + str(result[0]))
 
-crsr.execute("""SELECT COUNT(*) FROM votes""")
-result = crsr.fetchone()
-print('votes: ' + str(result[0]))
+	crsr.execute("""SELECT COUNT(*) FROM votes""")
+	result = crsr.fetchone()
+	print('votes: ' + str(result[0]))
+	
+	return True
+
+db_connect()
 
 # TABLE settings
 # db_id SERIAL PRIMARY KEY

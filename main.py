@@ -839,6 +839,21 @@ async def on_message(message):
 			await action_log('activematches sent to duel-mods')
 			return
 
+		# '.reconnect' command (duel-mods)
+		if message_content == '.reconnect':
+			await action_log('attempting to reconnect to database...')
+			success = connect.db_connect()
+			if success:
+				embed_title = 'Connection Established'
+				embed_description = 'The database has been reconnected.'
+				embed = await generate_embed('green', embed_title, embed_description)
+			else:
+				embed_title = 'Connection Attempt Failed'
+				embed_description = 'Something went wrong! Please contact lukenamop ASAP.'
+				embed = await generate_embed('red', embed_title, embed_description)
+			await message.channel.send(embed=embed)
+			return
+
 		# '.resignup' command (duel-mods)
 		if message_content.startswith('.resignup '):
 			await action_log('resignup command in #duel-mods')
