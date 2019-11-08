@@ -9,7 +9,9 @@ import config
 
 def db_connect():
 	# establish database connection
+	global conn
 	conn = psycopg2.connect(config.DB_URL)
+	global crsr
 	crsr = conn.cursor()
 	print('database connected')
 
@@ -32,7 +34,7 @@ def db_connect():
 	crsr.execute("""SELECT COUNT(*) FROM votes""")
 	result = crsr.fetchone()
 	print('votes: ' + str(result[0]))
-	
+
 	return True
 
 db_connect()
