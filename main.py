@@ -1306,7 +1306,10 @@ async def on_message(message):
 				results = connect.crsr.fetchall()
 				result = None
 				failed = False
-				if len(results) > 1:
+
+				if len(results) == 0 or results == None:
+					failed = True
+				elif len(results) > 1:
 					result = [0, 0, 0, 0, 0, 0]
 					# find the most recent match by creation_time
 					for match in results:
@@ -1314,14 +1317,13 @@ async def on_message(message):
 							result = match
 				elif len(results) == 1:
 					result = results[0]
-				else:
-					failed = True
 
 				# verify that an existing match was found
 				if not failed:
-					embed_title = 'not working as intended'
-					embed_description = 'There is no match to start solo. To split this match, use the `.splitmatch @user @user` command.'
-					embed = await generate_embed('red', embed)
+					embed_title = 'Match Found'
+					embed_description = ':thumbsup:'
+					embed = await generate_embed('green', embed_title, embed_description)
+					await message.channel.send(embed=embed)
 					return
 				else:
 					# inform the match channel that no existing match was found
