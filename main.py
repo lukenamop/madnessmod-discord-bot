@@ -1318,7 +1318,7 @@ async def on_message(message):
 					failed = True
 
 				# verify that an existing match was found
-				if !failed:
+				if not failed:
 
 					return
 				else:
