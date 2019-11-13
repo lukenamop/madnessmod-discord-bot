@@ -1304,6 +1304,7 @@ async def on_message(message):
 				query = 'SELECT creation_time, u1_id, u2_id, u1_submitted, u2_submitted, a_meme FROM matches WHERE channel_id = ' + str(message.channel.id)
 				connect.crsr.execute(query)
 				results = connect.crsr.fetchall()
+				await action_log(results)
 				result = None
 				failed = False
 
