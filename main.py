@@ -1302,7 +1302,9 @@ async def on_message(message):
 		if message_content.startswith('.startsolo '):
 			if len(message.mentions) == 1:
 				match_user = message.mentions[0]
-				query = 'SELECT creation_time, u1_id, u2_id, u1_submitted, u2_submitted, template_message_id FROM matches WHERE channel_id = ' + str(message.channel.id)
+				channel_id = message.channel.id
+
+				query = 'SELECT creation_time, u1_id, u2_id, u1_submitted, u2_submitted, template_message_id FROM matches WHERE channel_id = ' + str(channel_id)
 				connect.crsr.execute(query)
 				results = connect.crsr.fetchall()
 				result = None
@@ -1375,7 +1377,7 @@ async def on_message(message):
 								author_string = template_message.author.display_name
 
 							# update postgresql
-							query = 'UPDATE matches SET template_message_id = ' + str(template_message.id) + ' WHERE ' + match_udb + ' = ' + str(match_user.id) + ' AND channel_id = ' + str(message.channel.id)
+							query = 'UPDATE matches SET template_message_id = ' + str(template_message.id) + ' WHERE ' + match_udb + ' = ' + str(match_user.id) + ' AND channel_id = ' + str(channel_id)
 							connect.crsr.execute(query)
 							connect.conn.commit()
 							await action_log('match updated in database')
