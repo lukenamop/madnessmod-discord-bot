@@ -27,6 +27,10 @@ def db_connect():
 	result = crsr.fetchone()
 	print('participants: ' + str(result[0]))
 
+	query = """ALTER TABLE matches ADD creation_time NUMERIC(10) DEFAULT NULL"""
+	crsr.execute(query)
+	conn.commit()
+
 	crsr.execute("""SELECT COUNT(*) FROM matches""")
 	result = crsr.fetchone()
 	print('matches: ' + str(result[0]))
@@ -64,6 +68,7 @@ db_connect()
 # db_id SERIAL PRIMARY KEY
 # u1_id NUMERIC(18) NOT NULL
 # u2_id NUMERIC(18) NOT NULL
+# creation_time NUMERIC(10) DEFAULT NULL
 # start_time NUMERIC(10) DEFAULT NULL
 # u1_submitted BOOLEAN DEFAULT False
 # u2_submitted BOOLEAN DEFAULT False
