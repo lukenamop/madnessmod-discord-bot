@@ -27,10 +27,6 @@ def db_connect():
 	result = crsr.fetchone()
 	print('participants: ' + str(result[0]))
 
-	query = """ALTER TABLE matches ADD creation_time NUMERIC(10) DEFAULT NULL"""
-	crsr.execute(query)
-	conn.commit()
-
 	crsr.execute("""SELECT COUNT(*) FROM matches""")
 	result = crsr.fetchone()
 	print('matches: ' + str(result[0]))
