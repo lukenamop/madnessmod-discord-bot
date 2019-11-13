@@ -1329,8 +1329,6 @@ async def on_message(message):
 					await message.channel.send(embed=embed)
 					await action_log('no active split match')
 					return
-				else:
-					return
 			else:
 				embed_title = 'Participant Not Specified'
 				embed_description = 'The format to use this command is `.startsolo @user`, please be sure you\'re using it correctly.'
