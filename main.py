@@ -1301,13 +1301,13 @@ async def on_message(message):
 		# '.startsolo ' command (contest category)
 		if message_content.startswith('.startsolo '):
 			if len(message.mentions) == 1:
+				match_user = message.mentions[0]
 				query = 'SELECT creation_time, u1_id, u2_id, u1_submitted, u2_submitted, a_meme FROM matches WHERE channel_id = ' + str(message.channel.id)
 				connect.crsr.execute(query)
 				results = connect.crsr.fetchall()
-				await action_log(str(results))
 				result = None
 				failed = False
-				
+
 				if len(results) > 1:
 					result = [0, 0, 0, 0, 0, 0]
 					# find the most recent match by creation_time
@@ -1319,10 +1319,37 @@ async def on_message(message):
 				else:
 					failed = True
 
+				if not failed:
+					# check to see if the mentioned user is "u1" in the database
+					if match_user.id == result[1]:
+						# check to see if the user has submitted
+						if result[3]:
+							embed_title = 'User Already Submitted'
+							embed_description = 'This user has already submitted to their match in this channel.'
+							embed = await generate_embed('red', embed_title, embed_description)
+							await message.channel.send(embed=embed)
+							return
+						# if the user hasn't submitted, continue
+						match_udb = 1
+					# check to see if the mentioned user is "u2" in the database
+					elif match_user.id == result[2]:
+						# check to see if the user has submitted
+						if result[4]:
+							embed_title = 'User Already Submitted'
+							embed_description = 'This user has already submitted to their match in this channel.'
+							embed = await generate_embed('red', embed_title, embed_description)
+							await message.channel.send(embed=embed)
+							return
+						# if the user hasn't submitted, continue
+						match_udb = 2
+					else:
+						# failed is true if the mentioned user is not "u1" or "u2"
+						failed = True
+
 				# verify that an existing match was found
 				if not failed:
 					embed_title = 'Match Found'
-					embed_description = ':thumbsup:'
+					embed_description = str(match_udb)
 					embed = await generate_embed('green', embed_title, embed_description)
 					await message.channel.send(embed=embed)
 					return
