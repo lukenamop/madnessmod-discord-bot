@@ -1307,22 +1307,8 @@ async def on_message(message):
 				await action_log(str(results))
 				result = None
 				failed = False
-
-				if results == None:
-					embed_title = 'Match 1'
-					embed_description = ':thumbsdown:'
-					embed = await generate_embed('red', embed_title, embed_description)
-					await message.channel.send(embed=embed)
-					return
-				if results == [None, None, None, None, None]:
-					embed_title = 'Match 2'
-					embed_description = ':thumbsdown:'
-					embed = await generate_embed('red', embed_title, embed_description)
-					await message.channel.send(embed=embed)
-					return
-				if len(results) == 0:
-					failed = True
-				elif len(results) > 1:
+				
+				if len(results) > 1:
 					result = [0, 0, 0, 0, 0, 0]
 					# find the most recent match by creation_time
 					for match in results:
@@ -1330,6 +1316,8 @@ async def on_message(message):
 							result = match
 				elif len(results) == 1:
 					result = results[0]
+				else:
+					failed = True
 
 				# verify that an existing match was found
 				if not failed:
