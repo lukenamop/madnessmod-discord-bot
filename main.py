@@ -1319,7 +1319,9 @@ async def on_message(message):
 
 				# verify that an existing match was found
 				if not failed:
-
+					embed_title = 'not working as intended'
+					embed_description = 'There is no match to start solo. To split this match, use the `.splitmatch @user @user` command.'
+					embed = await generate_embed('red', embed)
 					return
 				else:
 					# inform the match channel that no existing match was found
