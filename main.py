@@ -1386,7 +1386,7 @@ async def on_message(message):
 							embed_title = 'Template for #' + message.channel.name
 							embed_description = 'Here\'s a random template! This template was submitted by ' + author_string
 							embed = await generate_embed('green', embed_title, embed_description, template_url)
-							nonce = 'tempcon_split' + str(channel_id)
+							nonce = 'sptemp' + str(channel_id)
 							await duelmods_chan.send(embed=embed, nonce=nonce)
 							await duelmods_chan.send(message.author.mention)
 							await action_log('template confirmation sent to duel-mods')
