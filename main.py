@@ -1885,7 +1885,6 @@ async def on_reaction_add(reaction, user):
 
 					# delete message from match channel
 					await match_channel.last_message.delete()
-					await match_channel.last_message.delete()
 					# send template to match channel
 					embed_title = 'Match Started'
 					embed_description = member.mention + ' has 30 minutes to hand in their final meme. Good luck!'
@@ -2050,7 +2049,6 @@ async def on_reaction_add(reaction, user):
 						return
 
 					# delete message from match channel
-					await match_channel.last_message.delete()
 					await match_channel.last_message.delete()
 					# send template to match channel
 					embed_title = 'Match Started'
