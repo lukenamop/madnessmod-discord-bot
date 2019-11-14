@@ -1228,39 +1228,42 @@ async def on_message(message):
 					await action_log('tournament not found')
 					return
 
-				# # send a confirmation embed
-				# embed_title = 'Creating Match Channels...'
-				# embed_description = 'Creating channels for any open matches.'
-				# embed = await generate_embed('yellow', embed_title, embed_description)
-				# conf_message = await message.channel.send(embed=embed)
+				# send a confirmation embed
+				embed_title = 'Creating Match Channels...'
+				embed_description = 'Creating channels for any open matches.'
+				embed = await generate_embed('yellow', embed_title, embed_description)
+				conf_message = await message.channel.send(embed=embed)
 
-				# # iterate through all matches
-				# total_created = 0
-				# for match in tournament_index:
-				# 	if match['state'] == 'open':
-				# 		# if a match is open, create a channel for it
-				# 		participant1 = tourney_manager.show_participant(tournament_shortcut, match['player1-id'])['name']
-				# 		participant2 = tourney_manager.show_participant(tournament_shortcut, match['player2-id'])['name']
-				# 		channel_name = 'match-' + str(match['suggested-play-order']) + '-' + participant1[:5] + '-v-' + participant2[:5]
-				# 		if not channel_name in category_channel_names:
-				# 			await mm_guild.create_text_channel(channel_name, category=contest_category)
-				# 			total_created += 1
+				# iterate through all matches
+				total_created = 0
+				for match in tournament_index:
+					if match['state'] == 'open':
+						# if a match is open, create a channel for it
+						participant1 = tourney_manager.show_participant(tournament_shortcut, match['player1-id'])['name']
+						participant2 = tourney_manager.show_participant(tournament_shortcut, match['player2-id'])['name']
+						channel_name = 'match-' + str(match['suggested-play-order']) + '-' + participant1[:5] + '-v-' + participant2[:5]
+						if channel_name in category_channel_names:
+							await action_log('nope canceled')
+						else:
+							await action_log('seems fine')
+							await mm_guild.create_text_channel(channel_name, category=contest_category)
+							total_created += 1
 
-				# # check to see if any matches were created
-				# if total_created > 0:
-				# 	embed_title = 'Channel Creation Complete'
-				# 	embed_description = 'A total of ' + str(total_created) + ' channels were created!'
-				# 	embed = await generate_embed('green', embed_title, embed_description)
-				# 	await message.channel.send(embed=embed)
-				# 	await action_log('channel creation complete - ' + str(total_created) + ' open matches')
-				# 	await conf_message.delete()
-				# else:
-				# 	embed_title = 'No Channels Created'
-				# 	embed_description = 'There were no open matches in the specified tournament. Please try again with a different tournament reference.'
-				# 	embed = await generate_embed('red', embed_title, embed_description)
-				# 	await message.channel.send(embed=embed)
-				# 	await action_log('no open matches in tournament')
-				# 	await conf_message.delete()
+				# check to see if any matches were created
+				if total_created > 0:
+					embed_title = 'Channel Creation Complete'
+					embed_description = 'A total of ' + str(total_created) + ' channels were created!'
+					embed = await generate_embed('green', embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log('channel creation complete - ' + str(total_created) + ' open matches')
+					await conf_message.delete()
+				else:
+					embed_title = 'No Channels Created'
+					embed_description = 'There were no open matches in the specified tournament. Please try again with a different tournament reference.'
+					embed = await generate_embed('red', embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log('no open matches in tournament')
+					await conf_message.delete()
 			return
 
 		# '.clearparticipantstats' command (duel-mods)
