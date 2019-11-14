@@ -1233,15 +1233,15 @@ async def on_message(message):
 						participant2 = tourney_manager.show_participant(tournament_shortcut, match['player2-id'])['name']
 						channel_name = 'match-' + match['suggested-play-order'] + '-' + participant1[:5] + '-v-' + participant2[:5]
 						await mm_guild.create_text_channel(channel_name, category=contest_category)
-						total += 1
+						total_created += 1
 
 				# check to see if any matches were created
-				if total > 0:
+				if total_created > 0:
 					embed_title = 'Channel Creation Complete'
-					embed_description = 'A total of ' + str(total) + ' channels were created!'
+					embed_description = 'A total of ' + str(total_created) + ' channels were created!'
 					embed = await generate_embed('green', embed_title, embed_description)
 					await message.channel.send(embed=embed)
-					await action_log('channel creation complete - ' + str(total) + ' open matches')
+					await action_log('channel creation complete - ' + str(total_created) + ' open matches')
 				else:
 					embed_title = 'No Channels Created'
 					embed_description = 'There were no open matches in the specified tournament. Please try again with a different tournament reference.'
