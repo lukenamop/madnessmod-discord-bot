@@ -66,8 +66,6 @@ async def on_message(message):
 	if message.author.bot:
 		# except for MadnessMod itself
 		if message.author.id == 622139031756734492:
-			if message.nonce is not None:
-				await action_log(message.nonce)
 			if message.nonce == 'poll':
 				# get base match channel
 				base_channel = message.channel
@@ -216,16 +214,12 @@ async def on_message(message):
 					await message.add_reaction('<:check_mark:637394596472815636>')
 					await message.add_reaction('<:x_mark:637394622200676396>')
 					return
-				return
 			if message.channel.id == config.DUELMODS_CHAN_ID and message.nonce is not None:
-				await action_log('part of the way in')
 				if message.nonce.startswith('sptemp'):
-					await action_log('ok we\'re all the way in')
 					# add reactions to split template confirmations in #duel-mods
 					await message.add_reaction('<:check_mark:637394596472815636>')
 					await message.add_reaction('<:x_mark:637394622200676396>')
 					return
-				return
 			return
 		return
 
@@ -1401,7 +1395,6 @@ async def on_message(message):
 							embed = await generate_embed('green', embed_title, embed_description, template_url)
 							nonce = 'sptemp' + user_num + str(channel_id)
 							await duelmods_chan.send(embed=embed, nonce=nonce)
-							await action_log(nonce)
 							await duelmods_chan.send(message.author.mention)
 							await action_log('template confirmation sent to duel-mods')
 							return
