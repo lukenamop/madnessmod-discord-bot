@@ -1209,7 +1209,7 @@ async def on_message(message):
 			if message.author.id in config.ADMIN_IDS:
 				mm_guild = message.guild
 				contest_category = mm_guild.get_channel(config.MATCH_CATEGORY_ID)
-				await action_log(contest_category.name)
+				await mm_guild.create_text_channel('test', category=contest_category)
 			return
 
 		# '.clearparticipantstats' command (duel-mods)
