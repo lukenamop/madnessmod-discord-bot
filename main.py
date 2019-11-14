@@ -1170,7 +1170,7 @@ async def on_message(message):
 					try:
 						# create the tournament on Challonge
 						tourney_manager.create_tournament(tournament_title, tournament_shortcut)
-					except challonge.api.ChallongeException:
+					except tourney_manager.challonge.api.ChallongeException:
 						embed_title = 'Bracket URL Already Taken'
 						embed_description = 'There is an issue with the name you tried to give the tournament. Please try a different tournament number.'
 						embed = await generate_embed('red', embed_title, embed_description)
