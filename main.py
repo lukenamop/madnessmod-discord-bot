@@ -560,7 +560,7 @@ async def on_message(message):
 		# '.submit' command (DM)
 		if message_content.startswith('.submit'):
 			# check for an active match including the specified user
-			query = 'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time FROM matches WHERE (u1_id = ' + str(message.author.id) + ' OR u2_id = ' + str(message.author.id) + ') AND start_time >= ' + str(time.time() - (config.MATCH_TIME + 10))
+			query = 'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, split_match_template_url FROM matches WHERE (u1_id = ' + str(message.author.id) + ' OR u2_id = ' + str(message.author.id) + ') AND start_time >= ' + str(time.time() - (config.MATCH_TIME + 10))
 			connect.crsr.execute(query)
 			result = connect.crsr.fetchone()
 
@@ -572,6 +572,7 @@ async def on_message(message):
 			# check for duplicate submissions
 			if result is not None:
 				start_time = result[5]
+				split_match_template_url = result[6]
 				if message.author.id == result[0]:
 					if result[2]:
 						await message.channel.send(embed=embed)
@@ -1306,7 +1307,9 @@ async def on_message(message):
 		# '.startsolo ' command (contest category)
 		if message_content.startswith('.startsolo '):
 			if len(message.mentions) == 1:
+				await action_log('starting solo')
 				match_user = message.mentions[0]
+				match_channel = message.channel
 				channel_id = message.channel.id
 
 				query = 'SELECT creation_time, u1_id, u2_id, u1_submitted, u2_submitted, split_match_template_url FROM matches WHERE channel_id = ' + str(channel_id)
@@ -1340,6 +1343,7 @@ async def on_message(message):
 						# if the user hasn't submitted, continue
 						match_udb = 'u1_id'
 						user_num = '1'
+						await action_log('match and participant found')
 					# check to see if the mentioned user is "u2" in the database
 					elif match_user.id == result[2]:
 						# check to see if the user has submitted
@@ -1352,6 +1356,7 @@ async def on_message(message):
 						# if the user hasn't submitted, continue
 						match_udb = 'u2_id'
 						user_num = '2'
+						await action_log('match and participant found')
 					else:
 						# failed is true if the mentioned user is not "u1" or "u2"
 						failed = True
