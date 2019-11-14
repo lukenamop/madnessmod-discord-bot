@@ -9,7 +9,7 @@ DB_URL = os.environ['DATABASE_URL']
 
 ##### main.py stuff
 TOKEN = os.environ['DISCORD_TOKEN']
-TESTING = True # if set to true, stats will not be recorded to the database
+TESTING = False # if set to true, stats will not be recorded to the database
 MM_GUILD_ID = 581695290986332160 # Meme Madness guild ID
 ADMIN_IDS = [324273473360887808, 380462665358901268] # admin user IDs (lukenamop, eltoch)
 CYCLE = 1209600 # 14 days
