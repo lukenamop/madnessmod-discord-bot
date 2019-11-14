@@ -1150,6 +1150,13 @@ async def on_message(message):
 		if message_content.startswith('.createbracket '):
 			# check to be sure only admin user uses command
 			if message.author.id in config.ADMIN_IDS:
+				# send a confirmation embed
+				embed_title = 'Creating Bracket...'
+				embed_description = 'Creating a Challonge bracket with the given tournament number.'
+				embed = generate_embed('yellow', embed_title, embed_description)
+				conf_message = await message.channel.send(embed=embed)
+
+				# initialize some important variables
 				bracket_number = message_content.split()[1]
 				tournament_title = 'Meme Madness ' + bracket_number
 				tournament_shortcut = 'mmcycle' + bracket_number
@@ -1160,24 +1167,37 @@ async def on_message(message):
 				results = connect.crsr.fetchall()
 				# check to make sure there are signups
 				if results is not None:
-					# create the tournament on Challonge
-					tourney_manager.create_tournament(tournament_title, tournament_shortcut)
+					try:
+						# create the tournament on Challonge
+						tourney_manager.create_tournament(tournament_title, tournament_shortcut)
+					except challonge.api.ChallongeException:
+						embed_title = 'Bracket URL Already Taken'
+						embed_description = 'There is an issue with the name you tried to give the tournament. Please try a different tournament number.'
+						embed = await generate_embed('red', embed_title, embed_description)
+						await message.channel.send(embed=embed)
+						await action_log('createbracket URL already taken')
+						await conf_message.delete()
+						return
 					# iterate through all valid signups
 					for entry in results:
 						member = message.guild.get_member(entry[0])
 						if member is not None:
 							tourney_manager.add_participant(tournament_shortcut, member.display_name)
+					# send a final embed
 					embed_title = 'Bracket Created'
 					embed_description = 'Your bracket has been created! Check it out here: https://challonge.com/' + tournament_shortcut
 					embed = await generate_embed('green', embed_title, embed_description)
 					await message.channel.send(embed=embed)
 					await action_log('bracket created from signups')
 				else:
+					# send an error embed (no rows in the signups database)
 					embed_title = 'Error Creating Bracket'
 					embed_description = 'There aren\'t any signups for this cycle in the database yet.'
 					embed = await generate_embed('red', embed_title, embed_description)
 					await message.channel.send(embed=embed)
 					await action_log('createbracket error sent to duel-mods')
+				# delete the original confirmation embed
+				await conf_message.delete()
 				return
 
 			return
