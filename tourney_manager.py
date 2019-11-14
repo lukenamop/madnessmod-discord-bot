@@ -27,6 +27,9 @@ def shuffle_seeds(tournament_shortcut):
 	challonge.participants.randomize(tournament_shortcut)
 	return
 
+def index_tournament(tournament_shortcut):
+	return challonge.matches.index(tournament_shortcut)
+
 # TESTING BELOW
 print(challonge.matches.index('mmcyclez'))
 
