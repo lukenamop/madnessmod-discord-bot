@@ -1732,7 +1732,7 @@ async def on_reaction_add(reaction, user):
 
 				# get url information from the base message
 				template_url = message.embeds[0].image.url
-				template_message_id = result[2]
+				template_message_id = result[1]
 				template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
 
 				#  find which reaction was added
