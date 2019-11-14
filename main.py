@@ -1739,19 +1739,19 @@ async def on_reaction_add(reaction, user):
 			await reaction.remove(user)
 			await action_log('reaction added to poll by ' + user.name + '#' + user.discriminator)
 
-			if not config.TESTING:
-				# check for existing participant in database
-				query = 'SELECT templates_submitted FROM participants WHERE user_id = ' + str(user.id)
+			#if not config.TESTING:
+			# check for existing participant in database
+			query = 'SELECT templates_submitted FROM participants WHERE user_id = ' + str(user.id)
+			connect.crsr.execute(query)
+			result = connect.crsr.fetchone()
+			if result is None:
+				# create participant if none exists
+				query = 'INSERT INTO participants (user_id) VALUES (' + str(user.id) + ')'
 				connect.crsr.execute(query)
-				result = connect.crsr.fetchone()
-				if result is None:
-					# create participant if none exists
-					query = 'INSERT INTO participants (user_id) VALUES (' + str(user.id) + ')'
-					connect.crsr.execute(query)
-					connect.conn.commit()
-					await action_log('no existing user, new user added to participants table in postgresql')
-				else:
-					participant_match_votes = result
+				connect.conn.commit()
+				await action_log('no existing user, new user added to participants table in postgresql')
+			else:
+				participant_match_votes = result
 
 			# find the ID of the active match
 			query = 'SELECT db_id FROM matches WHERE channel_id = ' + str(message.channel.id) + ' AND start_time >= ' + str(time.time() - (config.BASE_POLL_TIME + config.MATCH_TIME + 5))
@@ -1785,6 +1785,7 @@ async def on_reaction_add(reaction, user):
 						embed_title = 'Vote Removal'
 						embed_description = 'Your vote for image ' + vote_position + ' has been removed.'
 						embed = await generate_embed('yellow', embed_title, embed_description)
+						# if not config.TESTING:
 						# remove vote from postgresql
 						query = 'DELETE FROM votes WHERE user_id = ' + str(user.id) + ' AND match_id = ' + str(match_id)
 						connect.crsr.execute(query)
@@ -1813,6 +1814,7 @@ async def on_reaction_add(reaction, user):
 				# add vote info to postgresql via the above queries
 				connect.crsr.execute(query)
 				connect.conn.commit()
+				# if not config.TESTING:
 				# update participant stats
 				participant_match_votes += 1
 				query = 'UPDATE participants SET match_votes = ' + participant_match_votes + ' WHERE user_id = ' + str(user.id)
