@@ -1185,7 +1185,7 @@ async def on_message(message):
 							tourney_manager.add_participant(tournament_shortcut, member.display_name)
 					# send a final embed
 					embed_title = 'Bracket Created'
-					embed_description = 'Your bracket has been created! Check it out here: https://challonge.com/' + tournament_shortcut
+					embed_description = 'Your bracket **' + tournament_title + '** has been created! Check it out here: https://challonge.com/' + tournament_shortcut
 					embed = await generate_embed('green', embed_title, embed_description)
 					await message.channel.send(embed=embed)
 					await action_log('bracket created from signups')
