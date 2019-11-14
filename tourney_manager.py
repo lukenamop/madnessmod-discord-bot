@@ -30,7 +30,7 @@ def shuffle_seeds(tournament_shortcut):
 def index_tournament(tournament_shortcut):
 	return challonge.matches.index(tournament_shortcut)
 
-def show_participant(tournament_shortcut, participant_id)
+def show_participant(tournament_shortcut, participant_id):
 	return challonge.participants.show(tournament_shortcut, participant_id)
 
 ##### TESTING BELOW
