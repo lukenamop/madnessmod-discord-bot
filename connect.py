@@ -27,6 +27,10 @@ def db_connect():
 	result = crsr.fetchone()
 	print('participants: ' + str(result[0]))
 
+	query = """ALTER TABLE matches ADD split_match_template_url VARCHAR(200) DEFAULT NULL"""
+	crsr.execute(query)
+	conn.commit()
+
 	crsr.execute("""SELECT COUNT(*) FROM matches""")
 	result = crsr.fetchone()
 	print('matches: ' + str(result[0]))
@@ -73,6 +77,7 @@ db_connect()
 # u2_image_url VARCHAR(200) DEFAULT NULL
 # a_meme NUMERIC(1) DEFAULT NULL
 # template_message_id NUMERIC(18) DEFAULT NULL
+# split_match_template_url VARCHAR(200) DEFAULT NULL
 
 # TABLE votes
 # db_id SERIAL PRIMARY KEY
