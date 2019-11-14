@@ -17,7 +17,7 @@ mod_help = """`.donate` - shows MadnessMod donation info
 
 admin_help = """`.clearmatches` - clears all matches and votes from the database (**admin only**)
 	\n`.clearsignups` - clears all signups from the database (**admin only**)
-	\n`.createbracket <tournament number>` - creates a Challonge bracket with the given tournament number (for example, Meme Madness 10) and populates all participants
+	\n`.createbracket <tournament reference>` - creates a Challonge bracket with the given tournament reference (for example, Meme Madness 10) and populates all participants
 	\n`.donate` - shows MadnessMod donation info
 	\n`.help` - returns this help menu
 	\n`.prelim <user ID>` - sets a user's tournament role to `Preliminary` (**admin only**)

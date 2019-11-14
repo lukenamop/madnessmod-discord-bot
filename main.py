@@ -1173,7 +1173,7 @@ async def on_message(message):
 						tourney_manager.create_tournament(tournament_title, tournament_shortcut)
 					except tourney_manager.challonge.api.ChallongeException:
 						embed_title = 'Bracket URL Already Taken'
-						embed_description = 'There is an issue with the name you tried to give the tournament. Please try a different tournament number.'
+						embed_description = 'There is an issue with the name you tried to give the tournament. Please try a different tournament reference.'
 						embed = await generate_embed('red', embed_title, embed_description)
 						await message.channel.send(embed=embed)
 						await action_log('createbracket URL already taken')
@@ -1216,7 +1216,12 @@ async def on_message(message):
 					tournament_index = tourney_manager.index_tournament(tournament_shortcut)
 					await action_log('success')
 				except urllib.error.HTTPError:
-					await action_log('httperror')
+					embed_title = 'Invalid Tournament Reference'
+					embed_description = 'I couldn\'t find a tournament matching the reference you provided. Please try again.'
+					embed = await generate_embed('red', embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log('creatematchchannels tournament not found')
+					return
 
 				# for match in tournament_index:
 
