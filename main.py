@@ -218,7 +218,9 @@ async def on_message(message):
 					return
 				return
 			if message.channel.id == config.DUELMODS_CHAN_ID and message.nonce is not None:
+				await action_log('part of the way in')
 				if message.nonce.startswith('sptemp'):
+					await action_log('ok we\'re all the way in')
 					# add reactions to split template confirmations in #duel-mods
 					await message.add_reaction('<:check_mark:637394596472815636>')
 					await message.add_reaction('<:x_mark:637394622200676396>')
