@@ -26,3 +26,6 @@ def bulk_add_participants(tournament_shortcut, bulk_usernames):
 def shuffle_seeds(tournament_shortcut):
 	challonge.participants.randomize(tournament_shortcut)
 	return
+
+# TESTING BELOW
+print(challonge.matches.index('mmcyclez'))
