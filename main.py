@@ -1786,17 +1786,17 @@ async def on_reaction_add(reaction, user):
 						embed_title = 'Vote Removal'
 						embed_description = 'Your vote for image ' + vote_position + ' has been removed.'
 						embed = await generate_embed('yellow', embed_title, embed_description)
-						# if not config.TESTING:
 						# remove vote from postgresql
 						query = 'DELETE FROM votes WHERE user_id = ' + str(user.id) + ' AND match_id = ' + str(match_id)
 						connect.crsr.execute(query)
 						connect.conn.commit()
 						await action_log('vote removed from match by ' + user.name + '#' + user.discriminator)
-						# update participant stats
-						query = 'UPDATE participants SET match_votes = ' + str(participant_match_votes - 1) + ' WHERE user_id = ' + str(user.id)
-						connect.crsr.execute(query)
-						connect.conn.commit()
-						await action_log('participant stats updated')
+						if not config.TESTING:
+							# update participant stats
+							query = 'UPDATE participants SET match_votes = ' + str(participant_match_votes - 1) + ' WHERE user_id = ' + str(user.id)
+							connect.crsr.execute(query)
+							connect.conn.commit()
+							await action_log('participant stats updated')
 						# send embed to the user via dm
 						await user_channel.send(embed=embed)
 						return
@@ -1814,12 +1814,12 @@ async def on_reaction_add(reaction, user):
 				# add vote info to postgresql via the above queries
 				connect.crsr.execute(query)
 				connect.conn.commit()
-				# if not config.TESTING:
-				# update participant stats
-				query = 'UPDATE participants SET match_votes = ' + str(participant_match_votes + 1) + ' WHERE user_id = ' + str(user.id)
-				connect.crsr.execute(query)
-				connect.conn.commit()
-				await action_log('participant stats updated')
+				if not config.TESTING:
+					# update participant stats
+					query = 'UPDATE participants SET match_votes = ' + str(participant_match_votes + 1) + ' WHERE user_id = ' + str(user.id)
+					connect.crsr.execute(query)
+					connect.conn.commit()
+					await action_log('participant stats updated')
 				# send vote confirmation to the user via dm
 				embed_title = 'Vote Confirmation'
 				embed_description = 'Your vote for image ' + vote_position + ' has been confirmed. If you\'d like to change your vote, remove this vote by using the same emoji.'
