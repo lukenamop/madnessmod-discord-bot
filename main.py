@@ -1283,7 +1283,7 @@ async def on_message(message):
 				channel_id = message.channel.id
 
 				# add match info to postgresql
-				query = 'INSERT INTO matches (u1_id, u2_id, channel_id) VALUES (' + str(member1.id) + ', ' + str(member2.id) + ', ' + str(channel_id) + ')'
+				query = 'INSERT INTO matches (u1_id, u2_id, channel_id, creation_time) VALUES (' + str(member1.id) + ', ' + str(member2.id) + ', ' + str(channel_id) + ', ' + str(time.time()) + ')'
 				connect.crsr.execute(query)
 				connect.conn.commit()
 
