@@ -1201,10 +1201,18 @@ async def on_message(message):
 				# delete the original confirmation embed
 				await conf_message.delete()
 				return
-
 			return
 
-		# '.clearparticipantstats' command(duel-mods)
+		# '.creatematchchannels' command (duel-mods)
+		if message_content.startswith('.creatematchchannels '):
+			# check to be sure only admin user uses command
+			if message.author.id in config.ADMIN_IDS:
+				mm_guild = message.guild
+				contest_category = mm_guild.get_channel(config.MATCH_CATEGORY_ID)
+				await action_log(contest_category.name)
+			return
+
+		# '.clearparticipantstats' command (duel-mods)
 		if message_content == '.clearparticipantstats':
 			# check to be sure only admin user uses command
 			if message.author.id in config.ADMIN_IDS:
@@ -1283,7 +1291,7 @@ async def on_message(message):
 				return
 
 	# contest category specific commands
-	if message.channel.category_id == 639599353526485034:
+	if message.channel.category_id == config.MATCH_CATEGORY_ID:
 		# '.startmatch' command (contest category)
 		if message_content.startswith('.startmatch '):
 			if len(message.mentions) == 2:

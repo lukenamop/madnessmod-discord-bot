@@ -11,7 +11,7 @@ DB_URL = os.environ['DATABASE_URL']
 TOKEN = os.environ['DISCORD_TOKEN']
 TESTING = True # if set to true, stats will not be recorded to the database
 MM_GUILD_ID = 581695290986332160 # Meme Madness guild ID
-ADMIN_IDS = [324273473360887808, 380462665358901268] # admin user IDs (lukenamop, eltoch)
+ADMIN_IDS = [324273473360887808, 380462665358901268, 583050600984346655] # admin user IDs (lukenamop, eltoch, UncreativeFilth)
 CYCLE = 1209600 # 14 days
 
 MATCH_TIME = 1800 # 30 minutes
@@ -32,6 +32,7 @@ TEMPLATE_CHAN_ID = 599333803407835147 # channel ID for saving templates
 SUBMISSION_CHAN_ID = 599758863700328459 # channel ID for submitting final memes
 SIGNUP_CHAN_ID = 638796625573183488 # channel ID for signup confirmations
 DUELMODS_CHAN_ID = 600397545050734612 # channel ID for #duel-mods
+MATCH_CATEGORY_ID = 639599353526485034 # category ID for #matches
 
 
 ##### verify.py stuff
