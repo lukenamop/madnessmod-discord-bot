@@ -1750,6 +1750,7 @@ async def on_reaction_add(reaction, user):
 				connect.crsr.execute(query)
 				connect.conn.commit()
 				await action_log('no existing user, new user added to participants table in postgresql')
+				participant_match_votes = 0
 			else:
 				participant_match_votes = result[0]
 
