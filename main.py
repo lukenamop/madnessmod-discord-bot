@@ -1244,7 +1244,7 @@ async def on_message(message):
 						channel_name = 'match-' + str(match['suggested-play-order']) + '-' + participant1[:5] + '-v-' + participant2[:5]
 						unique = True
 						for name in category_channel_names:
-							if channel_name is name:
+							if channel_name == name:
 								unique = False
 								await action_log('nope canceled')
 						if unique:
