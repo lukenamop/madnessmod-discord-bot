@@ -1208,25 +1208,44 @@ async def on_message(message):
 		if message_content.startswith('.creatematchchannels '):
 			# check to be sure only admin user uses command
 			if message.author.id in config.ADMIN_IDS:
+				await action_log('attempting to create match channels')
 				tournament_shortcut = 'mmcycle' + message_content.split()[1]
 				mm_guild = message.guild
 				contest_category = mm_guild.get_channel(config.MATCH_CATEGORY_ID)
 
 				try:
 					tournament_index = tourney_manager.index_tournament(tournament_shortcut)
-					await action_log('success')
+					await action_log('tournament found')
 				except urllib.error.HTTPError:
 					embed_title = 'Invalid Tournament Reference'
 					embed_description = 'I couldn\'t find a tournament matching the reference you provided. Please try again.'
 					embed = await generate_embed('red', embed_title, embed_description)
 					await message.channel.send(embed=embed)
-					await action_log('creatematchchannels tournament not found')
+					await action_log('tournament not found')
 					return
 
-				# for match in tournament_index:
+				# iterate through all matches
+				total_created = 0
+				for match in tournament_index:
+					if match['state'] == 'open':
+						# if a match is open, create a channel for it
+						channel_name = 'match-' + match['suggested-play-order'] + '-'
+						await mm_guild.create_text_channel(channel_name, category=contest_category)
+						total += 1
 
-
-				# await mm_guild.create_text_channel(arg, category=contest_category)
+				# check to see if any matches were created
+				if total > 0:
+					embed_title = 'Channel Creation Complete'
+					embed_description = 'A total of ' + str(total) + ' channels were created!'
+					embed = await generate_embed('green', embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log('channel creation complete - ' + str(total) + ' open matches')
+				else:
+					embed_title = 'No Channels Created'
+					embed_description = 'There were no open matches in the specified tournament. Please try again with a different tournament reference.'
+					embed = await generate_embed('red', embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log('no open matches in tournament')
 			return
 
 		# '.clearparticipantstats' command (duel-mods)

@@ -31,7 +31,7 @@ def index_tournament(tournament_shortcut):
 	return challonge.matches.index(tournament_shortcut)
 
 # TESTING BELOW
-# print(challonge.matches.index('mmcyclez'))
+print(challonge.participants.show(mmcyclez, 109357021))
 
 # [{'id': 180695793,
 # 'tournament-id': 7797446,
