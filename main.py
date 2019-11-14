@@ -1152,6 +1152,34 @@ async def on_message(message):
 			if message.author.id in config.ADMIN_IDS:
 				bracket_number = message_content.split()[1]
 				tournament_title = 'Meme Madness ' + bracket_number
+				tournament_shortcut = 'mmcycle' + bracket_number
+
+				# pull all signups from database
+				query = 'SELECT user_id FROM signups WHERE submission_time >= ' + str(time.time() - config.CYCLE)
+				connect.crsr.execute(query)
+				results = connect.crsr.fetchall()
+				# check to make sure there are signups
+				if results is not None:
+					# create the tournament on Challonge
+					tourney_manager.create_tournament(tournament_title, tournament_shortcut)
+					# iterate through all valid signups
+					for entry in results:
+						member = message.guild.get_member(entry[0])
+						if member is not None:
+							tourney_manager.add_participant(tournament_shortcut, member.display_name)
+					embed_title = 'Bracket Created'
+					embed_description = 'Your bracket has been created! Check it out here: https://challonge.com/' + tournament_shortcut
+					embed = await generate_embed('green', embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log('bracket created from signups')
+				else:
+					embed_title = 'Error Creating Bracket'
+					embed_description = 'There aren\'t any signups for this cycle in the database yet.'
+					embed = await generate_embed('red', embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log('createbracket error sent to duel-mods')
+				return
+
 			return
 
 		# '.clearparticipantstats' command(duel-mods)
