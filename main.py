@@ -573,6 +573,7 @@ async def on_message(message):
 			if result is not None:
 				start_time = result[5]
 				split_match_template_url = result[6]
+				match_channel = client.get_channel(result[4])
 				if message.author.id == result[0]:
 					if result[2]:
 						await message.channel.send(embed=embed)
@@ -625,7 +626,7 @@ async def on_message(message):
 					embed_title = 'Solo Match Complete'
 					embed_description = message.author.mention + ' has completed their part of the match!'
 					embed = await generate_embed('green', embed_title, embed_description)
-					await client.get_channel(config.SUBMISSION_CHAN_ID).send(embed=embed)
+					await match_channel.send(embed=embed)
 					await action_log('match channel notified about splitmatch completion')
 
 				# add submission info to postgresql database
@@ -1848,7 +1849,7 @@ async def on_reaction_add(reaction, user):
 					await message.delete()
 					# build template accepted embed
 					embed_title = 'Template Accepted'
-					embed_description = 'The randomized template was accepted. It has been sent to the competing user and shared to the submissions channel.'
+					embed_description = 'The randomized template was accepted. It has been sent to the competing user and stored in the database.'
 					embed = await generate_embed('green', embed_title, embed_description)
 					await message.channel.send(embed=embed)
 					await action_log('randomized template accepted')
@@ -1882,14 +1883,8 @@ async def on_reaction_add(reaction, user):
 						await action_log('match removed from database')
 						return
 
-					# send template to #submissions
-					embed_title = 'Split Match Template'
-					embed_description = match_channel.mention
-					embed = await generate_embed('yellow', embed_title, embed_description, template_url)
-					await client.get_channel(config.SUBMISSION_CHAN_ID).send(embed=embed)
-					await action_log('template sent to submission channel')
-
 					# delete message from match channel
+					await match_channel.last_message.delete()
 					await match_channel.last_message.delete()
 					# send template to match channel
 					embed_title = 'Match Started'
@@ -2055,6 +2050,7 @@ async def on_reaction_add(reaction, user):
 						return
 
 					# delete message from match channel
+					await match_channel.last_message.delete()
 					await match_channel.last_message.delete()
 					# send template to match channel
 					embed_title = 'Match Started'
