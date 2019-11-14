@@ -1208,6 +1208,7 @@ async def on_message(message):
 			# check to be sure only admin user uses command
 			if message.author.id in config.ADMIN_IDS:
 				arg = message_content.split()[1]
+				await action_log(arg)
 				mm_guild = message.guild
 				contest_category = mm_guild.get_channel(config.MATCH_CATEGORY_ID)
 				await mm_guild.create_text_channel(arg, category=contest_category)
