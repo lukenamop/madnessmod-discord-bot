@@ -1741,7 +1741,7 @@ async def on_reaction_add(reaction, user):
 
 			#if not config.TESTING:
 			# check for existing participant in database
-			query = 'SELECT templates_submitted FROM participants WHERE user_id = ' + str(user.id)
+			query = 'SELECT match_votes FROM participants WHERE user_id = ' + str(user.id)
 			connect.crsr.execute(query)
 			result = connect.crsr.fetchone()
 			if result is None:
