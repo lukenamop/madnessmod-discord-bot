@@ -1211,10 +1211,14 @@ async def on_message(message):
 				mm_guild = message.guild
 				contest_category = mm_guild.get_channel(config.MATCH_CATEGORY_ID)
 
-				tournament_index = tourney_manager.index_tournament(tournament_shortcut)
+				try:
+					tournament_index = tourney_manager.index_tournament(tournament_shortcut)
+					await action_log('success')
+				except urllib.error.HTTPError:
+					await action_log('httperror')
 
 				# for match in tournament_index:
-					
+
 
 				# await mm_guild.create_text_channel(arg, category=contest_category)
 			return
