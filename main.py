@@ -10,6 +10,7 @@ import os
 import requests
 import random
 import string
+import urllib
 from unidecode import unidecode
 from time import gmtime
 from time import strftime
@@ -1214,7 +1215,7 @@ async def on_message(message):
 				try:
 					tournament_index = tourney_manager.index_tournament(tournament_shortcut)
 					await action_log('success')
-				except HTTPError:
+				except urllib.error.HTTPError:
 					await action_log('httperror')
 
 				# for match in tournament_index:
