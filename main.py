@@ -624,7 +624,7 @@ async def on_message(message):
 					# build submission confirmation for match channel
 					embed_title = 'Solo Match Complete'
 					embed_description = message.author.mention + ' has completed their part of the match!'
-					embed = await generate_embed('green'. embed_title, embed_description)
+					embed = await generate_embed('green', embed_title, embed_description)
 					await client.get_channel(config.SUBMISSION_CHAN_ID).send(embed=embed)
 					await action_log('match channel notified about splitmatch completion')
 
