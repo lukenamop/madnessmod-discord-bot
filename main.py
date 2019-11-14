@@ -1231,7 +1231,7 @@ async def on_message(message):
 						# if a match is open, create a channel for it
 						participant1 = tourney_manager.show_participant(tournament_shortcut, match['player1-id'])['name']
 						participant2 = tourney_manager.show_participant(tournament_shortcut, match['player2-id'])['name']
-						channel_name = 'match-' + match['suggested-play-order'] + '-' + participant1[:5] + '-v-' + participant2[:5]
+						channel_name = 'match-' + str(match['suggested-play-order']) + '-' + participant1[:5] + '-v-' + participant2[:5]
 						await mm_guild.create_text_channel(channel_name, category=contest_category)
 						total_created += 1
 
