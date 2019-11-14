@@ -1212,6 +1212,9 @@ async def on_message(message):
 				tournament_shortcut = 'mmcycle' + message_content.split()[1]
 				mm_guild = message.guild
 				contest_category = mm_guild.get_channel(config.MATCH_CATEGORY_ID)
+				category_channel_names = []
+				for channel in contest_category.text_channels:
+					category_channel_names.append(channel.name)
 
 				try:
 					tournament_index = tourney_manager.index_tournament(tournament_shortcut)
@@ -1224,6 +1227,12 @@ async def on_message(message):
 					await action_log('tournament not found')
 					return
 
+				# send a confirmation embed
+				embed_title = 'Creating Match Channels...'
+				embed_description = 'Creating channels for any open matches.'
+				embed = await generate_embed('yellow', embed_title, embed_description)
+				conf_message = await message.channel.send(embed=embed)
+
 				# iterate through all matches
 				total_created = 0
 				for match in tournament_index:
@@ -1232,8 +1241,9 @@ async def on_message(message):
 						participant1 = tourney_manager.show_participant(tournament_shortcut, match['player1-id'])['name']
 						participant2 = tourney_manager.show_participant(tournament_shortcut, match['player2-id'])['name']
 						channel_name = 'match-' + str(match['suggested-play-order']) + '-' + participant1[:5] + '-v-' + participant2[:5]
-						await mm_guild.create_text_channel(channel_name, category=contest_category)
-						total_created += 1
+						if channel_name not in category_channel_names:
+							await mm_guild.create_text_channel(channel_name, category=contest_category)
+							total_created += 1
 
 				# check to see if any matches were created
 				if total_created > 0:
@@ -1242,12 +1252,14 @@ async def on_message(message):
 					embed = await generate_embed('green', embed_title, embed_description)
 					await message.channel.send(embed=embed)
 					await action_log('channel creation complete - ' + str(total_created) + ' open matches')
+					await conf_message.delete()
 				else:
 					embed_title = 'No Channels Created'
 					embed_description = 'There were no open matches in the specified tournament. Please try again with a different tournament reference.'
 					embed = await generate_embed('red', embed_title, embed_description)
 					await message.channel.send(embed=embed)
 					await action_log('no open matches in tournament')
+					await conf_message.delete()
 			return
 
 		# '.clearparticipantstats' command (duel-mods)
