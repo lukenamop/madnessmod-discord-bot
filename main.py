@@ -620,6 +620,14 @@ async def on_message(message):
 				await message.channel.send(embed=embed)
 				await action_log('final meme attachment sent in by ' + message.author.name + '#' + message.author.discriminator)
 
+				if split_match_template_url is not None:
+					# build submission confirmation for match channel
+					embed_title = 'Solo Match Complete'
+					embed_description = message.author.mention + ' has completed their part of the match!'
+					embed = await generate_embed('green'. embed_title, embed_description)
+					await client.get_channel(config.SUBMISSION_CHAN_ID).send(embed=embed)
+					await action_log('match channel notified about splitmatch completion')
+
 				# add submission info to postgresql database
 				if u_order == 1:
 					query = 'UPDATE matches SET u1_submitted = true, u1_image_url = \'' + message.attachments[0].url + '\' WHERE u1_id = ' + str(message.author.id) + ' AND start_time >= ' + str(time.time() - (config.MATCH_TIME + 10))
