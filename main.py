@@ -1150,16 +1150,16 @@ async def on_message(message):
 		if message_content.startswith('.createbracket '):
 			# check to be sure only admin user uses command
 			if message.author.id in config.ADMIN_IDS:
-				# send a confirmation embed
-				embed_title = 'Creating Bracket...'
-				embed_description = 'Creating a Challonge bracket with the given tournament number.'
-				embed = await generate_embed('yellow', embed_title, embed_description)
-				conf_message = await message.channel.send(embed=embed)
-
 				# initialize some important variables
 				bracket_number = message_content.split()[1]
 				tournament_title = 'Meme Madness ' + bracket_number
 				tournament_shortcut = 'mmcycle' + bracket_number
+
+				# send a confirmation embed
+				embed_title = 'Creating Bracket...'
+				embed_description = 'Creating a Challonge bracket called **' + tournament_title + '**.'
+				embed = await generate_embed('yellow', embed_title, embed_description)
+				conf_message = await message.channel.send(embed=embed)
 
 				# pull all signups from database
 				query = 'SELECT user_id FROM signups WHERE submission_time >= ' + str(time.time() - config.CYCLE)
