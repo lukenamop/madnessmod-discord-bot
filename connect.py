@@ -23,6 +23,10 @@ def db_connect():
 	for row in crsr.fetchall():
 		print('settings: ' + str(row))
 
+	query = """ALTER TABLE participants ADD match_votes NUMERIC(7) DEFAULT 0"""
+	crsr.execute(query)
+	conn.commit()
+
 	crsr.execute("""SELECT COUNT(*) FROM participants""")
 	result = crsr.fetchone()
 	print('participants: ' + str(result[0]))
@@ -53,6 +57,7 @@ db_connect()
 # total_votes_for NUMERIC(7) DEFAULT 0
 # avg_final_meme_time NUMERIC(4) DEFAULT NULL
 # templates_submitted NUMERIC(7) DEFAULT 0
+# match_votes NUMERIC(7) DEFAULT 0
 
 # TABLE signups
 # db_id SERIAL PRIMARY KEY
