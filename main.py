@@ -1153,7 +1153,7 @@ async def on_message(message):
 				# send a confirmation embed
 				embed_title = 'Creating Bracket...'
 				embed_description = 'Creating a Challonge bracket with the given tournament number.'
-				embed = generate_embed('yellow', embed_title, embed_description)
+				embed = await generate_embed('yellow', embed_title, embed_description)
 				conf_message = await message.channel.send(embed=embed)
 
 				# initialize some important variables
