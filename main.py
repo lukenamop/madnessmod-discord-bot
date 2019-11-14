@@ -1242,10 +1242,12 @@ async def on_message(message):
 						participant1 = tourney_manager.show_participant(tournament_shortcut, match['player1-id'])['name']
 						participant2 = tourney_manager.show_participant(tournament_shortcut, match['player2-id'])['name']
 						channel_name = 'match-' + str(match['suggested-play-order']) + '-' + participant1[:5] + '-v-' + participant2[:5]
-						if channel_name in category_channel_names:
-							await action_log('nope canceled')
-						else:
-							await action_log('seems fine')
+						unique = True
+						for name in category_channel_names:
+							if channel_name is name:
+								unique = False
+								await action_log('nope canceled')
+						if unique:
 							await mm_guild.create_text_channel(channel_name, category=contest_category)
 							total_created += 1
 
