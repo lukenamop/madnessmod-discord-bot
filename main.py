@@ -257,9 +257,9 @@ async def on_message(message):
 			# build stats embed
 			embed_title = 'Stats for ' + user.display_name
 			try:
-				embed_description = '**Total matches:** `' + str(results[0]) + '`\n**Match wins/losses:** `' + str(results[1]) + '/' + str(results[2]) + '`\n**Win percentage:** `' + str(round((float(results[1]) / float(results[0])) * 100)) + '%`\n**Total votes for your memes:** `' + str(results[3]) + '`\n**Avg. time per meme:** `' + avg_time + '`\n**Templates submitted:** `' + str(results[5]) + '`\n**Matches voted for:** `' + str(results[6]) + '`'
+				embed_description = '**Total matches:** `' + str(results[0]) + '`\n**Match wins/losses:** `' + str(results[1]) + '/' + str(results[2]) + '`\n**Win percentage:** `' + str(round((float(results[1]) / float(results[0])) * 100)) + '%`\n**Total votes for your memes:** `' + str(results[3]) + '`\n**Avg. time per meme:** `' + avg_time + '`\n**Templates submitted:** `' + str(results[5]) + '`\n**Matches voted in:** `' + str(results[6]) + '`'
 			except ZeroDivisionError:
-				embed_description = '**Total matches:** `' + str(results[0]) + '`\n**Match wins/losses:** `' + str(results[1]) + '/' + str(results[2]) + '`\n**Win percentage:** `N/A`\n**Total votes for your memes:** `' + str(results[3]) + '`\n**Avg. time per meme:** `' + avg_time + '`\n**Templates submitted:** `' + str(results[5]) + '`\n**Matches voted for:** `' + str(results[6]) + '`'
+				embed_description = '**Total matches:** `' + str(results[0]) + '`\n**Match wins/losses:** `' + str(results[1]) + '/' + str(results[2]) + '`\n**Win percentage:** `N/A`\n**Total votes for your memes:** `' + str(results[3]) + '`\n**Avg. time per meme:** `' + avg_time + '`\n**Templates submitted:** `' + str(results[5]) + '`\n**Matches voted in:** `' + str(results[6]) + '`'
 			embed = await generate_embed('pink', embed_title, embed_description)
 			await message.channel.send(embed=embed)
 			await action_log('stats shared to ' + message.author.name + '#' + message.author.discriminator)
@@ -1739,6 +1739,20 @@ async def on_reaction_add(reaction, user):
 			await reaction.remove(user)
 			await action_log('reaction added to poll by ' + user.name + '#' + user.discriminator)
 
+			if not config.TESTING:
+				# check for existing participant in database
+				query = 'SELECT templates_submitted FROM participants WHERE user_id = ' + str(user.id)
+				connect.crsr.execute(query)
+				result = connect.crsr.fetchone()
+				if result is None:
+					# create participant if none exists
+					query = 'INSERT INTO participants (user_id) VALUES (' + str(user.id) + ')'
+					connect.crsr.execute(query)
+					connect.conn.commit()
+					await action_log('no existing user, new user added to participants table in postgresql')
+				else:
+					participant_match_votes = result
+
 			# find the ID of the active match
 			query = 'SELECT db_id FROM matches WHERE channel_id = ' + str(message.channel.id) + ' AND start_time >= ' + str(time.time() - (config.BASE_POLL_TIME + config.MATCH_TIME + 5))
 			connect.crsr.execute(query)
@@ -1775,9 +1789,15 @@ async def on_reaction_add(reaction, user):
 						query = 'DELETE FROM votes WHERE user_id = ' + str(user.id) + ' AND match_id = ' + str(match_id)
 						connect.crsr.execute(query)
 						connect.conn.commit()
+						await action_log('vote removed from match by ' + user.name + '#' + user.discriminator)
+						# update participant stats
+						participant_match_votes -= 1
+						query = 'UPDATE participants SET match_votes = ' + participant_match_votes + ' WHERE user_id = ' + str(user.id)
+						connect.crsr.execute(query)
+						connect.conn.commit()
+						await action_log('participant stats updated')
 						# send embed to the user via dm
 						await user_channel.send(embed=embed)
-						await action_log('vote removed from match by ' + user.name + '#' + user.discriminator)
 						return
 					return
 				# find which image the user voted for
@@ -1793,6 +1813,12 @@ async def on_reaction_add(reaction, user):
 				# add vote info to postgresql via the above queries
 				connect.crsr.execute(query)
 				connect.conn.commit()
+				# update participant stats
+				participant_match_votes += 1
+				query = 'UPDATE participants SET match_votes = ' + participant_match_votes + ' WHERE user_id = ' + str(user.id)
+				connect.crsr.execute(query)
+				connect.conn.commit()
+				await action_log('participant stats updated')
 				# send vote confirmation to the user via dm
 				embed_title = 'Vote Confirmation'
 				embed_description = 'Your vote for image ' + vote_position + ' has been confirmed. If you\'d like to change your vote, remove this vote by using the same emoji.'
