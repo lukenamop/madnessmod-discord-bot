@@ -1214,7 +1214,7 @@ async def on_message(message):
 				try:
 					tournament_index = tourney_manager.index_tournament(tournament_shortcut)
 					await action_log('success')
-				except tourney_manager.urllib.error.HTTPError:
+				except tourney_manager.challonge.urllib.error.HTTPError:
 					await action_log('httperror')
 
 				# for match in tournament_index:
