@@ -1751,7 +1751,7 @@ async def on_reaction_add(reaction, user):
 				connect.conn.commit()
 				await action_log('no existing user, new user added to participants table in postgresql')
 			else:
-				participant_match_votes = result
+				participant_match_votes = result[0]
 
 			# find the ID of the active match
 			query = 'SELECT db_id FROM matches WHERE channel_id = ' + str(message.channel.id) + ' AND start_time >= ' + str(time.time() - (config.BASE_POLL_TIME + config.MATCH_TIME + 5))
