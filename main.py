@@ -1183,6 +1183,8 @@ async def on_message(message):
 						member = message.guild.get_member(entry[0])
 						if member is not None:
 							tourney_manager.add_participant(tournament_shortcut, member.display_name)
+					# shuffle the participants
+					tourney_manager.shuffle_seeds(tournament_shortcut)
 					# send a final embed
 					embed_title = 'Bracket Created'
 					embed_description = 'Your bracket **' + tournament_title + '** has been created! Check it out here: https://challonge.com/' + tournament_shortcut

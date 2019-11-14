@@ -10,8 +10,8 @@ import config
 challonge.set_credentials(config.C_USERNAME, config.C_API_KEY)
 print('challonge API connected')
 
-def create_tournament(name, shortcut):
-	challonge.tournaments.create(name, shortcut, hold_third_place_match=True, quick_advance=True)
+def create_tournament(tournament_name, tournament_shortcut):
+	challonge.tournaments.create(tournament_name, tournament_shortcut, hold_third_place_match=True, quick_advance=True)
 	return
 
 def add_participant(tournament_shortcut, username):
@@ -21,4 +21,8 @@ def add_participant(tournament_shortcut, username):
 def bulk_add_participants(tournament_shortcut, bulk_usernames):
 	for username in bulk_usernames:
 		challonge.participants.create(tournament_shortcut, username)
+	return
+
+def shuffle_seeds(tournament_shortcut):
+	challonge.participants.randomize(tournament_shortcut)
 	return
