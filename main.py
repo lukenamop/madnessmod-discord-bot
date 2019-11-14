@@ -1215,7 +1215,7 @@ async def on_message(message):
 				category_channel_names = []
 				for channel in contest_category.text_channels:
 					category_channel_names.append(channel.name)
-				await action_log(category_channel_names)
+				await action_log(', '.join(category_channel_names))
 
 				try:
 					tournament_index = tourney_manager.index_tournament(tournament_shortcut)
