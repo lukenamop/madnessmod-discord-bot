@@ -1341,6 +1341,7 @@ async def on_message(message):
 							return
 						# if the user hasn't submitted, continue
 						match_udb = 'u1_id'
+						user_num = '1'
 					# check to see if the mentioned user is "u2" in the database
 					elif match_user.id == result[2]:
 						# check to see if the user has submitted
@@ -1352,6 +1353,7 @@ async def on_message(message):
 							return
 						# if the user hasn't submitted, continue
 						match_udb = 'u2_id'
+						user_num = '2'
 					else:
 						# failed is true if the mentioned user is not "u1" or "u2"
 						failed = True
@@ -1393,7 +1395,7 @@ async def on_message(message):
 							embed_title = 'Template for #' + message.channel.name
 							embed_description = 'Here\'s a random template! This template was submitted by ' + author_string
 							embed = await generate_embed('green', embed_title, embed_description, template_url)
-							nonce = 'sptemp' + str(channel_id)
+							nonce = 'sptemp' + user_num + str(channel_id)
 							await duelmods_chan.send(embed=embed, nonce=nonce)
 							await duelmods_chan.send(message.author.mention)
 							await action_log('template confirmation sent to duel-mods')
