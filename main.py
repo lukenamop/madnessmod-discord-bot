@@ -1792,8 +1792,7 @@ async def on_reaction_add(reaction, user):
 						connect.conn.commit()
 						await action_log('vote removed from match by ' + user.name + '#' + user.discriminator)
 						# update participant stats
-						participant_match_votes = participant_match_votes - 1
-						query = 'UPDATE participants SET match_votes = ' + str(participant_match_votes) + ' WHERE user_id = ' + str(user.id)
+						query = 'UPDATE participants SET match_votes = ' + str(participant_match_votes - 1) + ' WHERE user_id = ' + str(user.id)
 						connect.crsr.execute(query)
 						connect.conn.commit()
 						await action_log('participant stats updated')
@@ -1816,8 +1815,7 @@ async def on_reaction_add(reaction, user):
 				connect.conn.commit()
 				# if not config.TESTING:
 				# update participant stats
-				participant_match_votes = participant_match_votes + 1
-				query = 'UPDATE participants SET match_votes = ' + str(participant_match_votes) + ' WHERE user_id = ' + str(user.id)
+				query = 'UPDATE participants SET match_votes = ' + str(participant_match_votes + 1) + ' WHERE user_id = ' + str(user.id)
 				connect.crsr.execute(query)
 				connect.conn.commit()
 				await action_log('participant stats updated')
