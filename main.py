@@ -1146,6 +1146,14 @@ async def on_message(message):
 					await action_log('template toggle confirmation')
 					return
 
+		# '.createbracket' command (duel-mods)
+		if message_content.startswith('.createbracket '):
+			# check to be sure only admin user uses command
+			if message.author.id in config.ADMIN_IDS:
+				bracket_number = message_content.split()[1]
+				tournament_title = 'Meme Madness ' + bracket_number
+			return
+
 		# '.clearparticipantstats' command(duel-mods)
 		if message_content == '.clearparticipantstats':
 			# check to be sure only admin user uses command

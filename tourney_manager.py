@@ -9,4 +9,6 @@ import config
 # set challonge API credentials
 challonge.set_credentials(config.C_USERNAME, config.C_API_KEY)
 
+challonge.create('test tournament', 'ttjachar77', hold_third_place_match=True)
+
 # print(challonge.matches.index('mmcycle9'))
