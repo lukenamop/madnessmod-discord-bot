@@ -1747,7 +1747,7 @@ async def on_reaction_add(reaction, user):
 					await action_log('randomized template accepted')
 
 					# update match start_time and split_match_template_url in database
-					query = 'UPDATE matches SET start_time = ' + str(time.time()) + ', template_message_id = NULL, split_match_template_url = ' + template_url + ' WHERE channel_id = ' + str(match_channel.id) + ' AND start_time IS NULL AND template_message_id IS NOT NULL'
+					query = 'UPDATE matches SET start_time = ' + str(time.time()) + ', template_message_id = NULL, split_match_template_url = \'' + template_url + '\' WHERE channel_id = ' + str(match_channel.id) + ' AND start_time IS NULL AND template_message_id IS NOT NULL'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('match start_time updated in database')
