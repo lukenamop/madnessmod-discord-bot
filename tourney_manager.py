@@ -8,6 +8,7 @@ import config
 
 # set challonge API credentials
 challonge.set_credentials(config.C_USERNAME, config.C_API_KEY)
+print('challonge API connected')
 
 def create_tournament(name, shortcut):
 	challonge.tournaments.create(name, shortcut, hold_third_place_match=True, quick_advance=True)
