@@ -1207,11 +1207,16 @@ async def on_message(message):
 		if message_content.startswith('.creatematchchannels '):
 			# check to be sure only admin user uses command
 			if message.author.id in config.ADMIN_IDS:
-				arg = message_content.split()[1]
-				await action_log(arg)
+				tournament_shortcut = 'mmcycle' + message_content.split()[1]
 				mm_guild = message.guild
 				contest_category = mm_guild.get_channel(config.MATCH_CATEGORY_ID)
-				await mm_guild.create_text_channel(arg, category=contest_category)
+
+				tournament_index = tourney_manager.index_tournament(tournament_shortcut)
+
+				# for match in tournament_index:
+					
+
+				# await mm_guild.create_text_channel(arg, category=contest_category)
 			return
 
 		# '.clearparticipantstats' command (duel-mods)
