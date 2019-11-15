@@ -1212,10 +1212,6 @@ async def on_message(message):
 				tournament_shortcut = 'mmcycle' + message_content.split()[1]
 				mm_guild = message.guild
 				contest_category = mm_guild.get_channel(config.MATCH_CATEGORY_ID)
-				category_channel_names = []
-				for channel in contest_category.text_channels:
-					category_channel_names.append(channel.name)
-				await action_log(', '.join(category_channel_names))
 
 				try:
 					tournament_index = tourney_manager.index_tournament(tournament_shortcut)
@@ -1242,14 +1238,9 @@ async def on_message(message):
 						participant1 = tourney_manager.show_participant(tournament_shortcut, match['player1-id'])['name']
 						participant2 = tourney_manager.show_participant(tournament_shortcut, match['player2-id'])['name']
 						channel_name = 'match-' + str(match['suggested-play-order']) + '-' + participant1[:5] + '-v-' + participant2[:5]
-						unique = True
-						for name in category_channel_names:
-							if channel_name == name:
-								unique = False
-								await action_log('nope canceled')
-						if unique:
-							await mm_guild.create_text_channel(channel_name, category=contest_category)
-							total_created += 1
+						channel_desc = str(match['player1-id']) + '/' + str(match['player2-id'])
+						await contest_category.create_text_channel(channel_name, description=channel_desc)
+						total_created += 1
 
 				# check to see if any matches were created
 				if total_created > 0:
