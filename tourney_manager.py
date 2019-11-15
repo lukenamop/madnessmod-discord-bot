@@ -27,7 +27,7 @@ def shuffle_seeds(tournament_shortcut):
 	challonge.participants.randomize(tournament_shortcut)
 	return
 
-def set_match_winner(tournament_shortcut, match_id, scores_csv, winner_id)
+def set_match_winner(tournament_shortcut, match_id, scores_csv, winner_id):
 	challonge.matches.update(tournament_shortcut, match_id, scores_csv, winner_id)
 	return
 
