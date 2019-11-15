@@ -27,8 +27,8 @@ def shuffle_seeds(tournament_shortcut):
 	challonge.participants.randomize(tournament_shortcut)
 	return
 
-def set_match_winner(tournament_shortcut, match_id, scores_csv, winner_id):
-	challonge.matches.update(tournament_shortcut, match_id, scores_csv, winner_id)
+def set_match_winner(tournament_shortcut, match_id, scores_csv, winner_id)
+	challonge.matches.update(tournament_shortcut, match_id, scores_csv=scores_csv, winner_id=winner_id)
 	return
 
 def index_tournament(tournament_shortcut):
@@ -38,6 +38,7 @@ def show_participant(tournament_shortcut, participant_id):
 	return challonge.participants.show(tournament_shortcut, participant_id)
 
 ##### TESTING BELOW
+# challonge.matches.update('mmcyclez', 180695794, scores_csv='0-1', winner_id=109357042)
 
 # [{'id': 180695793,
 # 'tournament-id': 7797446,
