@@ -34,7 +34,7 @@ def show_participant(tournament_shortcut, participant_id):
 	return challonge.participants.show(tournament_shortcut, participant_id)
 
 ##### TESTING BELOW
-# challonge.
+challonge.matches.update('mmcyclez', 180695794, winner_id=109357042)
 
 # [{'id': 180695793,
 # 'tournament-id': 7797446,
