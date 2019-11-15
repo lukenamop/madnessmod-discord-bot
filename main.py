@@ -1242,7 +1242,7 @@ async def on_message(message):
 						await contest_category.create_text_channel(channel_name, topic=channel_topic)
 						total_created += 1
 						if config.TESTING:
-							return
+							break
 
 				# check to see if any matches were created
 				if total_created > 0:
