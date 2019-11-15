@@ -90,12 +90,20 @@ async def on_message(message):
 				query = 'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url FROM matches WHERE channel_id = ' + str(message.channel.id) + ' AND start_time >= ' + str(time.time() - (config.BASE_POLL_TIME + config.MATCH_TIME + 30))
 				connect.crsr.execute(query)
 				result = connect.crsr.fetchone()
+				# initialize important variables
+				db_id = result[0]
+				u1_id = result[1]
+				u2_id = result[2]
+				a_meme = result[3]
+				u1_image_url = result[4]
+				u2_image_url = result[5]
+
 				# check how many votes image A got
-				query = 'SELECT COUNT(*) FROM votes WHERE match_id = ' + str(result[0]) + ' AND a_vote = True'
+				query = 'SELECT COUNT(*) FROM votes WHERE match_id = ' + str(db_id) + ' AND a_vote = True'
 				connect.crsr.execute(query)
 				a_votes = connect.crsr.fetchone()[0]
 				# check how many votes image B got
-				query = 'SELECT COUNT(*) FROM votes WHERE match_id = ' + str(result[0]) + ' AND b_vote = True'
+				query = 'SELECT COUNT(*) FROM votes WHERE match_id = ' + str(db_id) + ' AND b_vote = True'
 				connect.crsr.execute(query)
 				b_votes = connect.crsr.fetchone()[0]
 
@@ -114,14 +122,14 @@ async def on_message(message):
 
 				# alert match channel of poll results
 				try:
-					if (result[3] == 1 and winning_image == 'A') or (result[3] == 2 and winning_image == 'B'):
-						winner = base_channel.guild.get_member(result[1])
-						winning_image_url = result[4]
-						loser = base_channel.guild.get_member(result[2])
-					elif (result[3] == 2 and winning_image == 'A') or (result [3] == 1 and winning_image == 'B'):
-						winner = base_channel.guild.get_member(result[2])
-						winning_image_url = result[5]
-						loser = base_channel.guild.get_member(result[1])
+					if (a_meme == 1 and winning_image == 'A') or (a_meme == 2 and winning_image == 'B'):
+						winner = base_channel.guild.get_member(u1_id)
+						winning_image_url = u1_image_url
+						loser = base_channel.guild.get_member(u2_id)
+					elif (a_meme == 2 and winning_image == 'A') or (a_meme == 1 and winning_image == 'B'):
+						winner = base_channel.guild.get_member(u2_id)
+						winning_image_url = u2_image_url
+						loser = base_channel.guild.get_member(u1_id)
 					elif winning_image == 'tie':
 						# build tie embed for match channel
 						embed_title = 'Voting Results'
@@ -132,10 +140,10 @@ async def on_message(message):
 
 						if not config.TESTING:
 							# update participant stats in the databsee (tie)
-							query = 'UPDATE participants SET total_votes_for = total_votes_for + ' + votes + ' WHERE user_id = ' + str(result[1])
+							query = 'UPDATE participants SET total_votes_for = total_votes_for + ' + votes + ' WHERE user_id = ' + str(u1_id)
 							connect.crsr.execute(query)
 							connect.conn.commit()
-							query = 'UPDATE participants SET total_votes_for = total_votes_for + ' + votes + ' WHERE user_id = ' + str(result[2])
+							query = 'UPDATE participants SET total_votes_for = total_votes_for + ' + votes + ' WHERE user_id = ' + str(u2_id)
 							connect.crsr.execute(query)
 							connect.conn.commit()
 							await action_log('participant stats updated')
@@ -190,6 +198,29 @@ async def on_message(message):
 				embed = await generate_embed('pink', embed_title, embed_description, embed_link)
 				await client.get_channel(config.ARCHIVE_CHAN_ID).send(embed=embed)
 				await action_log('winning image sent to archive channel')
+
+				# check to see if challonge info is in the channel topic
+				if base_channel.topic is not None:
+					tournament_shortcut = base_channel.topic.split('/')[0]
+					match_id = base_channel.topic.split('/')[1]
+					player1_id = base_channel.topic.split('/')[2]
+					player2_id = base_channel.topic.split('/')[3]
+
+					# find player names from challonge
+					player1_name = tourney_manager.show_participant(tournament_shortcut, player1_id)['name']
+					player2_name = tourney_manager.show_participant(tournament_shortcut, player2_id)['name']
+
+					# figure out which challonge player won
+					if player1_name == winner.display_name:
+						# player1 wins, 1-0
+						scores_csv = '1-0'
+						tourney_manager.set_match_winner(tournament_shortcut, int(match_id), scores_csv, int(player1_id))
+						await action_log(player1_name + ' set as match winner in challonge')
+					elif player2_name == winner.display_name:
+						# player2 wins, 0-1
+						scores_csv = '0-1'
+						tourney_manager.set_match_winner(tournament_shortcut, int(match_id), scores_csv, int(player2_id))
+						await action_log(player2_name + ' set as match winner in challonge')
 				return
 			if message.channel.id == config.TEMPLATE_CHAN_ID and message.nonce == 'template':
 				# add reactions to messages in the #templates channel
