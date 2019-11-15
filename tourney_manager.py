@@ -34,7 +34,7 @@ def show_participant(tournament_shortcut, participant_id):
 	return challonge.participants.show(tournament_shortcut, participant_id)
 
 ##### TESTING BELOW
-challonge.
+# challonge.
 
 # [{'id': 180695793,
 # 'tournament-id': 7797446,
