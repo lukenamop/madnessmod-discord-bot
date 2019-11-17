@@ -1271,7 +1271,10 @@ async def on_message(message):
 						participant2 = tourney_manager.show_participant(tournament_shortcut, match['player2-id'])['name']
 						channel_name = 'match-' + str(match['suggested-play-order']) + '-' + participant1[:5] + '-v-' + participant2[:5]
 						channel_topic = tournament_shortcut + '/' + str(match['id']) + '/' + str(match['player1-id']) + '/' + str(match['player2-id'])
-						await contest_category.create_text_channel(channel_name, topic=channel_topic)
+						match_channel = await contest_category.create_text_channel(channel_name, topic=channel_topic)
+						member1 = match_channel.guild.get_member_named(participant1)
+						member2 = match_channel.guild.get_member_named(participant2)
+						await match_channel.send(member1.mention + ' ' + member2.mention)
 						total_created += 1
 						if config.TESTING:
 							break
