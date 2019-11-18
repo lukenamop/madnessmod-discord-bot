@@ -143,7 +143,7 @@ async def on_message(message):
 							return
 						# build tie embed for match channel
 						embed_title = 'Voting Results'
-						embed_description = 'This match has ended in a ' + str(a_votes) + ' - ' + str(b_votes) + ' tie! ' + a_member.mention + ' submitted Image A and ' + b_member.mention + ' submitted Image B. Participants, please contact each other and find a time to rematch.'
+						embed_description = 'This match has ended in a ' + str(a_votes) + ' - ' + str(b_votes) + ' tie! ' + a_member.mention + ' submitted image A and ' + b_member.mention + ' submitted image B. Participants, please contact each other and find a time to rematch.'
 						embed = await generate_embed('pink', embed_title, embed_description)
 						await base_channel.send(embed=embed)
 						await action_log('match ended in a tie, results sent in match channel')
