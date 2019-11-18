@@ -672,14 +672,6 @@ async def on_message(message):
 					await match_channel.send(embed=embed)
 					await action_log('match channel notified about splitmatch completion')
 
-					try:
-						embed_title = 'Match Template'
-						embed = await generate_embed('green', embed_title, '', split_match_template_url)
-						await match_channel.send(embed=embed)
-						await action_log('template sent to split match channel')
-					except:
-						await action_log('template failed to send to channel')
-
 				# add submission info to postgresql database
 				if u_order == 1:
 					query = f'UPDATE matches SET u1_submitted = true, u1_image_url = \'{message.attachments[0].url}\' WHERE u1_id = {str(message.author.id)} AND start_time >= {str(time.time() - (config.MATCH_TIME + 10))}'
@@ -717,6 +709,16 @@ async def on_message(message):
 				submissions_channel = client.get_channel(config.SUBMISSION_CHAN_ID)
 				# only execute if both users have submitted final memes
 				if result[2] and result[3]:
+					# if it's a split match, send the template to the channel
+					if split_match_template_url is not None:
+						try:
+							embed_title = 'Match Template'
+							embed = await generate_embed('green', embed_title, '', split_match_template_url)
+							await match_channel.send(embed=embed)
+							await action_log('template sent to split match channel')
+						except:
+							await action_log('template failed to send to channel')
+
 					if u_order == 1:
 						try:
 							# set user order
@@ -1547,6 +1549,7 @@ async def on_message(message):
 						# if the user hasn't submitted, continue
 						match_udb = 'u1_id'
 						user_num = '1'
+						submitted = 'u1_submitted'
 						await action_log('match and participant found')
 					# check to see if the mentioned user is "u2" in the database
 					elif match_user.id == result[2]:
@@ -1560,6 +1563,7 @@ async def on_message(message):
 						# if the user hasn't submitted, continue
 						match_udb = 'u2_id'
 						user_num = '2'
+						submitted = 'u2_submitted'
 						await action_log('match and participant found')
 					else:
 						# failed is true if the mentioned user is not "u1" or "u2"
