@@ -436,7 +436,8 @@ async def on_message(message):
 						await user_channel.send(embed=embed)
 						await action_log(f'verification key incorrect from {username_discriminator}')
 				else:
-					await action_log(f'verification username error for {username_discriminator}, attempted name: {message.content.split('/')[-1]}')
+					attempted_name = message.content.split('/')[-1]
+					await action_log(f'verification username error for {username_discriminator}, attempted name: {attempted_name}')
 					# build verification failure embed (username error)
 					embed_title = 'Username Error'
 					embed_description = 'To try again, please send `.verify` in #verification.'
