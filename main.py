@@ -77,7 +77,7 @@ async def on_message(message):
 				await action_log('added reactions to poll message')
 				vote_pings_role = message.channel.guild.get_role(600356303033860106)
 				if not config.TESTING:
-					await message.channel.send(vote_pings_role.mention + ' @here')
+					await message.channel.send(f'{vote_pings_role.mention} @here')
 				else:
 					await message.channel.send('This is just a test match, not pinging `Vote Pings` or `here`.')
 
@@ -87,7 +87,7 @@ async def on_message(message):
 				await message.delete()
 
 				# check to see who submitted each meme
-				query = 'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url FROM matches WHERE channel_id = ' + str(message.channel.id) + ' AND start_time >= ' + str(time.time() - (config.BASE_POLL_TIME + config.MATCH_TIME + 30))
+				query = f'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url FROM matches WHERE channel_id = {str(message.channel.id)} AND start_time >= {str(time.time() - (config.BASE_POLL_TIME + config.MATCH_TIME + 30))}'
 				connect.crsr.execute(query)
 				result = connect.crsr.fetchone()
 				# initialize important variables
@@ -99,11 +99,11 @@ async def on_message(message):
 				u2_image_url = result[5]
 
 				# check how many votes image A got
-				query = 'SELECT COUNT(*) FROM votes WHERE match_id = ' + str(db_id) + ' AND a_vote = True'
+				query = f'SELECT COUNT(*) FROM votes WHERE match_id = {str(db_id)} AND a_vote = True'
 				connect.crsr.execute(query)
 				a_votes = connect.crsr.fetchone()[0]
 				# check how many votes image B got
-				query = 'SELECT COUNT(*) FROM votes WHERE match_id = ' + str(db_id) + ' AND b_vote = True'
+				query = f'SELECT COUNT(*) FROM votes WHERE match_id = {str(db_id)} AND b_vote = True'
 				connect.crsr.execute(query)
 				b_votes = connect.crsr.fetchone()[0]
 
@@ -143,17 +143,17 @@ async def on_message(message):
 							return
 						# build tie embed for match channel
 						embed_title = 'Voting Results'
-						embed_description = 'This match has ended in a ' + str(a_votes) + ' - ' + str(b_votes) + ' tie! ' + a_member.mention + ' submitted image A and ' + b_member.mention + ' submitted image B. Participants, please contact each other and find a time to rematch.'
+						embed_description = f'This match has ended in a {str(a_votes)} - {str(b_votes)} tie! {a_member.mention} submitted image A and {b_member.mention} submitted image B. Participants, please contact each other and find a time to rematch.'
 						embed = await generate_embed('pink', embed_title, embed_description)
 						await base_channel.send(embed=embed)
 						await action_log('match ended in a tie, results sent in match channel')
 
 						if not config.TESTING:
 							# update participant stats in the databsee (tie)
-							query = 'UPDATE participants SET total_votes_for = total_votes_for + ' + votes + ' WHERE user_id = ' + str(u1_id)
+							query = f'UPDATE participants SET total_votes_for = total_votes_for + {votes} WHERE user_id = {str(u1_id)}'
 							connect.crsr.execute(query)
 							connect.conn.commit()
-							query = 'UPDATE participants SET total_votes_for = total_votes_for + ' + votes + ' WHERE user_id = ' + str(u2_id)
+							query = f'UPDATE participants SET total_votes_for = total_votes_for + {votes} WHERE user_id = {str(u2_id)}'
 							connect.crsr.execute(query)
 							connect.conn.commit()
 							await action_log('participant stats updated')
@@ -185,18 +185,18 @@ async def on_message(message):
 					await action_log('winner round role updated')
 
 					# update participant stats in the database
-					query = 'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1, total_votes_for = total_votes_for + ' + str(winning_votes) + ' WHERE user_id = ' + str(winner.id)
+					query = f'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1, total_votes_for = total_votes_for + {str(winning_votes)} WHERE user_id = {str(winner.id)}'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('winner participant stats updated')
-					query = 'UPDATE participants SET total_matches = total_matches + 1, match_losses = match_losses + 1, total_votes_for = total_votes_for + ' + str(losing_votes) + ' WHERE user_id = ' + str(loser.id)
+					query = f'UPDATE participants SET total_matches = total_matches + 1, match_losses = match_losses + 1, total_votes_for = total_votes_for + {str(losing_votes)} WHERE user_id = {str(loser.id)}'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('loser participant stats updated')
 
 				# build notification embed for match channel (win/loss)
 				embed_title = 'Voting Results'
-				embed_description = 'Congratulations to ' + winner.mention + ', you have won this match with image ' + winning_image + '! Thank you for participating ' + loser.mention + '. The final score was ' + str(a_votes) + ' - ' + str(b_votes) + '.'
+				embed_description = f'Congratulations to {winner.mention}, you have won this match with image {winning_image}! Thank you for participating {loser.mention}. The final score was {str(a_votes)} - {str(b_votes)}.'
 				embed = await generate_embed('pink', embed_title, embed_description)
 				await base_channel.send(embed=embed)
 				await action_log('voting results sent in match channel')
@@ -225,12 +225,12 @@ async def on_message(message):
 						# player1 wins, 1-0
 						scores_csv = '1-0'
 						tourney_manager.set_match_winner(tournament_shortcut, int(match_id), scores_csv, int(player1_id))
-						await action_log(player1_name + ' set as match winner in challonge')
+						await action_log(f'{player1_name} set as match winner in challonge')
 					elif player2_name == winner.display_name:
 						# player2 wins, 0-1
 						scores_csv = '0-1'
 						tourney_manager.set_match_winner(tournament_shortcut, int(match_id), scores_csv, int(player2_id))
-						await action_log(player2_name + ' set as match winner in challonge')
+						await action_log(f'{player2_name} set as match winner in challonge')
 				return
 			if message.channel.id == config.TEMPLATE_CHAN_ID and message.nonce == 'template':
 				# add reactions to messages in the #templates channel
@@ -287,7 +287,7 @@ async def on_message(message):
 			user = message.author
 
 		# check participants database for the specified user
-		query = 'SELECT total_matches, match_wins, match_losses, total_votes_for, avg_final_meme_time, templates_submitted, match_votes FROM participants WHERE user_id = ' + str(user.id)
+		query = f'SELECT total_matches, match_wins, match_losses, total_votes_for, avg_final_meme_time, templates_submitted, match_votes FROM participants WHERE user_id = {str(user.id)}'
 		connect.crsr.execute(query)
 		results = connect.crsr.fetchone()
 		if results is not None:
@@ -297,19 +297,19 @@ async def on_message(message):
 				avg_time = 'N/A'
 
 			# build stats embed
-			embed_title = 'Stats for ' + user.display_name
+			embed_title = f'Stats for {user.display_name}'
 			try:
-				embed_description = '**Total matches:** `' + str(results[0]) + '`\n**Match wins/losses:** `' + str(results[1]) + '/' + str(results[2]) + '`\n**Win percentage:** `' + str(round((float(results[1]) / float(results[0])) * 100)) + '%`\n**Total votes for your memes:** `' + str(results[3]) + '`\n**Avg. time per meme:** `' + avg_time + '`\n**Templates submitted:** `' + str(results[5]) + '`\n**Matches voted in:** `' + str(results[6]) + '`'
+				embed_description = f'**Total matches:** `{str(results[0])}`\n**Match wins/losses:** `{str(results[1])}/{str(results[2])}`\n**Win percentage:** `{str(round((float(results[1]) / float(results[0])) * 100))}%`\n**Total votes for your memes:** `{str(results[3])}`\n**Avg. time per meme:** `{avg_time}`\n**Templates submitted:** `{str(results[5])}`\n**Matches voted in:** `{str(results[6])}`'
 			except ZeroDivisionError:
-				embed_description = '**Total matches:** `' + str(results[0]) + '`\n**Match wins/losses:** `' + str(results[1]) + '/' + str(results[2]) + '`\n**Win percentage:** `N/A`\n**Total votes for your memes:** `' + str(results[3]) + '`\n**Avg. time per meme:** `' + avg_time + '`\n**Templates submitted:** `' + str(results[5]) + '`\n**Matches voted in:** `' + str(results[6]) + '`'
+				embed_description = f'**Total matches:** `{str(results[0])}`\n**Match wins/losses:** `{str(results[1])}/{str(results[2])}`\n**Win percentage:** `N/A`\n**Total votes for your memes:** `{str(results[3])}`\n**Avg. time per meme:** `{avg_time}`\n**Templates submitted:** `{str(results[5])}`\n**Matches voted in:** `{str(results[6])}`'
 			embed = await generate_embed('pink', embed_title, embed_description)
 			await message.channel.send(embed=embed)
-			await action_log('stats shared to ' + message.author.name + '#' + message.author.discriminator)
+			await action_log(f'stats shared to {message.author.name}#{message.author.discriminator}')
 			return
 
 		# if no record of specified user, build no-stats embed
 		embed_title = 'No Stats Available'
-		embed_description = user.display_name + ' needs to sign up for a tournament to start recording stats.'
+		embed_description = f'{user.display_name} needs to sign up for a tournament to start recording stats.'
 		embed = await generate_embed('red', embed_title, embed_description)
 		await message.channel.send(embed=embed)
 		await action_log('stats not able to be shared')
@@ -320,7 +320,7 @@ async def on_message(message):
 		# '.verify' command (verification)
 		if message_content.startswith('.verify'):
 			verified = False
-			username_discriminator = message.author.name + '#' + message.author.discriminator
+			username_discriminator = f'{message.author.name}#{message.author.discriminator}'
 			# check manually which guild the user is verifying to; get "Verified" role from guild
 			if message.guild.id == 581695290986332160:
 				verification_role = message.guild.get_role(599354132771504128)
@@ -335,10 +335,10 @@ async def on_message(message):
 
 			# build verification begin embed
 			embed_title = 'Verification Process Started'
-			embed_description = base_member.mention + ', please check your Discord messages for the next steps!'
+			embed_description = f'{base_member.mention}, please check your Discord messages for the next steps!'
 			embed = await generate_embed('yellow', embed_title, embed_description)
 			base_bot_response = await message.channel.send(embed=embed)
-			await action_log('verification started by ' + username_discriminator)
+			await action_log(f'verification started by {username_discriminator}')
 
 			# build verification step 1/2 embed
 			user_channel = await base_member.create_dm()
@@ -355,7 +355,7 @@ async def on_message(message):
 				# wait for a message
 				message = await client.wait_for('message', check=check, timeout=120)
 				reddit_username = message.content.split('/')[-1].lstrip('@')
-				await action_log('verification username shared by ' + username_discriminator)
+				await action_log(f'verification username shared by {username_discriminator}')
 
 				# generate random 6 character string excluding unwanted_chars
 				unwanted_chars = ["0", "O", "l", "I"]
@@ -372,7 +372,7 @@ async def on_message(message):
 
 				# verify that a username was shared
 				if reddit_username is not None:
-					await action_log('verification reddit message for ' + username_discriminator + ' sent to \'' + reddit_username + '\'')
+					await action_log(f'verification reddit message for {username_discriminator} sent to \'{reddit_username}\'')
 
 					# build verification step 2/2 embed
 					embed_title = 'Verification Attempt (Step 2/2)'
@@ -418,25 +418,25 @@ async def on_message(message):
 						# check which server is hosting the verification
 						if base_message.guild.id == 607342998497525808:
 							# build welcome embed
-							embed_description = base_member.mention + ', welcome to MEX! Please let a member of the mod team know if you need any help.'
+							embed_description = f'{base_member.mention}, welcome to MEX! Please let a member of the mod team know if you need any help.'
 							embed = await generate_embed('green', embed_title, embed_description)
 							await client.get_channel(607342999751491585).send(embed=embed)
 						elif base_message.guild.id == 581695290986332160:
 							# build welcome embed
-							embed_description = base_member.mention + ', welcome to Meme Madness! Check out #info and #rules to see how this place is run and let a member of the mod team know if you need any help.'
+							embed_description = f'{base_member.mention}, welcome to Meme Madness! Check out #info and #rules to see how this place is run and let a member of the mod team know if you need any help.'
 							embed = await generate_embed('green', embed_title, embed_description)
 							await client.get_channel(581695290986332162).send(embed=embed)
 						# send welcome embed
-						await action_log('verification compeleted by ' + username_discriminator)
+						await action_log(f'verification compeleted by {username_discriminator}')
 					else:
 						# build verification failure embed (verification key error)
 						embed_title = 'Verification Key Incorrect'
 						embed_description = 'To try again, please send `.verify` in #verification.'
 						embed = await generate_embed('red', embed_title, embed_description)
 						await user_channel.send(embed=embed)
-						await action_log('verification key incorrect from ' + username_discriminator)
+						await action_log(f'verification key incorrect from {username_discriminator}')
 				else:
-					await action_log('verification username error for ' + username_discriminator + ', attempted name: ' + message.content.split('/')[-1])
+					await action_log(f'verification username error for {username_discriminator}, attempted name: {message.content.split('/')[-1]}')
 					# build verification failure embed (username error)
 					embed_title = 'Username Error'
 					embed_description = 'To try again, please send `.verify` in #verification.'
@@ -448,7 +448,7 @@ async def on_message(message):
 				embed_description = 'To try again, please send `.verify` in #verification.'
 				embed = await generate_embed('red', embed_title, embed_description)
 				await user_channel.send(embed=embed)
-				await action_log('verification timed out for ' + username_discriminator)
+				await action_log(f'verification timed out for {username_discriminator}')
 
 			# discord.errors.NotFound triggers if messages set for deletion don't exist
 			try:
@@ -483,7 +483,7 @@ async def on_message(message):
 				return
 
 			# check tournament settings via database (template requirement)
-			query = 'SELECT template_required FROM settings WHERE guild_id = ' + str(config.MM_GUILD_ID)
+			query = f'SELECT template_required FROM settings WHERE guild_id = {str(config.MM_GUILD_ID)}'
 			connect.crsr.execute(query)
 			results = connect.crsr.fetchone()
 			template_required = results[0]
@@ -498,7 +498,7 @@ async def on_message(message):
 					embed_description = 'Please send me a blank template to confirm your signup! This signup attempt will expire in 120 seconds.'
 					embed = await generate_embed('yellow', embed_title, embed_description)
 					await message.channel.send(embed=embed)
-					await action_log('signup attempted without attachment by ' + message.author.name + '#' + message.author.discriminator)
+					await action_log(f'signup attempted without attachment by {message.author.name}#{message.author.discriminator}')
 
 					# asyncio.TimeoutError triggers if client.wait_for(message) times out
 					try:
@@ -507,41 +507,41 @@ async def on_message(message):
 							return m.channel.type == message.channel.type and m.author.id == message.author.id and len(m.attachments) == 1
 						# wait for a message
 						message = await client.wait_for('message', check=check, timeout=120)
-						await action_log('signup attachment received from ' + message.author.name + '#' + message.author.discriminator)
+						await action_log(f'signup attachment received from {message.author.name}#{message.author.discriminator}')
 					except asyncio.TimeoutError:
 						# build signup error embed (timed out)
 						embed_title = 'Signup Timed Out'
 						embed_description = 'If you\'d like to signup for this week\'s competition, send me another message with `.signup`!'
 						embed = await generate_embed('red', embed_title, embed_description)
 						await message.channel.send(embed=embed)
-						await action_log('signup timed out by ' + message.author.name + '#' + message.author.discriminator)
+						await action_log(f'signup timed out by {message.author.name}#{message.author.discriminator}')
 						return
 				else:
-					await action_log('signup attachment received from ' + message.author.name + '#' + message.author.discriminator)
+					await action_log(f'signup attachment received from {message.author.name}#{message.author.discriminator}')
 
 					# check to see if user has signed up in the last 7 days (config.CYCLE seconds)
-					query = 'SELECT * FROM signups WHERE user_id = ' + str(message.author.id) + ' AND submission_time >= ' + str(time.time() - config.CYCLE)
+					query = f'SELECT * FROM signups WHERE user_id = {str(message.author.id)} AND submission_time >= {str(time.time() - config.CYCLE)}'
 					connect.crsr.execute(query)
 					result = connect.crsr.fetchone()
 					# don't create a new signup for previously signed up users
 					if result is None:
 						# build confirmation embed
 						embed_title = 'Template Confirmation'
-						embed_description = 'Thank you for submitting your template ' + message.author.mention + '! If there are any issues with your entry you will be contacted.'
+						embed_description = f'Thank you for submitting your template {message.author.mention}! If there are any issues with your entry you will be contacted.'
 						embed = await generate_embed('green', embed_title, embed_description)
 						await message.channel.send(embed=embed)
 
 						# send template to #templates
 						embed_title = 'Template Submission'
-						embed_description = member.mention + ' (' + functions.escape_underscores(member.display_name) + ', ' + str(member.id) + ')'
+						embed_description = f'{member.mention} ({functions.escape_underscores(member.display_name)}, {str(member.id)})'
 						embed_link = message.attachments[0].url
 						embed = await generate_embed('green', embed_title, embed_description, embed_link)
 						template_chan = client.get_channel(config.TEMPLATE_CHAN_ID)
 						template_message = await template_chan.send(embed=embed, nonce='template')
-						await action_log('signup attachment sent to #templates by ' + message.author.name + '#' + message.author.discriminator)
+						await action_log(f'signup attachment sent to #templates by {message.author.name}#{message.author.discriminator}')
 
 						# add signup info to postgresql
-						query = 'INSERT INTO signups (user_id, message_id, submission_time) VALUES (' + str(message.author.id) + ', 0, ' + str(time.time()) + ')'
+						query = f'INSERT INTO signups (user_id, message_id, submission_time) VALUES ({str(message.author.id)}, 0, {str(time.time())})'
 						connect.crsr.execute(query)
 						connect.conn.commit()
 						await action_log('signup info added to postgresql')
@@ -551,31 +551,31 @@ async def on_message(message):
 						embed_description = 'It looks like you\'ve already signed up for this cycle of Meme Madness! Contact a moderator if this is incorrect.'
 						embed = await generate_embed('red', embed_title, embed_description)
 						await message.channel.send(embed=embed)
-						await action_log('already signed up from ' + message.author.name + '#' + message.author.discriminator)
+						await action_log(f'already signed up from {message.author.name}#{message.author.discriminator}')
 						return
 			else:
 				# signup process when no template is required
 				# check to see if user has signed up in the last 7 days (config.CYCLE seconds)
-				query = 'SELECT * FROM signups WHERE user_id = ' + str(message.author.id) + ' AND submission_time >= ' + str(time.time() - config.CYCLE)
+				query = f'SELECT * FROM signups WHERE user_id = {str(message.author.id)} AND submission_time >= {str(time.time() - config.CYCLE)}'
 				connect.crsr.execute(query)
 				result = connect.crsr.fetchone()
 				# don't create a new signup for previously signed up users
 				if result is None:
 					embed_title = 'Signup Confirmation'
-					embed_description = 'Thank you for signing up ' + message.author.mention + '! If there are any issues with your entry you will be contacted.'
+					embed_description = f'Thank you for signing up {message.author.mention}! If there are any issues with your entry you will be contacted.'
 					embed = await generate_embed('green', embed_title, embed_description)
 					await message.channel.send(embed=embed)
 
 					# send signup to #templates
 					embed_title = 'Signup Confirmed'
-					embed_description = member.mention + ' (' + functions.escape_underscores(member.display_name) + ', ' + str(member.id) + ')'
+					embed_description = f'{member.mention} ({functions.escape_underscores(member.display_name)}, {str(member.id)})'
 					embed = await generate_embed('green', embed_title, embed_description)
 					template_chan = client.get_channel(config.SIGNUP_CHAN_ID)
 					template_message = await template_chan.send(embed=embed)
-					await action_log('signup sent to #templates by ' + message.author.name + '#' + message.author.discriminator)
+					await action_log(f'signup sent to #templates by {message.author.name}#{message.author.discriminator}')
 
 					# add signup info to postgresql
-					query = 'INSERT INTO signups (user_id, message_id, submission_time) VALUES (' + str(message.author.id) + ', 0, ' + str(time.time()) + ')'
+					query = f'INSERT INTO signups (user_id, message_id, submission_time) VALUES ({str(message.author.id)}, 0, {str(time.time())})'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('signup info added to postgresql')
@@ -585,15 +585,15 @@ async def on_message(message):
 					embed_description = 'It looks like you\'ve already signed up for this cycle of Meme Madness! Contact a moderator if this is incorrect.'
 					embed = await generate_embed('red', embed_title, embed_description)
 					await message.channel.send(embed=embed)
-					await action_log('already signed up from ' + message.author.name + '#' + message.author.discriminator)
+					await action_log(f'already signed up from {message.author.name}#{message.author.discriminator}')
 					return
 
 			# check for existing participant in database
-			query = 'SELECT * FROM participants WHERE user_id = ' + str(message.author.id)
+			query = f'SELECT * FROM participants WHERE user_id = {str(message.author.id)}'
 			connect.crsr.execute(query)
 			if connect.crsr.fetchone() is None:
 				# create participant if none exists
-				query = 'INSERT INTO participants (user_id) VALUES (' + str(message.author.id) + ')'
+				query = f'INSERT INTO participants (user_id) VALUES ({str(message.author.id)})'
 				connect.crsr.execute(query)
 				connect.conn.commit()
 				await action_log('user added to participants table in postgresql')
@@ -602,7 +602,7 @@ async def on_message(message):
 		# '.submit' command (DM)
 		if message_content.startswith('.submit'):
 			# check for an active match including the specified user
-			query = 'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, split_match_template_url FROM matches WHERE (u1_id = ' + str(message.author.id) + ' OR u2_id = ' + str(message.author.id) + ') AND start_time >= ' + str(time.time() - (config.MATCH_TIME + 10))
+			query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, split_match_template_url FROM matches WHERE (u1_id = {str(message.author.id)} OR u2_id = {str(message.author.id)}) AND start_time >= {str(time.time() - (config.MATCH_TIME + 10))}'
 			connect.crsr.execute(query)
 			result = connect.crsr.fetchone()
 
@@ -619,13 +619,13 @@ async def on_message(message):
 				if message.author.id == result[0]:
 					if result[2]:
 						await message.channel.send(embed=embed)
-						await action_log('duplicate submission by ' + message.author.name + '#' + message.author.discriminator)
+						await action_log(f'duplicate submission by {message.author.name}#{message.author.discriminator}')
 						return
 					u_order = 1
 				elif message.author.id == result[1]:
 					if result[3]:
 						await message.channel.send(embed=embed)
-						await action_log('duplicate submission by ' + message.author.name + '#' + message.author.discriminator)
+						await action_log(f'duplicate submission by {message.author.name}#{message.author.discriminator}')
 						return
 					u_order = 2
 				# check for an attachment
@@ -635,7 +635,7 @@ async def on_message(message):
 					embed_description = 'Please send me your final meme to confirm your submission! This submission attempt will expire in 120 seconds.'
 					embed = await generate_embed('yellow', embed_title, embed_description)
 					await message.channel.send(embed=embed)
-					await action_log('submission attempted without attachment by ' + message.author.name + '#' + message.author.discriminator)
+					await action_log(f'submission attempted without attachment by {message.author.name}#{message.author.discriminator}')
 
 					# asyncio.TimeoutError triggers if client.wait_for(message) times out
 					try:
@@ -644,29 +644,29 @@ async def on_message(message):
 							return m.channel.type == message.channel.type and m.author.id == message.author.id and len(m.attachments) == 1
 						# wait for a message
 						message = await client.wait_for('message', check=check, timeout=120)
-						await action_log('submission attachment received from ' + message.author.name + '#' + message.author.discriminator)
+						await action_log(f'submission attachment received from {message.author.name}#{message.author.discriminator}')
 					except asyncio.TimeoutError:
 						# build submission error embed (timed out)
 						embed_title = 'Submission Timed Out'
 						embed_description = 'If you\'d like to submit your final meme, send me another message with `.submit`!'
 						embed = await generate_embed('red', embed_title, embed_description)
 						await message.channel.send(embed=embed)
-						await action_log('submission timed out by ' + message.author.name + '#' + message.author.discriminator)
+						await action_log(f'submission timed out by {message.author.name}#{message.author.discriminator}')
 						return
 				else:
-					await action_log('submission attachment received from ' + message.author.name + '#' + message.author.discriminator)
+					await action_log(f'submission attachment received from {message.author.name}#{message.author.discriminator}')
 
 				# build submission confirmation embed
 				embed_title = 'Submission Confirmation'
-				embed_description = 'Thank you for submitting your final meme ' + message.author.mention + '! If there are any issues with your submission you will be contacted.'
+				embed_description = f'Thank you for submitting your final meme {message.author.mention}! If there are any issues with your submission you will be contacted.'
 				embed = await generate_embed('green', embed_title, embed_description)
 				await message.channel.send(embed=embed)
-				await action_log('final meme attachment sent in by ' + message.author.name + '#' + message.author.discriminator)
+				await action_log(f'final meme attachment sent in by {message.author.name}#{message.author.discriminator}')
 
 				if split_match_template_url is not None:
 					# build submission confirmation for match channel
 					embed_title = 'Solo Match Complete'
-					embed_description = message.author.mention + ' has completed their part of the match!'
+					embed_description = f'{message.author.mention} has completed their part of the match!'
 					embed = await generate_embed('green', embed_title, embed_description)
 					await match_channel.send(embed=embed)
 					await action_log('match channel notified about splitmatch completion')
@@ -681,19 +681,19 @@ async def on_message(message):
 
 				# add submission info to postgresql database
 				if u_order == 1:
-					query = 'UPDATE matches SET u1_submitted = true, u1_image_url = \'' + message.attachments[0].url + '\' WHERE u1_id = ' + str(message.author.id) + ' AND start_time >= ' + str(time.time() - (config.MATCH_TIME + 10))
+					query = f'UPDATE matches SET u1_submitted = true, u1_image_url = \'{message.attachments[0].url}\' WHERE u1_id = {str(message.author.id)} AND start_time >= {str(time.time() - (config.MATCH_TIME + 10))}'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('match info updated in postgresql')
 				if u_order == 2:
-					query = 'UPDATE matches SET u2_submitted = true, u2_image_url = \'' + message.attachments[0].url + '\' WHERE u2_id = ' + str(message.author.id) + ' AND start_time >= ' + str(time.time() - (config.MATCH_TIME + 10))
+					query = f'UPDATE matches SET u2_submitted = true, u2_image_url = \'{message.attachments[0].url}\' WHERE u2_id = {str(message.author.id)} AND start_time >= {str(time.time() - (config.MATCH_TIME + 10))}'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('match info updated in postgresql')
 
 				if not config.TESTING:
 					# pull participant info from database
-					query = 'SELECT avg_final_meme_time, total_matches FROM participants WHERE user_id = ' + str(message.author.id)
+					query = f'SELECT avg_final_meme_time, total_matches FROM participants WHERE user_id = {str(message.author.id)}'
 					connect.crsr.execute(query)
 					results = connect.crsr.fetchone()
 					# check to see if avg_final_meme_time exists
@@ -702,13 +702,13 @@ async def on_message(message):
 					else:
 						new_avg_final_meme_time = ((float(results[0] * results[1]) + (time.time() - float(start_time))) / float(results[1] + 1))
 					# update participant stats in database
-					query = 'UPDATE participants SET avg_final_meme_time = ' + str(new_avg_final_meme_time) + ' WHERE user_id = ' + str(message.author.id)
+					query = f'UPDATE participants SET avg_final_meme_time = {str(new_avg_final_meme_time)} WHERE user_id = {str(message.author.id)}'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('participant stats updated')
 
 				# pull match info from database
-				query = 'SELECT u1_id, u2_id, u1_submitted, u2_submitted, u1_image_url, u2_image_url, channel_id FROM matches WHERE (u1_id = ' + str(message.author.id) + ' OR u2_id = ' + str(message.author.id) + ') AND start_time >= ' + str(time.time() - (config.MATCH_TIME + 10))
+				query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, u1_image_url, u2_image_url, channel_id FROM matches WHERE (u1_id = {str(message.author.id)} OR u2_id = {str(message.author.id)}) AND start_time >= {str(time.time() - (config.MATCH_TIME + 10))}'
 				connect.crsr.execute(query)
 				result = connect.crsr.fetchone()
 				# find match_channel and submissions_channel from discord
@@ -729,7 +729,7 @@ async def on_message(message):
 							await action_log('final meme submission stopped due to an AttributeError')
 							return
 						# update match info in database
-						query = 'UPDATE matches SET a_meme = 1 WHERE (u1_id = ' + str(message.author.id) + ' OR u2_id = ' + str(message.author.id) + ') AND start_time >= ' + str(time.time() - (config.MATCH_TIME + 10))
+						query = f'UPDATE matches SET a_meme = 1 WHERE (u1_id = {str(message.author.id)} OR u2_id = {str(message.author.id)}) AND start_time >= {str(time.time() - (config.MATCH_TIME + 10))}'
 						connect.crsr.execute(query)
 						connect.conn.commit()
 					if u_order == 2:
@@ -745,19 +745,19 @@ async def on_message(message):
 							await action_log('final meme submission stopped due to an AttributeError')
 							return
 						# update match info in database
-						query = 'UPDATE matches SET a_meme = 2 WHERE (u1_id = ' + str(message.author.id) + ' OR u2_id = ' + str(message.author.id) + ') AND start_time >= ' + str(time.time() - (config.MATCH_TIME + 10))
+						query = f'UPDATE matches SET a_meme = 2 WHERE (u1_id = {str(message.author.id)} OR u2_id = {str(message.author.id)}) AND start_time >= {str(time.time() - (config.MATCH_TIME + 10))}'
 						connect.crsr.execute(query)
 						connect.conn.commit()
 
 					# send final memes to #submissions channel
 					# submission embed for user 1
 					embed_title = 'Final Meme Submission'
-					embed_description = u1_mention + ' (' + u1.display_name + ', ' + str(result[0]) + ')'
+					embed_description = f'{u1_mention} ({u1.display_name}, {str(result[0])})'
 					embed_link = u1_link
 					embed = await generate_embed('green', embed_title, embed_description, embed_link)
 					await submissions_channel.send(embed=embed)
 					# submission embed for user 2
-					embed_description = u2_mention + ' (' + u2.display_name + ', ' + str(result[1]) + ')'
+					embed_description = f'{u2_mention} ({u2.display_name}, {str(result[1])})'
 					embed_link = u2_link
 					embed = await generate_embed('green', embed_title, embed_description, embed_link)
 					await submissions_channel.send(embed=embed)
@@ -787,7 +787,7 @@ async def on_message(message):
 				embed_description = 'You don\'t appear to have an active match to submit to right now.'
 				embed = await generate_embed('red', embed_title, embed_description)
 				await message.channel.send(embed=embed)
-				await action_log('submission attempt without match by ' + message.author.name + '#' + message.author.discriminator)
+				await action_log(f'submission attempt without match by {message.author.name}#{message.author.discriminator}')
 				return
 
 		# '.template' command (DM)
@@ -802,7 +802,7 @@ async def on_message(message):
 				embed_description = 'If you\'d like to help out by providing a template, please send me a blank image. This template submission attempt will expire in 120 seconds.'
 				embed = await generate_embed('yellow', embed_title, embed_description)
 				await message.channel.send(embed=embed)
-				await action_log('template attempted without attachment by ' + message.author.name + '#' + message.author.discriminator)
+				await action_log(f'template attempted without attachment by {message.author.name}#{message.author.discriminator}')
 
 				# asyncio.TimeoutError triggers if client.wait_for(message) times out
 				try:
@@ -817,39 +817,39 @@ async def on_message(message):
 					embed_description = 'If you\'d like to submit a template to be used in Meme Madness, send me another message with `.template`!'
 					embed = await generate_embed('red', embed_title, embed_description)
 					await message.channel.send(embed=embed)
-					await action_log('template submission timed out by ' + message.author.name + '#' + message.author.discriminator)
+					await action_log(f'template submission timed out by {message.author.name}#{message.author.discriminator}')
 					return
 
-			await action_log('template attachment received from ' + message.author.name + '#' + message.author.discriminator)
+			await action_log(f'template attachment received from {message.author.name}#{message.author.discriminator}')
 			# build confirmation embed
 			embed_title = 'Template Confirmation'
-			embed_description = 'Thank you for submitting your template ' + message.author.mention + '! If there are any issues, you will be contacted.'
+			embed_description = f'Thank you for submitting your template {message.author.mention}! If there are any issues, you will be contacted.'
 			embed = await generate_embed('green', embed_title, embed_description)
 			await message.channel.send(embed=embed)
 
 			# send template to #templates
 			embed_title = 'Voluntary Template Submission'
-			embed_description = member.mention + ' (' + functions.escape_underscores(member.display_name) + ', ' + str(member.id) + ')'
+			embed_description = f'{member.mention} ({functions.escape_underscores(member.display_name)}, {str(member.id)})'
 			embed_link = message.attachments[0].url
 			embed = await generate_embed('green', embed_title, embed_description, embed_link)
 			template_chan = client.get_channel(config.TEMPLATE_CHAN_ID)
 			template_message = await template_chan.send(embed=embed, nonce='voluntary_template')
-			await action_log('template attachment sent to #templates by ' + message.author.name + '#' + message.author.discriminator)
+			await action_log(f'template attachment sent to #templates by {message.author.name}#{message.author.discriminator}')
 
 			if not config.TESTING:
 				# check for existing participant in database
-				query = 'SELECT templates_submitted FROM participants WHERE user_id = ' + str(message.author.id)
+				query = f'SELECT templates_submitted FROM participants WHERE user_id = {str(message.author.id)}'
 				connect.crsr.execute(query)
 				result = connect.crsr.fetchone()
 				if result is None:
 					# create participant if none exists
-					query = 'INSERT INTO participants (user_id, templates_submitted) VALUES (' + str(message.author.id) + ', 1)'
+					query = f'INSERT INTO participants (user_id, templates_submitted) VALUES ({str(message.author.id)}, 1)'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('no existing user, new user added to participants table in postgresql')
 				else:
 					# update participant stats if they already exist
-					query = 'UPDATE participants SET templates_submitted = ' + str(result[0] + 1) + ' WHERE user_id = ' + str(message.author.id)
+					query = f'UPDATE participants SET templates_submitted = {str(result[0] + 1)} WHERE user_id = {str(message.author.id)}'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('user already existed, participant stats updated in postgresql')
@@ -862,7 +862,7 @@ async def on_message(message):
 			embed_description = help_cmd.dm_help
 			embed = await generate_embed('yellow', embed_title, embed_description)
 			await message.channel.send(embed=embed)
-			await action_log('help query sent to ' + message.author.name + '#' + message.author.discriminator)
+			await action_log(f'help query sent to {message.author.name}#{message.author.discriminator}')
 			return
 		return
 
@@ -875,7 +875,7 @@ async def on_message(message):
 			embed_description = help_cmd.stats_help
 			embed = await generate_embed('yellow', embed_title, embed_description)
 			await message.channel.send(embed=embed)
-			await action_log('help query sent to ' + message.author.name + '#' + message.author.discriminator + ' in stats-flex')
+			await action_log(f'help query sent to {message.author.name}#{message.author.discriminator} in stats-flex')
 			return
 		return
 
@@ -884,7 +884,7 @@ async def on_message(message):
 	if message.channel.id == 600397545050734612 or message.channel.id == 581728812518080522:
 		# '.activematches' command (duel-mods)
 		if message_content == '.activematches':
-			query = 'SELECT channel_id FROM matches WHERE start_time >= ' + str(time.time() - (config.MATCH_TIME + config.BASE_POLL_TIME))
+			query = f'SELECT channel_id FROM matches WHERE start_time >= {str(time.time() - (config.MATCH_TIME + config.BASE_POLL_TIME))}'
 			connect.crsr.execute(query)
 			results = connect.crsr.fetchall()
 			embed_title = 'Active Matches'
@@ -898,7 +898,7 @@ async def on_message(message):
 					if channel is not None:
 						embed_description += channel.mention + '\n'
 						total += 1
-				embed_description += '**Total active matches: `' + str(total) + '`**'
+				embed_description += f'**Total active matches: `{str(total)}`**'
 			else:
 				embed_description = '**Total active matches: `0`**'
 			embed = await generate_embed('green', embed_title, embed_description)
@@ -934,7 +934,7 @@ async def on_message(message):
 				reason = message_split[2]
 
 				# check signups database for specified user_id
-				query = 'SELECT message_id FROM signups WHERE user_id = ' + str(user_id) + ' AND submission_time >= ' + str(time.time() - config.CYCLE)
+				query = f'SELECT message_id FROM signups WHERE user_id = {str(user_id)} AND submission_time >= {str(time.time() - config.CYCLE)}'
 				connect.crsr.execute(query)
 				result = connect.crsr.fetchone()
 				if result is not None:
@@ -945,7 +945,7 @@ async def on_message(message):
 
 					# build resignup embed
 					embed_title = 'Re-signup Required'
-					embed_description = 'Your signup was removed for reason: `' + reason + '`. To enter this cycle of Meme Madness please `.signup` with a new template. If you have any questions please contact the moderators. Thank you!'
+					embed_description = f'Your signup was removed for reason: `{reason}`. To enter this cycle of Meme Madness please `.signup` with a new template. If you have any questions please contact the moderators. Thank you!'
 					embed = await generate_embed('red', embed_title, embed_description)
 					await user_channel.send(embed=embed)
 					await action_log('DM sent to user')
@@ -962,14 +962,14 @@ async def on_message(message):
 						await action_log('no submission message to delete')
 
 					# remove signup info from postgresql
-					query = 'DELETE FROM signups WHERE user_id = ' + str(user_id) + ' AND submission_time >= ' + str(time.time() - config.CYCLE)
+					query = f'DELETE FROM signups WHERE user_id = {str(user_id)} AND submission_time >= {str(time.time() - config.CYCLE)}'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('signup info deleted')
 
 					# build resignup confirmation embed
 					embed_title = 'Signup Deleted'
-					embed_description = message.guild.get_member(user_id).mention + '\'s signup has been deleted. I have sent them a DM including your reason for removing their signup and told them to `.signup` again if they\'d like to participate.'
+					embed_description = f'{message.guild.get_member(user_id).mention}\'s signup has been deleted. I have sent them a DM including your reason for removing their signup and told them to `.signup` again if they\'d like to participate.'
 					embed = await generate_embed('green', embed_title, embed_description)
 					await message.channel.send(embed=embed)
 					return
@@ -1001,7 +1001,7 @@ async def on_message(message):
 		# '.signuplist' command (duel-mods)
 		if message_content.startswith('.signuplist') or message_content.startswith('.signups'):
 			# pull all signups from database
-			query = 'SELECT user_id FROM signups WHERE submission_time >= ' + str(time.time() - config.CYCLE)
+			query = f'SELECT user_id FROM signups WHERE submission_time >= {str(time.time() - config.CYCLE)}'
 			connect.crsr.execute(query)
 			results = connect.crsr.fetchall()
 			embed_title = 'Signup List'
@@ -1015,7 +1015,7 @@ async def on_message(message):
 					if member is not None:
 						embed_description += functions.escape_underscores(member.display_name) + '\n'
 						total += 1
-				embed_description += '**Total signups: `' + str(total) + '`**'
+				embed_description += f'**Total signups: `{str(total)}`**'
 			else:
 				embed_description = 'There aren\'t any signups for this cycle in the database yet.'
 			embed = await generate_embed('green', embed_title, embed_description)
@@ -1043,10 +1043,10 @@ async def on_message(message):
 							await member.remove_roles(role)
 							# count up
 							total_removed += 1
-				await action_log(str(total_removed) + ' roles removed')
+				await action_log(f'{str(total_removed)} roles removed')
 
 				# pull all signups from database
-				query = 'SELECT user_id FROM signups WHERE submission_time >= ' + str(time.time() - config.CYCLE)
+				query = f'SELECT user_id FROM signups WHERE submission_time >= {str(time.time() - config.CYCLE)}'
 				connect.crsr.execute(query)
 				results = connect.crsr.fetchall()
 				# check to make sure there are signups
@@ -1061,7 +1061,7 @@ async def on_message(message):
 							total_added += 1
 					await processing_message.delete()
 					embed_title = 'Tournament Roles Set'
-					embed_description = 'Success! ' + str(total_removed) + ' previous tournament roles removed, ' + str(total_added) + ' new tournament roles added.'
+					embed_description = f'Success! {str(total_removed)} previous tournament roles removed, {str(total_added)} new tournament roles added.'
 					embed = await generate_embed('green', embed_title, embed_description)
 					await action_log(str(total_added) + ' roles added')
 				else:
@@ -1095,10 +1095,10 @@ async def on_message(message):
 							# count up
 							total_removed += 1
 				embed_title = 'Tournament Roles Removed'
-				embed_description = 'Success! ' + str(total_removed) + ' previous tournament roles removed.'
+				embed_description = f'Success! {str(total_removed)} previous tournament roles removed.'
 				embed = await generate_embed('green', embed_title, embed_description)
 				await message.channel.send(embed=embed)
-				await action_log(str(total_removed) + ' roles removed')
+				await action_log(f'{str(total_removed)} roles removed')
 				await action_log('removetournamentroles complete')
 				return
 			return
@@ -1127,10 +1127,10 @@ async def on_message(message):
 						if passed:
 							# build prelim success embed
 							embed_title = 'Role Set to Prelim'
-							embed_description = 'The tournament role for ' + member.mention + ' has been set to `Preliminary`.'
+							embed_description = f'The tournament role for {member.mention} has been set to `Preliminary`.'
 							embed = await generate_embed('green', embed_title, embed_description)
 							await message.channel.send(embed=embed)
-							await action_log('prelim set for ' + member.name + '#' + member.discriminator)
+							await action_log(f'prelim set for {member.name}#{member.discriminator}')
 						else:
 							# build prelim error embed (user did not have tournament role)
 							embed_title = 'Error: Specified User Not Valid'
@@ -1163,13 +1163,13 @@ async def on_message(message):
 			if message.author.id in config.ADMIN_IDS:
 				await action_log('signup templates toggled')
 				# check to see if templates are required
-				query = 'SELECT template_required FROM settings WHERE guild_id = ' + str(config.MM_GUILD_ID)
+				query = f'SELECT template_required FROM settings WHERE guild_id = {str(config.MM_GUILD_ID)}'
 				connect.crsr.execute(query)
 				results = connect.crsr.fetchone()
 				template_required = results[0]
 				if template_required:
 					# set templates to no longer be required
-					query = 'UPDATE settings SET template_required = False WHERE guild_id = ' + str(config.MM_GUILD_ID)
+					query = f'UPDATE settings SET template_required = False WHERE guild_id = {str(config.MM_GUILD_ID)}'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('templates no longer required')
@@ -1183,7 +1183,7 @@ async def on_message(message):
 					return
 				else:
 					# set templates to now be required
-					query = 'UPDATE settings SET template_required = True WHERE guild_id = ' + str(config.MM_GUILD_ID)
+					query = f'UPDATE settings SET template_required = True WHERE guild_id = {str(config.MM_GUILD_ID)}'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('templates now required')
