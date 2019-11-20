@@ -1964,14 +1964,16 @@ async def on_reaction_add(reaction, user):
 				match_id = result[0]
 				u1_id = result[1]
 				u2_id = result[2]
-				# check to see if the person voting is one of the match participants
-				if user.id == u1_id or user.id == u2_id:
-					embed_title = 'Invalid Vote'
-					embed_description = 'You cannot vote in your own match.'
-					embed = await generate_embed('red', embed_title, embed_description)
-					await user_channel.send(embed=embed)
-					await action_log(f'attempted self-vote in match by {user.name}#{user.discriminator}')
-					return
+
+				if not config.TESTING:
+					# check to see if the person voting is one of the match participants
+					if user.id == u1_id or user.id == u2_id:
+						embed_title = 'Invalid Vote'
+						embed_description = 'You cannot vote in your own match.'
+						embed = await generate_embed('red', embed_title, embed_description)
+						await user_channel.send(embed=embed)
+						await action_log(f'attempted self-vote in match by {user.name}#{user.discriminator}')
+						return
 
 				# check postgresql database for an existing vote by the user in the specified match
 				query = f'SELECT a_vote, b_vote FROM votes WHERE user_id = {str(user.id)} AND match_id = {str(match_id)}'
