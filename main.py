@@ -1938,29 +1938,41 @@ async def on_reaction_add(reaction, user):
 			await reaction.remove(user)
 			await action_log(f'reaction added to poll by {user.name}#{user.discriminator}')
 
-			#if not config.TESTING:
-			# check for existing participant in database
-			query = f'SELECT match_votes FROM participants WHERE user_id = {str(user.id)}'
-			connect.crsr.execute(query)
-			result = connect.crsr.fetchone()
-			if result is None:
-				# create participant if none exists
-				query = f'INSERT INTO participants (user_id) VALUES ({str(user.id)})'
+			# create dm channel with the user
+			user_channel = await user.create_dm()
+
+			if not config.TESTING:
+				# check for existing participant in database
+				query = f'SELECT match_votes FROM participants WHERE user_id = {str(user.id)}'
 				connect.crsr.execute(query)
-				connect.conn.commit()
-				await action_log('no existing user, new user added to participants table in postgresql')
-				participant_match_votes = 0
-			else:
-				participant_match_votes = result[0]
+				result = connect.crsr.fetchone()
+				if result is None:
+					# create participant if none exists
+					query = f'INSERT INTO participants (user_id) VALUES ({str(user.id)})'
+					connect.crsr.execute(query)
+					connect.conn.commit()
+					await action_log('no existing user, new user added to participants table in postgresql')
+					participant_match_votes = 0
+				else:
+					participant_match_votes = result[0]
 
 			# find the ID of the active match
-			query = f'SELECT db_id FROM matches WHERE channel_id = {str(message.channel.id)} AND start_time >= {str(time.time() - (config.BASE_POLL_TIME + config.MATCH_TIME + 5))}'
+			query = f'SELECT db_id, u1_id, u2_id FROM matches WHERE channel_id = {str(message.channel.id)} AND start_time >= {str(time.time() - (config.BASE_POLL_TIME + config.MATCH_TIME + 5))}'
 			connect.crsr.execute(query)
 			result = connect.crsr.fetchone()
 			if result is not None:
 				match_id = result[0]
-				# create dm channel with the user
-				user_channel = await user.create_dm()
+				u1_id = result[1]
+				u2_id = result[2]
+				# check to see if the person voting is one of the match participants
+				if user.id == u1_id or user.id == u2_id:
+					embed_title = 'Invalid Vote'
+					embed_description = 'You cannot vote in your own match.'
+					embed = await generate_embed('red', embed_title, embed_description)
+					await user_channel.send(embed=embed)
+					await action_log(f'attempted self-vote in match by {user.name}#{user.discriminator}')
+					return
+
 				# check postgresql database for an existing vote by the user in the specified match
 				query = f'SELECT a_vote, b_vote FROM votes WHERE user_id = {str(user.id)} AND match_id = {str(match_id)}'
 				connect.crsr.execute(query)
@@ -1975,7 +1987,7 @@ async def on_reaction_add(reaction, user):
 						else:
 							# send the user a warning if their vote broke any rules
 							embed_title = 'Invalid Vote'
-							embed_description = 'To change your vote, first remove your original vote by reacting with the letter of the image you chose first.'
+							embed_description = 'You attempted to react to a match poll with an invalid emoji.'
 							embed = await generate_embed('red', embed_title, embed_description)
 							# send embed to the user via dm
 							await user_channel.send(embed=embed)
