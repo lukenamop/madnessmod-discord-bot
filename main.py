@@ -1650,7 +1650,7 @@ async def on_message(message):
 
 					if template_url is not None:
 						# update match start_time in database
-						query = f'UPDATE matches SET start_time = {str(time.time())} WHERE channel_id = {str(channel_id)} AND start_time IS NOT NULL AND template_message_id IS NULL AND split_match_template_url = \'{template_url}\''
+						query = f'UPDATE matches SET start_time = {str(time.time())} WHERE channel_id = {str(channel_id)} AND template_message_id IS NULL AND split_match_template_url = \'{template_url}\''
 						connect.crsr.execute(query)
 						connect.conn.commit()
 						await action_log('match start_time updated in database')
