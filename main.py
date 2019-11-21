@@ -610,9 +610,20 @@ async def on_message(message):
 		# '.submit' command (DM)
 		if message_content.startswith('.submit'):
 			# check for an active match including the specified user
-			query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, split_match_template_url FROM matches WHERE (u1_id = {str(message.author.id)} OR u2_id = {str(message.author.id)}) AND start_time >= {str(time.time() - (config.MATCH_TIME + 10))}'
+			query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, split_match_template_url, creation_time FROM matches WHERE (u1_id = {str(message.author.id)} OR u2_id = {str(message.author.id)}) AND start_time >= {str(time.time() - (config.MATCH_TIME + 10))}'
 			connect.crsr.execute(query)
-			result = connect.crsr.fetchone()
+			results = connect.crsr.fetchall()
+			result = None
+			failed = False
+
+			if len(results) > 1:
+				result = [None, None, None, None, None, None, None, 0]
+				# find the most recent match by creation_time
+				for match in results:
+					if match[7] > result[7]:
+						result = match
+			elif len(results) == 1:
+				result = results[0]
 
 			# build duplicate submission embed
 			embed_title = 'Error: Already Submitted'
