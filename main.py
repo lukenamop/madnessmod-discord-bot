@@ -1489,17 +1489,46 @@ async def on_message(message):
 				u2_id = member2.id
 				channel_id = message.channel.id
 
-				# add match info to postgresql
-				query = f'INSERT INTO matches (u1_id, u2_id, channel_id, creation_time) VALUES ({str(member1.id)}, {str(member2.id)}, {str(channel_id)}, {str(time.time())})'
-				connect.crsr.execute(query)
-				connect.conn.commit()
-
-				# respond with confirmation embed
-				embed_title = 'Match Split'
-				embed_description = f'Match between {member1.mention} and {member2.mention} has been split. Use `.startsolo @user` to get each user started.'
-				embed = await generate_embed('green', embed_title, embed_description)
+				embed_title = 'Splitting Match'
+				embed_description = 'Randomly selecting template...'
+				embed = await generate_embed('yellow', embed_title, embed_description)
 				await message.channel.send(embed=embed)
-				await action_log(f'match split between {member1.name}#{member1.discriminator} and {member2.name}#{member2.discriminator}')
+
+				template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).history(limit=200).flatten()
+				await action_log(f'list of {str(len(template_list))} templates compiled from #templates')
+				duelmods_chan = client.get_channel(config.DUELMODS_CHAN_ID)
+				if len(template_list) >= 1:
+					template_message = random.choice(template_list)
+					if len(template_message.embeds) == 1:
+						template_url = template_message.embeds[0].image.url
+						author_string = template_message.embeds[0].description
+					else:
+						template_url = template_message.attachments[0].url
+						author_string = template_message.author.display_name
+
+					# add match info to postgresql
+					query = f'INSERT INTO matches (u1_id, u2_id, channel_id, creation_time, template_message_id) VALUES ({str(member1.id)}, {str(member2.id)}, {str(channel_id)}, {str(time.time())}, {str(template_message.id)})'
+					connect.crsr.execute(query)
+					connect.conn.commit()
+					await action_log('match added to database')
+
+					# build random template embed
+					embed_title = f'Template for #{message.channel.name}'
+					embed_description = f'Here\'s a random template! This template was submitted by {author_string}'
+					embed = await generate_embed('green', embed_title, embed_description, template_url)
+					nonce = f'spltemp{str(channel_id)}'
+					await duelmods_chan.send(embed=embed, nonce=nonce)
+					await duelmods_chan.send(message.author.mention)
+					await action_log('template confirmation sent to duel-mods')
+					return
+				else:
+					# build startmatch error (no templates)
+					embed_title = 'Match Error'
+					embed_description = 'No templates in #templates!'
+					embed = await generate_embed('red',embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log('no templates for .splitmatch')
+					return
 				return
 			else:
 				embed_title = 'Participants Not Specified'
@@ -1518,14 +1547,14 @@ async def on_message(message):
 				match_channel = message.channel
 				channel_id = message.channel.id
 
-				query = f'SELECT creation_time, u1_id, u2_id, u1_submitted, u2_submitted, split_match_template_url FROM matches WHERE channel_id = {str(channel_id)}'
+				query = f'SELECT creation_time, u1_id, u2_id, u1_submitted, u2_submitted, split_match_template_url, start_time FROM matches WHERE channel_id = {str(channel_id)}'
 				connect.crsr.execute(query)
 				results = connect.crsr.fetchall()
 				result = None
 				failed = False
 
 				if len(results) > 1:
-					result = [0, None, None, None, None, None]
+					result = [0, None, None, None, None, None, None]
 					# find the most recent match by creation_time
 					for match in results:
 						if match[0] > result[0]:
@@ -1551,6 +1580,14 @@ async def on_message(message):
 						user_num = '1'
 						submitted = 'u1_submitted'
 						await action_log('match and participant found')
+						# return if there is a start_time but the other user has not yet submitted
+						if result[6] is not None and not result[4]:
+							embed_title = 'Match In Progress...'
+							embed_description = 'Please wait for the other participant to finish their part of the match!'
+							embed = await generate_embed('red', embed_title, embed_description)
+							await message.channel.send(embed=embed)
+							await action_log('split match already in progress')
+							return
 					# check to see if the mentioned user is "u2" in the database
 					elif match_user.id == result[2]:
 						# check to see if the user has submitted
@@ -1565,23 +1602,23 @@ async def on_message(message):
 						user_num = '2'
 						submitted = 'u2_submitted'
 						await action_log('match and participant found')
+						# return if there is a start_time but the other user has not yet submitted
+						if result[6] is not None and not result[3]:
+							embed_title = 'Match In Progress...'
+							embed_description = 'Please wait for the other participant to finish their part of the match!'
+							embed = await generate_embed('red', embed_title, embed_description)
+							await message.channel.send(embed=embed)
+							await action_log('split match already in progress')
+							return
 					else:
 						# failed is true if the mentioned user is not "u1" or "u2"
 						failed = True
 
-				template_url = result[5]
-				u_channel = await match_user.create_dm()
-
 				# verify that an existing match was found
 				if not failed:
-					# check to see if a template has already been specified
-					if template_url is not None and not result[3] and not result[4]:
-						embed_title = 'Match In Progress...'
-						embed_description = 'Please wait for the other participant to finish their part of the match!'
-						embed = await generate_embed('red', embed_title, embed_description)
-						await message.channel.send(embed=embed)
-						await action_log('split match already in progress')
-						return
+					template_url = result[5]
+					u_channel = await match_user.create_dm()
+
 					if template_url is not None:
 						# update match start_time in database
 						query = f'UPDATE matches SET start_time = {str(time.time())} WHERE channel_id = {str(channel_id)} AND start_time IS NOT NULL AND template_message_id IS NULL AND split_match_template_url = \'{template_url}\''
@@ -1603,7 +1640,7 @@ async def on_message(message):
 							embed_description = 'The match participant has DMs disabled! The match could not be started.'
 							embed = await generate_embed('red', embed_title, embed_description)
 							await match_channel.send(embed=embed)
-							await action_log('the participant has DMs turned off')
+							await action_log('participant has DMs turned off')
 							return
 
 						# send template to match channel
@@ -1672,47 +1709,47 @@ async def on_message(message):
 						embed2 = await generate_embed('red', embed_title, embed_description)
 						await client.get_channel(config.SUBMISSION_CHAN_ID).send(embed=embed2)
 						return
-					else:
-						embed_title = 'Starting Match'
-						embed_description = 'Randomly selecting template...'
-						embed = await generate_embed('yellow', embed_title, embed_description)
-						await message.channel.send(embed=embed)
+					# else:
+					# 	embed_title = 'Starting Match'
+					# 	embed_description = 'Randomly selecting template...'
+					# 	embed = await generate_embed('yellow', embed_title, embed_description)
+					# 	await message.channel.send(embed=embed)
 
-						template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).history(limit=200).flatten()
-						await action_log(f'list of {str(len(template_list))} templates compiled from #templates')
-						duelmods_chan = client.get_channel(config.DUELMODS_CHAN_ID)
-						if len(template_list) >= 1:
-							template_message = random.choice(template_list)
-							if len(template_message.embeds) == 1:
-								template_url = template_message.embeds[0].image.url
-								author_string = template_message.embeds[0].description
-							else:
-								template_url = template_message.attachments[0].url
-								author_string = template_message.author.display_name
+					# 	template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).history(limit=200).flatten()
+					# 	await action_log(f'list of {str(len(template_list))} templates compiled from #templates')
+					# 	duelmods_chan = client.get_channel(config.DUELMODS_CHAN_ID)
+					# 	if len(template_list) >= 1:
+					# 		template_message = random.choice(template_list)
+					# 		if len(template_message.embeds) == 1:
+					# 			template_url = template_message.embeds[0].image.url
+					# 			author_string = template_message.embeds[0].description
+					# 		else:
+					# 			template_url = template_message.attachments[0].url
+					# 			author_string = template_message.author.display_name
 
-							# update postgresql
-							query = f'UPDATE matches SET template_message_id = {str(template_message.id)} WHERE {match_udb} = {str(match_user.id)} AND channel_id = {str(channel_id)}'
-							connect.crsr.execute(query)
-							connect.conn.commit()
-							await action_log('match updated in database')
+					# 		# update postgresql
+					# 		query = f'UPDATE matches SET template_message_id = {str(template_message.id)} WHERE {match_udb} = {str(match_user.id)} AND channel_id = {str(channel_id)}'
+					# 		connect.crsr.execute(query)
+					# 		connect.conn.commit()
+					# 		await action_log('match updated in database')
 
-							# build random template embed
-							embed_title = f'Template for #{message.channel.name}'
-							embed_description = f'Here\'s a random template! This template was submitted by {author_string}'
-							embed = await generate_embed('green', embed_title, embed_description, template_url)
-							nonce = f'sptemp{user_num}{str(channel_id)}'
-							await duelmods_chan.send(embed=embed, nonce=nonce)
-							await duelmods_chan.send(message.author.mention)
-							await action_log('template confirmation sent to duel-mods')
-							return
-						else:
-							# build startmatch error (no templates)
-							embed_title = 'Match Error'
-							embed_description = 'No templates in #templates!'
-							embed = await generate_embed('red',embed_title, embed_description)
-							await message.channel.send(embed=embed)
-							await action_log('no templates for .startsolo')
-							return
+					# 		# build random template embed
+					# 		embed_title = f'Template for #{message.channel.name}'
+					# 		embed_description = f'Here\'s a random template! This template was submitted by {author_string}'
+					# 		embed = await generate_embed('green', embed_title, embed_description, template_url)
+					# 		nonce = f'sptemp{user_num}{str(channel_id)}'
+					# 		await duelmods_chan.send(embed=embed, nonce=nonce)
+					# 		await duelmods_chan.send(message.author.mention)
+					# 		await action_log('template confirmation sent to duel-mods')
+					# 		return
+					# 	else:
+					# 		# build startmatch error (no templates)
+					# 		embed_title = 'Match Error'
+					# 		embed_description = 'No templates in #templates!'
+					# 		embed = await generate_embed('red',embed_title, embed_description)
+					# 		await message.channel.send(embed=embed)
+					# 		await action_log('no templates for .startsolo')
+					# 		return
 					return
 				else:
 					# inform the match channel that no existing match was found
@@ -2043,6 +2080,75 @@ async def on_reaction_add(reaction, user):
 
 	if message.nonce is not None:	
 		# act on template confirmations for split matches
+		if message.nonce.startswith('spltemp'):
+			if not user.bot:
+				match_channel = client.get_channel(int(message.nonce.lstrip('spltemp')))
+
+				# pull match data from database
+				query = f'SELECT template_message_id, u1_id, u2_id FROM matches WHERE start_time IS NULL AND template_message_id IS NOT NULL AND channel_id = {str(match_channel.id)}'
+				connect.crsr.execute(query)
+				result = connect.crsr.fetchone()
+				template_message_id = result[0]
+				u1 = message.guild.get_member(result[1])
+				u2 = message.guild.get_member(result[2])
+
+				# get custom emojis from discord
+				check_emoji = client.get_emoji(637394596472815636)
+				x_emoji = client.get_emoji(637394622200676396)
+				if check_emoji == None or x_emoji == None:
+					await action_log('ERROR IN TEMPLATE RANDOMIZATION -- EMOJI NOT FOUND')
+					return
+
+				# get url information from the base message
+				template_url = message.embeds[0].image.url
+				template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
+
+				#  find which reaction was added
+				if reaction.emoji == check_emoji:
+					# delete original message
+					await message.delete()
+					# build template accepted embed
+					embed_title = 'Template Accepted'
+					embed_description = 'The randomized template was accepted. It has been stored in the database.'
+					embed = await generate_embed('green', embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log('randomized template accepted')
+
+					# delete message in match channel
+					await match_channel.last_message.delete()
+					# build split match embed
+					embed_title = 'Match Split'
+					embed_description = f'The match between {u1.mention} and {u2.mention} has been split. Mods, use the `.startsolo @user` command to start each match.'
+					embed = generate_embed('green', embed_title, embed_description)
+					await match_channel.send(embed=embed)
+
+					# update match start_time and split_match_template_url in database
+					query = f'UPDATE matches SET template_message_id = NULL, split_match_template_url = \'{template_url}\' WHERE channel_id = {str(match_channel.id)} AND start_time IS NULL AND template_message_id IS NOT NULL'
+					connect.crsr.execute(query)
+					connect.conn.commit()
+					await action_log('match template updated in database')
+				elif reaction.emoji == x_emoji:
+					# delete original message
+					await message.delete()
+					# build template rejected embed
+					embed_title = 'Template Rejected'
+					embed_description = 'The randomized template was rejected. Please try `.splitmatch` again.'
+					embed = await generate_embed('red', embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log('randomized template rejected')
+
+					# delete message from match channel
+					await match_channel.last_message.delete()
+					# send embed in match channel
+					await match_channel.send(embed=embed)
+					await action_log('match channel notified')
+
+					# remove match from database
+					query = f'DELETE FROM matches WHERE channel_id = {str(match_channel.id)} AND start_time IS NULL AND template_message_id IS NOT NULL'
+					connect.crsr.execute(query)
+					connect.conn.commit()
+					await action_log('match removed from database')
+
 		if message.nonce.startswith('sptemp'):
 			# don't act on bot reactions
 			if not user.bot:
