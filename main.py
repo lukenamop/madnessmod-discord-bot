@@ -1503,38 +1503,61 @@ async def on_message(message):
 				template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).history(limit=200).flatten()
 				await action_log(f'list of {str(len(template_list))} templates compiled from #templates')
 				duelmods_chan = client.get_channel(config.DUELMODS_CHAN_ID)
-				if len(template_list) >= 1:
-					template_message = random.choice(template_list)
-					if len(template_message.embeds) == 1:
-						template_url = template_message.embeds[0].image.url
-						author_string = template_message.embeds[0].description
+
+				# loop through until a valid template is found
+				found_template = False
+				iteration = 0
+				while (not found_template) and iteration >= 0:
+					iteration = iteration + 1
+					# don't allow an infinite loop
+					if iteration >= 50:
+						embed_title = 'No Valid Template'
+						embed_description = 'Template search stopped after iterating through 50 templates. Please try again.'
+						embed = await generate_embed('red', embed_title, embed_description)
+						await message.channel.send(embed=embed)
+						await action_log('50 templates searched, no valid template found, stopping while loop')
+						return
+
+					# check to make sure there is at least one template in the list
+					if len(template_list) >= 1:
+						template_message = random.choice(template_list)
+						if len(template_message.embeds) == 1:
+							template_url = template_message.embeds[0].image.url
+							author_string = template_message.embeds[0].description
+							template_author_mention = template_message.embeds[0].description.split(' (')[0]
+						else:
+							template_url = template_message.attachments[0].url
+							author_string = template_message.author.display_name
+							template_author_mention = template_message.author.mention
+
+						# if the template author is neither of the match members, break out of the loop
+						if not (member1.mention == template_author_mention or member2.mention == template_author_mention):
+							found_template = True
+
+					# trigger this if there are no templates
 					else:
-						template_url = template_message.attachments[0].url
-						author_string = template_message.author.display_name
+						# build startmatch error (no templates)
+						embed_title = 'Match Error'
+						embed_description = 'No templates in #templates!'
+						embed = await generate_embed('red',embed_title, embed_description)
+						await message.channel.send(embed=embed)
+						await action_log('no templates for .startmatch')
+						return
 
-					# add match info to postgresql
-					query = f'INSERT INTO matches (u1_id, u2_id, channel_id, creation_time, template_message_id) VALUES ({str(member1.id)}, {str(member2.id)}, {str(channel_id)}, {str(time.time())}, {str(template_message.id)})'
-					connect.crsr.execute(query)
-					connect.conn.commit()
-					await action_log('match added to database')
+				# add match info to postgresql
+				query = f'INSERT INTO matches (u1_id, u2_id, channel_id, creation_time, template_message_id) VALUES ({str(member1.id)}, {str(member2.id)}, {str(channel_id)}, {str(time.time())}, {str(template_message.id)})'
+				connect.crsr.execute(query)
+				connect.conn.commit()
+				await action_log('match added to database')
 
-					# build random template embed
-					embed_title = f'Template for #{message.channel.name}'
-					embed_description = f'Here\'s a random template! This template was submitted by {author_string}'
-					embed = await generate_embed('green', embed_title, embed_description, template_url)
-					nonce = f'spltemp{str(channel_id)}'
-					await duelmods_chan.send(embed=embed, nonce=nonce)
-					await duelmods_chan.send(message.author.mention)
-					await action_log('template confirmation sent to duel-mods')
-					return
-				else:
-					# build startmatch error (no templates)
-					embed_title = 'Match Error'
-					embed_description = 'No templates in #templates!'
-					embed = await generate_embed('red',embed_title, embed_description)
-					await message.channel.send(embed=embed)
-					await action_log('no templates for .splitmatch')
-					return
+				# build random template embed
+				embed_title = f'Template for #{message.channel.name}'
+				embed_description = f'Here\'s a random template! This template was submitted by {author_string}'
+				embed = await generate_embed('green', embed_title, embed_description, template_url)
+				nonce = f'spltemp{str(channel_id)}'
+				await duelmods_chan.send(embed=embed, nonce=nonce)
+				await duelmods_chan.send(message.author.mention)
+				await action_log('template confirmation sent to duel-mods')
 				return
 			else:
 				embed_title = 'Participants Not Specified'
