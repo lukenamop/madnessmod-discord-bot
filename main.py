@@ -623,7 +623,7 @@ async def on_message(message):
 					if match[7] > result[7]:
 						result = match
 
-				match_db_id = result[0]
+				match_db_id = result[8]
 			elif len(results) == 1:
 				result = results[0]
 
