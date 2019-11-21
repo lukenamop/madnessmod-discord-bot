@@ -201,13 +201,14 @@ async def on_message(message):
 				await base_channel.send(embed=embed)
 				await action_log('voting results sent in match channel')
 
-				# build winning image embed for match archive
-				embed_title = winner.display_name
-				embed_description = datetime.date.today().strftime("%B %d")
-				embed_link = winning_image_url
-				embed = await generate_embed('pink', embed_title, embed_description, embed_link)
-				await client.get_channel(config.ARCHIVE_CHAN_ID).send(embed=embed)
-				await action_log('winning image sent to archive channel')
+				if not config.TESTING:
+					# build winning image embed for match archive
+					embed_title = winner.display_name
+					embed_description = datetime.date.today().strftime("%B %d")
+					embed_link = winning_image_url
+					embed = await generate_embed('pink', embed_title, embed_description, embed_link)
+					await client.get_channel(config.ARCHIVE_CHAN_ID).send(embed=embed)
+					await action_log('winning image sent to archive channel')
 
 				# check to see if challonge info is in the channel topic
 				if base_channel.topic is not None:
