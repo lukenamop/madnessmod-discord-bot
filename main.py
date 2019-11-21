@@ -610,18 +610,20 @@ async def on_message(message):
 		# '.submit' command (DM)
 		if message_content.startswith('.submit'):
 			# check for an active match including the specified user
-			query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, split_match_template_url, creation_time FROM matches WHERE (u1_id = {str(message.author.id)} OR u2_id = {str(message.author.id)}) AND start_time >= {str(time.time() - (config.MATCH_TIME + 10))}'
+			query = f'SELECT db_id, u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, split_match_template_url, creation_time FROM matches WHERE (u1_id = {str(message.author.id)} OR u2_id = {str(message.author.id)}) AND start_time >= {str(time.time() - (config.MATCH_TIME + 10))}'
 			connect.crsr.execute(query)
 			results = connect.crsr.fetchall()
 			result = None
 			failed = False
 
 			if len(results) > 1:
-				result = [None, None, None, None, None, None, None, 0]
+				result = [None, None, None, None, None, None, None, None, 0]
 				# find the most recent match by creation_time
 				for match in results:
-					if match[7] > result[7]:
+					if match[8] > result[8]:
 						result = match
+
+				match_db_id = result[0]
 			elif len(results) == 1:
 				result = results[0]
 
@@ -692,12 +694,12 @@ async def on_message(message):
 
 				# add submission info to postgresql database
 				if u_order == 1:
-					query = f'UPDATE matches SET u1_submitted = true, u1_image_url = \'{message.attachments[0].url}\' WHERE u1_id = {str(message.author.id)} AND start_time >= {str(time.time() - (config.MATCH_TIME + 10))}'
+					query = f'UPDATE matches SET u1_submitted = true, u1_image_url = \'{message.attachments[0].url}\' WHERE db_id = {match_db_id}'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('match info updated in postgresql')
 				if u_order == 2:
-					query = f'UPDATE matches SET u2_submitted = true, u2_image_url = \'{message.attachments[0].url}\' WHERE u2_id = {str(message.author.id)} AND start_time >= {str(time.time() - (config.MATCH_TIME + 10))}'
+					query = f'UPDATE matches SET u2_submitted = true, u2_image_url = \'{message.attachments[0].url}\' WHERE db_id = {match_db_id}'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('match info updated in postgresql')
@@ -719,7 +721,7 @@ async def on_message(message):
 					await action_log('participant stats updated')
 
 				# pull match info from database
-				query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, u1_image_url, u2_image_url, channel_id FROM matches WHERE (u1_id = {str(message.author.id)} OR u2_id = {str(message.author.id)}) AND start_time >= {str(time.time() - (config.MATCH_TIME + 10))}'
+				query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, u1_image_url, u2_image_url, channel_id FROM matches WHERE db_id = {match_db_id}'
 				connect.crsr.execute(query)
 				result = connect.crsr.fetchone()
 				# find match_channel and submissions_channel from discord
@@ -750,7 +752,7 @@ async def on_message(message):
 							await action_log('final meme submission stopped due to an AttributeError')
 							return
 						# update match info in database
-						query = f'UPDATE matches SET a_meme = 1 WHERE (u1_id = {str(message.author.id)} OR u2_id = {str(message.author.id)}) AND start_time >= {str(time.time() - (config.MATCH_TIME + 10))}'
+						query = f'UPDATE matches SET a_meme = 1 WHERE db_id = {match_db_id}'
 						connect.crsr.execute(query)
 						connect.conn.commit()
 					if u_order == 2:
@@ -766,7 +768,7 @@ async def on_message(message):
 							await action_log('final meme submission stopped due to an AttributeError')
 							return
 						# update match info in database
-						query = f'UPDATE matches SET a_meme = 2 WHERE (u1_id = {str(message.author.id)} OR u2_id = {str(message.author.id)}) AND start_time >= {str(time.time() - (config.MATCH_TIME + 10))}'
+						query = f'UPDATE matches SET a_meme = 2 WHERE db_id = {match_db_id}'
 						connect.crsr.execute(query)
 						connect.conn.commit()
 
