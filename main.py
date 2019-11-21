@@ -626,6 +626,7 @@ async def on_message(message):
 				match_db_id = result[8]
 			elif len(results) == 1:
 				result = results[0]
+				match_db_id = result[8]
 
 			# build duplicate submission embed
 			embed_title = 'Error: Already Submitted'
