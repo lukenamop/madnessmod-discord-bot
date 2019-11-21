@@ -262,6 +262,12 @@ async def on_message(message):
 					await message.add_reaction('<:check_mark:637394596472815636>')
 					await message.add_reaction('<:x_mark:637394622200676396>')
 					return
+			if message.channel.id == config.DUELMODS_CHAN_ID and message.nonce is not None:
+				if message.nonce.startswith('spltemp'):
+					# add reactions to split template confirmations in #duel-mods
+					await message.add_reaction('<:check_mark:637394596472815636>')
+					await message.add_reaction('<:x_mark:637394622200676396>')
+					return
 			return
 		return
 
