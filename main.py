@@ -1557,7 +1557,7 @@ async def on_message(message):
 				nonce = f'spltemp{str(channel_id)}'
 				await duelmods_chan.send(embed=embed, nonce=nonce)
 				await duelmods_chan.send(message.author.mention)
-				await action_log('template confirmation sent to duel-mods')
+				await action_log(f'template confirmation sent to duel-mods (took {iteration} iterations)')
 				return
 			else:
 				embed_title = 'Participants Not Specified'
