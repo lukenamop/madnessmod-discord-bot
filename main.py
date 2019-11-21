@@ -2148,7 +2148,7 @@ async def on_reaction_add(reaction, user):
 					# build split match embed
 					embed_title = 'Match Split'
 					embed_description = f'The match between {u1.mention} and {u2.mention} has been split. Mods, use the `.startsolo @user` command to start each match.'
-					embed = generate_embed('green', embed_title, embed_description)
+					embed = await generate_embed('green', embed_title, embed_description)
 					await match_channel.send(embed=embed)
 
 					# update match start_time and split_match_template_url in database
