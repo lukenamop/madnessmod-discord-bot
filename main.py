@@ -350,6 +350,15 @@ async def on_message(message):
 							elif lb_rank >= 10 and lb_rank < 100:
 								embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
 						iteration += 1
+				query = f'SELECT lb_points, RANK () OVER (ORDER BY lb_points DESC) lb_rank FROM participants WHERE user_id = {message.author.id}'
+				connect.crsr.execute(query)
+				result = connect.crsr.fetchone()
+				u_lb_points = result[0]
+				u_lb_rank = result[1]
+				if u_lb_rank < 10:
+					embed_description += f'\nYour rank:\n**` {u_lb_rank}:` {functions.escape_underscores(message.author.display_name)}** - {u_lb_points} points'
+				elif u_lb_rank >= 10 and u_lb_rank < 100:
+					embed_description += f'\nYour rank:\n**`{u_lb_rank}:` {functions.escape_underscores(message.author.display_name)}** - {u_lb_points} points'
 				embed_description = embed_description.rstrip('\n')
 			else:
 				embed_description = 'The leaderboard seems to be empty in the database.'
