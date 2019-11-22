@@ -1470,11 +1470,13 @@ async def on_message(message):
 		if message_content == '.removeinvalidparticipants':
 			# check to be sure only admin user uses command
 			if message.author.id in config.ADMIN_IDS:
-				query = 'SELECT * FROM participants'
+				query = 'SELECT user_id FROM participants'
 				connect.crsr.execute(query)
 				results = connect.crsr.fetchall()
 				for result in results:
-					await action_log(result['user_id'])
+					user = message.guild.get_member(result[0])
+					if user is None:
+						await message.channel.send(result[0])
 				return
 			return
 
