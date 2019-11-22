@@ -340,7 +340,11 @@ async def on_message(message):
 					member = message.guild.get_member(entry[0])
 					if member is not None:
 						points = entry[1]
-						embed_description += f'`{place}:` {functions.escape_underscores(member.display_name)} - {points} points\n'
+						if place < 10:
+							place_str = f'{place} '
+						else:
+							place_str = place
+						embed_description += f'`{place_str}:` {functions.escape_underscores(member.display_name)} - {points} points\n'
 						place += 1
 				embed_description = embed_description.rstrip('\n')
 			else:
