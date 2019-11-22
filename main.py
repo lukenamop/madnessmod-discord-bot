@@ -1482,7 +1482,7 @@ async def on_message(message):
 						connect.conn.commit()
 						total += 1
 				await message.channel.send(f'{total} users in the database are no longer in this server. They have been removed from the database.')
-				await action_log('invalid participants removed from the participants table')
+				await action_log(f'{total} invalid participants removed from the participants table')
 				return
 			return
 
