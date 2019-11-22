@@ -325,7 +325,7 @@ async def on_message(message):
 	# leaderboard commands (stats-flex channel only)
 	if message.channel.id == 631239602736201728 or message.channel.id == 647495194018709534:
 		# '.top10' command (stats-flex)
-		if message_content.startswith('.top10') or message_content.startswith('.lb') or message_content.startswith('.leaderboard'):
+		if message_content == '.top10' or message_content == '.lb' or message_content == '.leaderboard':
 			# pull top 10 participants from database
 			query = 'SELECT user_id, lb_points FROM participants ORDER BY lb_points DESC LIMIT 10'
 			connect.crsr.execute(query)
@@ -926,7 +926,7 @@ async def on_message(message):
 			return
 
 		# '.help' command (DM)
-		if message_content.startswith('.help'):
+		if message_content == '.help':
 			# build help embed
 			embed_title = 'Commands'
 			embed_description = help_cmd.dm_help
@@ -939,7 +939,7 @@ async def on_message(message):
 	# stats-flex specific commands
 	if message.channel.id == 631239602736201728:
 		# '.help' command (stats-flex)
-		if message_content.startswith('.help'):
+		if message_content == '.help':
 			# build help embed
 			embed_title = 'Commands'
 			embed_description = help_cmd.stats_help
@@ -1069,7 +1069,7 @@ async def on_message(message):
 				return
 
 		# '.signuplist' command (duel-mods)
-		if message_content.startswith('.signuplist') or message_content.startswith('.signups'):
+		if message_content == '.signuplist' or message_content == '.signups':
 			# pull all signups from database
 			query = f'SELECT user_id FROM signups WHERE submission_time >= {str(time.time() - config.CYCLE)}'
 			connect.crsr.execute(query)
@@ -1461,7 +1461,7 @@ async def on_message(message):
 			return
 
 		# '.help' command (duel-mods)
-		if message_content.startswith('.help'):
+		if message_content == '.help':
 			# check to see who is asking for help
 			if message.author.id in config.ADMIN_IDS:
 				# build admin help embed
@@ -1958,7 +1958,7 @@ async def on_message(message):
 		# 	return
 
 		# '.showresults' command (contest category)
-		if message_content.startswith('.showresults'):
+		if message_content == '.showresults':
 			await action_log('showresults command in match channel')
 			# check to see who submitted each meme
 			query = f'SELECT db_id, u1_id, u2_id, a_meme, start_time FROM matches WHERE channel_id = {str(message.channel.id)}'
