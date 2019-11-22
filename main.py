@@ -309,7 +309,7 @@ async def on_message(message):
 				embed_description = f'**Total matches:** `{str(results[0])}`\n**Match wins/losses:** `{str(results[1])}/{str(results[2])}`\n**Win percentage:** `{str(round((float(results[1]) / float(results[0])) * 100))}%`\n**Total votes for your memes:** `{str(results[3])}`\n**Avg. time per meme:** `{avg_time}`\n**Templates submitted:** `{str(results[5])}`\n**Matches voted in:** `{str(results[6])}`'
 			except ZeroDivisionError:
 				embed_description = f'**Total matches:** `{str(results[0])}`\n**Match wins/losses:** `{str(results[1])}/{str(results[2])}`\n**Win percentage:** `N/A`\n**Total votes for your memes:** `{str(results[3])}`\n**Avg. time per meme:** `{avg_time}`\n**Templates submitted:** `{str(results[5])}`\n**Matches voted in:** `{str(results[6])}`'
-			embed = await generate_embed('pink', embed_title, embed_description)
+			embed = await generate_embed('blue', embed_title, embed_description)
 			nonce = f'stats{message.author.id}'
 			await message.channel.send(embed=embed, nonce=nonce)
 			await action_log(f'stats shared to {message.author.name}#{message.author.discriminator}')
