@@ -326,7 +326,7 @@ async def on_message(message):
 	if message.channel.id == 631239602736201728 or message.channel.id == 647495194018709534:
 		# '.top10' command (stats-flex)
 		if message_content == '.top10' or message_content == '.lb' or message_content == '.leaderboard':
-			# pull top 10 participants from database
+			# pull top 15 participants from database (extras in case some of the top 10 have left the server)
 			query = 'SELECT user_id, lb_points FROM participants ORDER BY lb_points DESC LIMIT 15'
 			connect.crsr.execute(query)
 			results = connect.crsr.fetchall()
@@ -342,9 +342,9 @@ async def on_message(message):
 						points = entry[1]
 						if place < 10:
 							# add an extra space to align all the messages
-							embed_description += f'` {place}:` {functions.escape_underscores(member.display_name)} - {points} points\n'
+							embed_description += f'` {place}:` {functions.escape_underscores(member.display_name)}\n\t\t{points} points\n'
 						elif place == 10:
-							embed_description += f'`{place}:` {functions.escape_underscores(member.display_name)} - {points} points\n'
+							embed_description += f'`{place}:` {functions.escape_underscores(member.display_name)}\n\t\t{points} points\n'
 						place += 1
 				embed_description = embed_description.rstrip('\n')
 			else:
