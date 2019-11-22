@@ -341,9 +341,9 @@ async def on_message(message):
 					if member is not None:
 						points = entry[1]
 						if place < 10:
-							place_str = f'{place} '
+							place_str = f' {place}'
 						else:
-							place_str = place
+							place_str = f'{place}'
 						embed_description += f'`{place_str}:` {functions.escape_underscores(member.display_name)} - {points} points\n'
 						place += 1
 				embed_description = embed_description.rstrip('\n')
