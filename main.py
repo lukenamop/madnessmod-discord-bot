@@ -1477,9 +1477,12 @@ async def on_message(message):
 				for result in results:
 					user = message.guild.get_member(result[0])
 					if user is None:
+						query = f'DELETE FROM participants WHERE user_id = {result[0]}'
+						connect.crsr.execute(query)
+						connect.conn.commit()
 						total += 1
-						await message.channel.send(result[0])
-				await message.channel.send(total)
+				await message.channel.send(f'{total} users in the database are no longer in this server. They have been removed from the database.')
+				await action_log('invalid participants removed from the participants table')
 				return
 			return
 
