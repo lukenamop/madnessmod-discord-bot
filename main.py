@@ -1473,10 +1473,13 @@ async def on_message(message):
 				query = 'SELECT user_id FROM participants'
 				connect.crsr.execute(query)
 				results = connect.crsr.fetchall()
+				total = 0
 				for result in results:
 					user = message.guild.get_member(result[0])
 					if user is None:
+						total += 1
 						await message.channel.send(result[0])
+				await message.channel.send(total)
 				return
 			return
 
