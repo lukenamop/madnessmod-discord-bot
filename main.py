@@ -323,7 +323,7 @@ async def on_message(message):
 		return
 
 	# leaderboard commands (stats-flex channel only)
-	if message.channel.id == 631239602736201728:
+	if message.channel.id == 631239602736201728 or message.channel.id == 647495194018709534:
 		# '.top10' command (stats-flex)
 		if message_content.startswith('.top10'):
 			# pull top 10 participants from database
