@@ -342,9 +342,9 @@ async def on_message(message):
 						points = entry[1]
 						if place < 10:
 							# add an extra space to align all the messages
-							embed_description += f'` {place}:` {functions.escape_underscores(member.display_name)}\n\t\t{points} points\n'
+							embed_description += f'` {place}:` {functions.escape_underscores(member.display_name)} - {points} points\n'
 						elif place == 10:
-							embed_description += f'`{place}:` {functions.escape_underscores(member.display_name)}\n\t\t{points} points\n'
+							embed_description += f'`{place}:` {functions.escape_underscores(member.display_name)} - {points} points\n'
 						place += 1
 				embed_description = embed_description.rstrip('\n')
 			else:
