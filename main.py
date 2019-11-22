@@ -331,7 +331,7 @@ async def on_message(message):
 			query = 'SELECT user_id, lb_points FROM participants ORDER BY lb_points DESC LIMIT 15'
 			connect.crsr.execute(query)
 			results = connect.crsr.fetchall()
-			embed_title = 'Points Leaderboard - Top 10'
+			embed_title = 'Points Leaderboard (1 to 10)'
 			# check to make sure there are signups
 			if results is not None:
 				# build signuplist embed
@@ -352,7 +352,8 @@ async def on_message(message):
 				embed_description = 'The leaderboard seems to be empty in the database.'
 			embed = await generate_embed('blue', embed_title, embed_description)
 			# send signuplist embed
-			await message.channel.send(embed=embed)
+			lb_message = await message.channel.send(embed=embed)
+			# lb_message.add_reaction('➡️')
 			await action_log('leaderboard sent to stats-flex')
 			return
 
@@ -2418,6 +2419,9 @@ async def on_reaction_add(reaction, user):
 		# 	return
 		return
 	return
+
+left_emoji = '⬅️'
+right_emoji = '➡️'
 
 # client event triggers when discord bot client is fully loaded and ready
 @client.event
