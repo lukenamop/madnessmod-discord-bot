@@ -1755,47 +1755,6 @@ async def on_message(message):
 						embed2 = await generate_embed('red', embed_title, embed_description)
 						await client.get_channel(config.SUBMISSION_CHAN_ID).send(embed=embed2)
 						return
-					# else:
-					# 	embed_title = 'Starting Match'
-					# 	embed_description = 'Randomly selecting template...'
-					# 	embed = await generate_embed('yellow', embed_title, embed_description)
-					# 	await message.channel.send(embed=embed)
-
-					# 	template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).history(limit=200).flatten()
-					# 	await action_log(f'list of {str(len(template_list))} templates compiled from #templates')
-					# 	duelmods_chan = client.get_channel(config.DUELMODS_CHAN_ID)
-					# 	if len(template_list) >= 1:
-					# 		template_message = random.choice(template_list)
-					# 		if len(template_message.embeds) == 1:
-					# 			template_url = template_message.embeds[0].image.url
-					# 			author_string = template_message.embeds[0].description
-					# 		else:
-					# 			template_url = template_message.attachments[0].url
-					# 			author_string = template_message.author.display_name
-
-					# 		# update postgresql
-					# 		query = f'UPDATE matches SET template_message_id = {str(template_message.id)} WHERE {match_udb} = {str(match_user.id)} AND channel_id = {str(channel_id)}'
-					# 		connect.crsr.execute(query)
-					# 		connect.conn.commit()
-					# 		await action_log('match updated in database')
-
-					# 		# build random template embed
-					# 		embed_title = f'Template for #{message.channel.name}'
-					# 		embed_description = f'Here\'s a random template! This template was submitted by {author_string}'
-					# 		embed = await generate_embed('green', embed_title, embed_description, template_url)
-					# 		nonce = f'sptemp{user_num}{str(channel_id)}'
-					# 		await duelmods_chan.send(embed=embed, nonce=nonce)
-					# 		await duelmods_chan.send(message.author.mention)
-					# 		await action_log('template confirmation sent to duel-mods')
-					# 		return
-					# 	else:
-					# 		# build startmatch error (no templates)
-					# 		embed_title = 'Match Error'
-					# 		embed_description = 'No templates in #templates!'
-					# 		embed = await generate_embed('red',embed_title, embed_description)
-					# 		await message.channel.send(embed=embed)
-					# 		await action_log('no templates for .startsolo')
-					# 		return
 					return
 				else:
 					# inform the match channel that no existing match was found
