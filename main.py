@@ -328,6 +328,7 @@ async def on_message(message):
 		# '.top10' command (stats-flex)
 		if message_content == '.top10' or message_content == '.lb' or message_content == '.leaderboard':
 			# pull top 15 participants from database (extras in case some of the top 10 have left the server)
+			# query = 'SELECT c, RANK () OVER (ORDER BY c) rank_number FROM participants ORDER BY lb_points DESC LIMIT 15'
 			query = 'SELECT user_id, lb_points FROM participants ORDER BY lb_points DESC LIMIT 15'
 			connect.crsr.execute(query)
 			results = connect.crsr.fetchall()
@@ -1462,6 +1463,18 @@ async def on_message(message):
 				embed = await generate_embed('green', embed_title, embed_description)
 				await message.channel.send(embed=embed)
 				await action_log('matches and votes cleared by duel-mods')
+				return
+			return
+
+		# '.removeinvalidparticipants' command (duel-mods)
+		if message_content == '.removeinvalidparticipants':
+			# check to be sure only admin user uses command
+			if message.author.id in config.ADMIN_IDS:
+				query = 'SELECT * FROM participants'
+				connect.crsr.execute(query)
+				results = connect.crsr.fetchall()
+				for result in results:
+					await action_log(result['user_id'])
 				return
 			return
 
