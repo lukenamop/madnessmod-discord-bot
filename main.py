@@ -263,12 +263,12 @@ async def on_message(message):
 					await message.add_reaction('<:check_mark:637394596472815636>')
 					await message.add_reaction('<:x_mark:637394622200676396>')
 					return
-			if message.nonce is not None:
-				if message.nonce.startswith('stats'):
-					# add reactions to dynamic stats menu
-					await message.add_reaction('1️⃣')
-					await message.add_reaction('2️⃣')
-					return
+			# if message.nonce is not None:
+			# 	if message.nonce.startswith('stats'):
+			# 		# add reactions to dynamic stats menu
+			# 		await message.add_reaction('1️⃣')
+			# 		await message.add_reaction('2️⃣')
+			# 		return
 			return
 		return
 
@@ -2404,18 +2404,18 @@ async def on_reaction_add(reaction, user):
 			return
 
 		# act on dynamic stats menus
-		if message.nonce.startswith('stats'):
-			if not user.bot:
+		# if message.nonce.startswith('stats'):
+		# 	if not user.bot:
 
-				await reaction.remove(user)
+		# 		await reaction.remove(user)
 
-				user_id = int(message.nonce.lstrip('stats'))
-				if user.id == user_id:
-					if reaction.emoji == '1️⃣':
-						return
-					if reaction.emoji == '2️⃣':
-						return
-			return
+		# 		user_id = int(message.nonce.lstrip('stats'))
+		# 		if user.id == user_id:
+		# 			if reaction.emoji == '1️⃣':
+		# 				return
+		# 			if reaction.emoji == '2️⃣':
+		# 				return
+		# 	return
 		return
 	return
 
