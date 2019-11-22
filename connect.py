@@ -23,10 +23,6 @@ def db_connect():
 	for row in crsr.fetchall():
 		print('settings: ' + str(row))
 
-	query = """ALTER TABLE participants ADD lb_points NUMERIC(10) DEFAULT 0"""
-	crsr.execute(query)
-	conn.commit()
-
 	crsr.execute("""SELECT COUNT(*) FROM participants""")
 	result = crsr.fetchone()
 	print('participants: ' + str(result[0]))
