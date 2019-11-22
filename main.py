@@ -327,7 +327,7 @@ async def on_message(message):
 		# '.top10' command (stats-flex)
 		if message_content == '.top10' or message_content == '.lb' or message_content == '.leaderboard':
 			# pull top 10 participants from database
-			query = 'SELECT user_id, lb_points FROM participants ORDER BY lb_points DESC LIMIT 10'
+			query = 'SELECT user_id, lb_points FROM participants ORDER BY lb_points DESC LIMIT 15'
 			connect.crsr.execute(query)
 			results = connect.crsr.fetchall()
 			embed_title = 'Points Leaderboard - Top 10'
@@ -341,10 +341,10 @@ async def on_message(message):
 					if member is not None:
 						points = entry[1]
 						if place < 10:
-							place_str = f' {place}'
-						else:
-							place_str = f'{place}'
-						embed_description += f'`{place_str}:` {functions.escape_underscores(member.display_name)} - {points} points\n'
+							# add an extra space to align all the messages
+							embed_description += f'` {place}:` {functions.escape_underscores(member.display_name)} - {points} points\n'
+						elif place == 10:
+							embed_description += f'`{place}:` {functions.escape_underscores(member.display_name)} - {points} points\n'
 						place += 1
 				embed_description = embed_description.rstrip('\n')
 			else:
@@ -539,7 +539,7 @@ async def on_message(message):
 				return
 
 			# check tournament settings via database (template requirement)
-			query = f'SELECT template_required FROM settings WHERE guild_id = {str(config.MM_GUILD_ID)}'
+			query = f'SELECT template_required FROM settings WHERE guild_id = {config.MM_GUILD_ID}'
 			connect.crsr.execute(query)
 			results = connect.crsr.fetchone()
 			template_required = results[0]
@@ -576,7 +576,7 @@ async def on_message(message):
 					await action_log(f'signup attachment received from {message.author.name}#{message.author.discriminator}')
 
 					# check to see if user has signed up in the last 7 days (config.CYCLE seconds)
-					query = f'SELECT * FROM signups WHERE user_id = {str(message.author.id)} AND submission_time >= {str(time.time() - config.CYCLE)}'
+					query = f'SELECT * FROM signups WHERE user_id = {message.author.id} AND submission_time >= {time.time() - config.CYCLE}'
 					connect.crsr.execute(query)
 					result = connect.crsr.fetchone()
 					# don't create a new signup for previously signed up users
@@ -589,7 +589,7 @@ async def on_message(message):
 
 						# send template to #templates
 						embed_title = 'Template Submission'
-						embed_description = f'{member.mention} ({functions.escape_underscores(member.display_name)}, {str(member.id)})'
+						embed_description = f'{member.mention} ({functions.escape_underscores(member.display_name)}, {member.id})'
 						embed_link = message.attachments[0].url
 						embed = await generate_embed('green', embed_title, embed_description, embed_link)
 						template_chan = client.get_channel(config.TEMPLATE_CHAN_ID)
@@ -597,7 +597,7 @@ async def on_message(message):
 						await action_log(f'signup attachment sent to #templates by {message.author.name}#{message.author.discriminator}')
 
 						# add signup info to postgresql
-						query = f'INSERT INTO signups (user_id, message_id, submission_time) VALUES ({str(message.author.id)}, 0, {str(time.time())})'
+						query = f'INSERT INTO signups (user_id, message_id, submission_time) VALUES ({message.author.id}, 0, {time.time()})'
 						connect.crsr.execute(query)
 						connect.conn.commit()
 						await action_log('signup info added to postgresql')
@@ -612,7 +612,7 @@ async def on_message(message):
 			else:
 				# signup process when no template is required
 				# check to see if user has signed up in the last 7 days (config.CYCLE seconds)
-				query = f'SELECT * FROM signups WHERE user_id = {str(message.author.id)} AND submission_time >= {str(time.time() - config.CYCLE)}'
+				query = f'SELECT * FROM signups WHERE user_id = {message.author.id} AND submission_time >= {time.time() - config.CYCLE}'
 				connect.crsr.execute(query)
 				result = connect.crsr.fetchone()
 				# don't create a new signup for previously signed up users
@@ -624,7 +624,7 @@ async def on_message(message):
 
 					# send signup to #templates
 					embed_title = 'Signup Confirmed'
-					embed_description = f'{member.mention} ({functions.escape_underscores(member.display_name)}, {str(member.id)})'
+					embed_description = f'{member.mention} ({functions.escape_underscores(member.display_name)}, {member.id})'
 					embed = await generate_embed('green', embed_title, embed_description)
 					template_chan = client.get_channel(config.SIGNUP_CHAN_ID)
 					template_message = await template_chan.send(embed=embed)
