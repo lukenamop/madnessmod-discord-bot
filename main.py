@@ -328,7 +328,7 @@ async def on_message(message):
 		# '.top10' command (stats-flex)
 		if message_content == '.top10' or message_content == '.lb' or message_content == '.leaderboard':
 			# pull top 15 participants from database (extras in case some of the top 10 have left the server)
-			query = 'SELECT user_id, lb_points, RANK () OVER (ORDER BY lb_points) lb_rank FROM participants ORDER BY lb_points DESC LIMIT 12'
+			query = 'SELECT user_id, lb_points, RANK () OVER (ORDER BY lb_points DESC) lb_rank FROM participants ORDER BY lb_points DESC LIMIT 12'
 			# query = 'SELECT user_id, lb_points FROM participants ORDER BY lb_points DESC LIMIT 15'
 			connect.crsr.execute(query)
 			results = connect.crsr.fetchall()
