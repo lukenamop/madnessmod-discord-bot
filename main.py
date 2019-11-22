@@ -622,11 +622,8 @@ async def on_message(message):
 				for match in results:
 					if match[7] > result[7]:
 						result = match
-
-				match_db_id = result[8]
 			elif len(results) == 1:
 				result = results[0]
-				match_db_id = result[8]
 
 			# build duplicate submission embed
 			embed_title = 'Error: Already Submitted'
@@ -635,17 +632,22 @@ async def on_message(message):
 
 			# check for duplicate submissions
 			if result is not None:
+				u1_id = result[0]
+				u2_id = result[1]
+				u1_submitted = result[2]
+				u2_submitted = result[3]
+				match_channel = client.get_channel(result[4])
 				start_time = result[5]
 				split_match_template_url = result[6]
-				match_channel = client.get_channel(result[4])
-				if message.author.id == result[0]:
-					if result[2]:
+				match_db_id = result[8]
+				if message.author.id == u1_id:
+					if u1_submitted:
 						await message.channel.send(embed=embed)
 						await action_log(f'duplicate submission by {message.author.name}#{message.author.discriminator}')
 						return
 					u_order = 1
-				elif message.author.id == result[1]:
-					if result[3]:
+				elif message.author.id == u2_id:
+					if u2_submitted:
 						await message.channel.send(embed=embed)
 						await action_log(f'duplicate submission by {message.author.name}#{message.author.discriminator}')
 						return
