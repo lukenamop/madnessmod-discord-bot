@@ -325,7 +325,7 @@ async def on_message(message):
 	# leaderboard commands (stats-flex channel only)
 	if message.channel.id == 631239602736201728 or message.channel.id == 647495194018709534:
 		# '.top10' command (stats-flex)
-		if message_content.startswith('.top10'):
+		if message_content.startswith('.top10') or message_content.startswith('.lb') or message_content.startswith('.leaderboard'):
 			# pull top 10 participants from database
 			query = 'SELECT user_id, lb_points FROM participants ORDER BY lb_points DESC LIMIT 10'
 			connect.crsr.execute(query)
@@ -349,6 +349,21 @@ async def on_message(message):
 			# send signuplist embed
 			await message.channel.send(embed=embed)
 			await action_log('leaderboard sent to stats-flex')
+			return
+
+		# '.lbsimulation' command (stats-flex)
+		if message_content == '.lbsim':
+			if message.author.id in config.ADMIN_IDS:
+				query = 'UPDATE participants SET lb_points = 50 WHERE user_id = 324273473360887808'
+				connect.crsr.execute(query)
+				query = 'UPDATE participants SET lb_points = 40 WHERE user_id = 539322059537383434'
+				connect.crsr.execute(query)
+				query = 'UPDATE participants SET lb_points = 100 WHERE user_id = 200621124768235521'
+				connect.crsr.execute(query)
+				connect.conn.commit()
+
+				await message.channel.send('done')
+				return
 			return
 
 	# verification specific commands
@@ -1384,6 +1399,24 @@ async def on_message(message):
 				embed = await generate_embed('green', embed_title, embed_description)
 				await message.channel.send(embed=embed)
 				await action_log('participant stats cleared by duel-mods')
+				return
+			return
+
+		# '.clearlbpoints' command (duel-mods)
+		if message_content == '.clearlbpoints':
+			# check to be sure only admin user uses command
+			if message.author.id in config.ADMIN_IDS:
+				# reset participant lb_points to default in database
+				query = 'UPDATE participants SET lb_points = DEFAULT'
+				connect.crsr.execute(query)
+				connect.conn.commit()
+
+				# build clearlbpoints confirmation embed
+				embed_title = 'Leaderboard Points Reset'
+				embed_description = 'All participants\' leaderboard points were cleared from the database.'
+				embed = await generate_embed('green', embed_title, embed_description)
+				await message.channel.send(embed=embed)
+				await action_log('leaderboard points cleared by duel-mods')
 				return
 			return
 
