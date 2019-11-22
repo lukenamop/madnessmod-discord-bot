@@ -28,7 +28,7 @@ client = discord.Client()
 
 # log actions to the command line
 async def action_log(reason):
-	print(f'{str(datetime.datetime.utcnow())} - {reason}')
+	print(f'{datetime.datetime.utcnow()} - {reason}')
 
 # generate a discord embed with an optional attached image
 async def generate_embed(color, title, description, attachment=None):
@@ -42,7 +42,7 @@ async def generate_embed(color, title, description, attachment=None):
 	elif color == 'pink':
 		color = 0xcc0099
 	elif color == 'blue':
-		color = 0x3399ff
+		color = 0x3498db
 	elif color == 'orange':
 		color = 0xff9900
 
@@ -349,7 +349,7 @@ async def on_message(message):
 				embed_description = embed_description.rstrip('\n')
 			else:
 				embed_description = 'The leaderboard seems to be empty in the database.'
-			embed = await generate_embed('pink', embed_title, embed_description)
+			embed = await generate_embed('blue', embed_title, embed_description)
 			# send signuplist embed
 			await message.channel.send(embed=embed)
 			await action_log('leaderboard sent to stats-flex')
