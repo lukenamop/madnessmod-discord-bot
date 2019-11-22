@@ -42,7 +42,7 @@ async def generate_embed(color, title, description, attachment=None):
 	elif color == 'pink':
 		color = 0xcc0099
 	elif color == 'blue':
-		color = 0x3498db
+		color = 0x2691d9
 	elif color == 'orange':
 		color = 0xff9900
 
