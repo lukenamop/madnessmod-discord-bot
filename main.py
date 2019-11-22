@@ -328,26 +328,28 @@ async def on_message(message):
 		# '.top10' command (stats-flex)
 		if message_content == '.top10' or message_content == '.lb' or message_content == '.leaderboard':
 			# pull top 15 participants from database (extras in case some of the top 10 have left the server)
-			# query = 'SELECT c, RANK () OVER (ORDER BY c) rank_number FROM participants ORDER BY lb_points DESC LIMIT 15'
-			query = 'SELECT user_id, lb_points FROM participants ORDER BY lb_points DESC LIMIT 15'
+			query = 'SELECT user_id, lb_points, RANK () OVER (ORDER BY lb_points) lb_rank FROM participants ORDER BY lb_points DESC LIMIT 12'
+			# query = 'SELECT user_id, lb_points FROM participants ORDER BY lb_points DESC LIMIT 15'
 			connect.crsr.execute(query)
 			results = connect.crsr.fetchall()
-			embed_title = 'Points Leaderboard (1 to 10)'
+			embed_title = 'Points Leaderboard - Top 10'
 			# check to make sure there are signups
 			if results is not None:
 				# build signuplist embed
 				embed_description = ''
-				place = 1
+				iteration = 1
 				for entry in results:
 					member = message.guild.get_member(entry[0])
+					lb_points = entry[1]
+					lb_rank = entry[2]
 					if member is not None:
-						points = entry[1]
-						if place < 10:
-							# add an extra space to align all the messages
-							embed_description += f'**` {place}:` {functions.escape_underscores(member.display_name)}** - {points} points\n'
-						elif place == 10:
-							embed_description += f'**`{place}:` {functions.escape_underscores(member.display_name)}** - {points} points\n'
-						place += 1
+						if iteration <= 10:
+							if lb_rank < 10:
+								# add an extra space to align all the messages
+								embed_description += f'**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
+							elif lb_rank >= 10 and lb_rank < 100:
+								embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
+						iteration += 1
 				embed_description = embed_description.rstrip('\n')
 			else:
 				embed_description = 'The leaderboard seems to be empty in the database.'
