@@ -203,7 +203,7 @@ async def on_message(message):
 
 				if not config.TESTING:
 					# build winning image embed for match archive
-					embed_title = winner.display_name
+					embed_title = functions.escape_underscores(winner.display_name)
 					embed_description = datetime.date.today().strftime("%B %d")
 					embed_link = winning_image_url
 					embed = await generate_embed('pink', embed_title, embed_description, embed_link)
@@ -304,7 +304,7 @@ async def on_message(message):
 				avg_time = 'N/A'
 
 			# build stats embed
-			embed_title = f'Stats for {user.display_name}'
+			embed_title = f'Stats for {functions.escape_underscores(user.display_name)}'
 			try:
 				embed_description = f'**Total matches:** `{str(results[0])}`\n**Match wins/losses:** `{str(results[1])}/{str(results[2])}`\n**Win percentage:** `{str(round((float(results[1]) / float(results[0])) * 100))}%`\n**Total votes for your memes:** `{str(results[3])}`\n**Avg. time per meme:** `{avg_time}`\n**Templates submitted:** `{str(results[5])}`\n**Matches voted in:** `{str(results[6])}`'
 			except ZeroDivisionError:
@@ -316,11 +316,40 @@ async def on_message(message):
 
 		# if no record of specified user, build no-stats embed
 		embed_title = 'No Stats Available'
-		embed_description = f'{user.display_name} needs to sign up for a tournament to start recording stats.'
+		embed_description = f'{functions.escape_underscores(user.display_name)} needs to sign up for a tournament to start recording stats.'
 		embed = await generate_embed('red', embed_title, embed_description)
 		await message.channel.send(embed=embed)
 		await action_log('stats not able to be shared')
 		return
+
+	# leaderboard commands (stats-flex channel only)
+	if message.channel.id == 631239602736201728:
+		# '.top10' command (stats-flex)
+		if message_content.startswith('.top10'):
+			# pull top 10 participants from database
+			query = 'SELECT user_id, lb_points FROM participants ORDER BY lb_points DESC LIMIT 10'
+			connect.crsr.execute(query)
+			results = connect.crsr.fetchall()
+			embed_title = 'Points Leaderboard - Top 10'
+			# check to make sure there are signups
+			if results is not None:
+				# build signuplist embed
+				embed_description = ''
+				place = 1
+				for entry in results:
+					member = message.guild.get_member(entry[0])
+					if member is not None:
+						points = entry[1]
+						embed_description += f'`{place}:` {functions.escape_underscores(member.display_name)} - {points} points\n'
+						place += 1
+				embed_description = embed_description.rstrip('\n')
+			else:
+				embed_description = 'The leaderboard seems to be empty in the database.'
+			embed = await generate_embed('pink', embed_title, embed_description)
+			# send signuplist embed
+			await message.channel.send(embed=embed)
+			await action_log('leaderboard sent to stats-flex')
+			return
 
 	# verification specific commands
 	if message.channel.id == 581705191703838720 or message.channel.id == 607344923481473054:
@@ -420,7 +449,7 @@ async def on_message(message):
 						await user_channel.send(embed=embed)
 
 						# send a message to the #general channel welcoming the new user
-						embed_title = 'New User Has Joined: ' + base_member.display_name
+						embed_title = 'New User Has Joined: ' + functions.escape_underscores(base_member.display_name)
 
 						# check which server is hosting the verification
 						if base_message.guild.id == 607342998497525808:
@@ -778,12 +807,12 @@ async def on_message(message):
 					# send final memes to #submissions channel
 					# submission embed for user 1
 					embed_title = 'Final Meme Submission'
-					embed_description = f'{u1_mention} ({u1.display_name}, {str(result[0])})'
+					embed_description = f'{u1_mention} ({functions.escape_underscores(u1.display_name)}, {str(result[0])})'
 					embed_link = u1_link
 					embed = await generate_embed('green', embed_title, embed_description, embed_link)
 					await submissions_channel.send(embed=embed)
 					# submission embed for user 2
-					embed_description = f'{u2_mention} ({u2.display_name}, {str(result[1])})'
+					embed_description = f'{u2_mention} ({functions.escape_underscores(u2.display_name)}, {str(result[1])})'
 					embed_link = u2_link
 					embed = await generate_embed('green', embed_title, embed_description, embed_link)
 					await submissions_channel.send(embed=embed)
@@ -1569,7 +1598,7 @@ async def on_message(message):
 
 				# build random template embed
 				embed_title = f'Template for #{message.channel.name}'
-				embed_description = f'Here\'s a random template! This template was submitted by {author_string}'
+				embed_description = f'Here\'s a random template! This template was submitted by {functions.escape_underscores(author_string)}'
 				embed = await generate_embed('green', embed_title, embed_description, template_url)
 				nonce = f'spltemp{str(channel_id)}'
 				await duelmods_chan.send(embed=embed, nonce=nonce)
