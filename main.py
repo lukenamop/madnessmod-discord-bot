@@ -2407,10 +2407,10 @@ async def on_reaction_add(reaction, user):
 		# act on dynamic stats menus
 		if message.nonce.startswith('stats'):
 			if not user.bot:
-				
+
 				await reaction.remove(user)
 
-				user_id = message.nonce.lstrip('stats')
+				user_id = int(message.nonce.lstrip('stats'))
 				if user.id == user_id:
 					if reaction.emoji == '1️⃣':
 						await message.channel.send('one')
