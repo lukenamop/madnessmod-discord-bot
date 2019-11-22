@@ -954,7 +954,6 @@ async def on_message(message):
 			return
 		return
 
-
 	# duel-mods specific commands
 	if message.channel.id == 600397545050734612 or message.channel.id == 581728812518080522:
 		# '.activematches' command (duel-mods)
@@ -2413,20 +2412,12 @@ async def on_reaction_add(reaction, user):
 				user_id = int(message.nonce.lstrip('stats'))
 				if user.id == user_id:
 					if reaction.emoji == '1️⃣':
-						await message.channel.send('one')
 						return
 					if reaction.emoji == '2️⃣':
-						await message.channel.send('two')
 						return
 			return
 		return
 	return
-
-# client event triggers on any discord channel creation
-# @client.event
-# async def on_channel_create(channel):
-# 	if channel.name.startswith('match'):
-# 		return
 
 # client event triggers when discord bot client is fully loaded and ready
 @client.event
