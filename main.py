@@ -2210,7 +2210,7 @@ async def on_reaction_add(reaction, user):
 						await action_log('participant stats updated')
 					# send vote confirmation to the user via dm
 					embed_title = 'Vote Confirmation'
-					embed_description = f'Your vote for image {vote_position} has been confirmed. If you\'d like to change your vote, remove this vote by using the same emoji.'
+					embed_description = f'Your vote for image {vote_position} has been confirmed. If you\'d like to change your vote, remove this vote by using the same emoji.\n\nYou have earned 10 points!'
 					embed = await generate_embed('green', embed_title, embed_description)
 					await user_channel.send(embed=embed)
 					await action_log('vote confirmation sent to user')
