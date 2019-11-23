@@ -349,10 +349,10 @@ async def on_message(message):
 					if member is not None:
 						iteration += 1
 						# 10 users printed and the base user was one of them
-						if iteration >= 10 and user_found:
+						if iteration > 10 and user_found:
 							break
 						# not 10 users printed yet
-						elif iteration < 10:
+						elif iteration <= 10:
 							if member == message.author:
 								user_found = True
 							if lb_rank < 10:
