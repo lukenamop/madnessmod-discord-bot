@@ -328,7 +328,7 @@ async def on_message(message):
 		# '.top10' command (stats-flex)
 		if message_content == '.top10' or message_content == '.lb' or message_content == '.leaderboard':
 			# pull top 15 participants from database (extras in case some of the top 10 have left the server)
-			query = 'SELECT user_id, lb_points, RANK () OVER (ORDER BY lb_points DESC) lb_rank FROM participants ORDER BY lb_points DESC LIMIT 12'
+			query = 'SELECT user_id, lb_points, RANK () OVER (ORDER BY lb_points DESC) lb_rank FROM participants ORDER BY lb_points DESC'
 			# query = 'SELECT user_id, lb_points FROM participants ORDER BY lb_points DESC LIMIT 15'
 			connect.crsr.execute(query)
 			results = connect.crsr.fetchall()
@@ -337,30 +337,42 @@ async def on_message(message):
 			if results is not None:
 				# build signuplist embed
 				embed_description = ''
-				iteration = 1
+				iteration = 0
+				user_found = False
+				# iterate through the participants in the database
 				for entry in results:
+					# initialize variables for the member and their info
 					member = message.guild.get_member(entry[0])
 					lb_points = entry[1]
 					lb_rank = entry[2]
+					# check to be sure the member is still in the guild
 					if member is not None:
-						if iteration <= 10:
+						iteration += 1
+						# 10 users printed and the base user was one of them
+						if iteration >= 10 and user_found:
+							break
+						# not 10 users printed yet
+						elif iteration < 10:
+							if member == message.author:
+								user_found = True
 							if lb_rank < 10:
-								# add an extra space to align all the messages
+								# add an extra space to align all the ranks
 								embed_description += f'**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
 							elif lb_rank >= 10 and lb_rank < 100:
 								embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
-						iteration += 1
-				query = f'SELECT lb_points, RANK () OVER (ORDER BY lb_points DESC) lb_rank FROM participants WHERE user_id = {message.author.id}'
-				connect.crsr.execute(query)
-				result = connect.crsr.fetchone()
-				u_lb_points = result[0]
-				u_lb_rank = result[1]
-				if u_lb_rank < 10:
-					embed_description += f'\nYour rank:\n**` {u_lb_rank}:` {functions.escape_underscores(message.author.display_name)}** - {u_lb_points} points'
-				elif u_lb_rank >= 10 and u_lb_rank < 100:
-					embed_description += f'\nYour rank:\n**`{u_lb_rank}:` {functions.escape_underscores(message.author.display_name)}** - {u_lb_points} points'
+						# 10 users printed but the base user hasn't been found yet
+						else:
+							if member == message.author:
+								user_found = True
+								# add the user's rank at the bottom
+								if lb_rank < 10:
+									embed_description += f'\nYour rank:\n**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
+								elif lb_rank >= 10 and lb_rank < 100:
+									embed_description += f'\nYour rank:\n**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
+				# strip any extraneous newlines
 				embed_description = embed_description.rstrip('\n')
 			else:
+				# send this message if no participants were found
 				embed_description = 'The leaderboard seems to be empty in the database.'
 			embed = await generate_embed('blue', embed_title, embed_description)
 			# send signuplist embed
@@ -372,7 +384,25 @@ async def on_message(message):
 		# '.lbsimulation' command (stats-flex)
 		if message_content == '.lbsim':
 			if message.author.id in config.ADMIN_IDS:
-				query = 'UPDATE participants SET lb_points = 50 WHERE user_id = 324273473360887808'
+				query = 'UPDATE participants SET lb_points = 10 WHERE user_id = 324273473360887808'
+				connect.crsr.execute(query)
+				query = 'UPDATE participants SET lb_points = 45 WHERE user_id = 380462665358901268'
+				connect.crsr.execute(query)
+				query = 'UPDATE participants SET lb_points = 30 WHERE user_id = 253912048944021508'
+				connect.crsr.execute(query)
+				query = 'UPDATE participants SET lb_points = 30 WHERE user_id = 393137628083388430'
+				connect.crsr.execute(query)
+				query = 'UPDATE participants SET lb_points = 30 WHERE user_id = 557236390060883998'
+				connect.crsr.execute(query)
+				query = 'UPDATE participants SET lb_points = 20 WHERE user_id = 277437604322869259'
+				connect.crsr.execute(query)
+				query = 'UPDATE participants SET lb_points = 25 WHERE user_id = 600460970321772544'
+				connect.crsr.execute(query)
+				query = 'UPDATE participants SET lb_points = 15 WHERE user_id = 406106448205185034'
+				connect.crsr.execute(query)
+				query = 'UPDATE participants SET lb_points = 12 WHERE user_id = 239516219445608449'
+				connect.crsr.execute(query)
+				query = 'UPDATE participants SET lb_points = 12 WHERE user_id = 451274758198394881'
 				connect.crsr.execute(query)
 				query = 'UPDATE participants SET lb_points = 40 WHERE user_id = 539322059537383434'
 				connect.crsr.execute(query)
