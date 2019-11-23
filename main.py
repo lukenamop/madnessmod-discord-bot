@@ -2116,7 +2116,7 @@ async def on_reaction_add(reaction, user):
 
 				if not config.TESTING:
 					# check for existing participant in database
-					query = f'SELECT match_votes FROM participants WHERE user_id = {str(user.id)}'
+					query = f'SELECT match_votes, lb_points FROM participants WHERE user_id = {str(user.id)}'
 					connect.crsr.execute(query)
 					result = connect.crsr.fetchone()
 					if result is None:
@@ -2126,8 +2126,10 @@ async def on_reaction_add(reaction, user):
 						connect.conn.commit()
 						await action_log('no existing user, new user added to participants table in postgresql')
 						participant_match_votes = 0
+						participant_lb_points = 0
 					else:
 						participant_match_votes = result[0]
+						participant_lb_points = result[1]
 
 				# find the ID of the active match
 				query = f'SELECT db_id, u1_id, u2_id FROM matches WHERE channel_id = {str(message.channel.id)} AND start_time >= {str(time.time() - (config.BASE_POLL_TIME + config.MATCH_TIME + 5))}'
@@ -2179,7 +2181,7 @@ async def on_reaction_add(reaction, user):
 							await action_log(f'vote removed from match by {user.name}#{user.discriminator}')
 							if not config.TESTING:
 								# update participant stats
-								query = f'UPDATE participants SET match_votes = {str(participant_match_votes - 1)} WHERE user_id = {str(user.id)}'
+								query = f'UPDATE participants SET match_votes = {participant_match_votes - 1}, lb_points = {participant_lb_points - 10} WHERE user_id = {str(user.id)}'
 								connect.crsr.execute(query)
 								connect.conn.commit()
 								await action_log('participant stats updated')
@@ -2202,7 +2204,7 @@ async def on_reaction_add(reaction, user):
 					connect.conn.commit()
 					if not config.TESTING:
 						# update participant stats
-						query = f'UPDATE participants SET match_votes = {str(participant_match_votes + 1)} WHERE user_id = {str(user.id)}'
+						query = f'UPDATE participants SET match_votes = {participant_match_votes + 1}, lb_points = {participant_lb_points + 10} WHERE user_id = {str(user.id)}'
 						connect.crsr.execute(query)
 						connect.conn.commit()
 						await action_log('participant stats updated')
