@@ -1835,6 +1835,7 @@ async def on_message(message):
 						result = connect.crsr.fetchone()
 						if result is not None:
 							if result[0]:
+								await action_log('user already submitted')
 								return
 						# build reminder embed
 						embed_title = 'Match Reminder'
@@ -1853,6 +1854,7 @@ async def on_message(message):
 						result = connect.crsr.fetchone()
 						if result is not None:
 							if result[0]:
+								await action_log('user already submitted')
 								return
 						# build reminder embed
 						embed_title = 'Match Reminder'
@@ -1869,8 +1871,10 @@ async def on_message(message):
 						query = f'SELECT {submitted} FROM matches WHERE {match_udb} = {str(match_user.id)} AND start_time >= {str(time.time() - (config.MATCH_TIME + 5))}'
 						connect.crsr.execute(query)
 						result = connect.crsr.fetchone()
-						if result[0]:
-							return
+						if result is not None:
+							if result[0]:
+								await action_log('user already submitted')
+								return
 						# build match end embed
 						embed_title = 'Match Closed'
 						embed_description = 'Your match has ended without your submission resulting in your disqualification. Next time, please be sure to submit your final meme before the time runs out!'
