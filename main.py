@@ -150,10 +150,10 @@ async def on_message(message):
 
 						if not config.TESTING:
 							# update participant stats in the databsee (tie)
-							query = f'UPDATE participants SET total_votes_for = total_votes_for + {votes} WHERE user_id = {u1_id}'
+							query = f'UPDATE participants SET total_votes_for = total_votes_for + {votes}, lb_points = lb_points + {votes * 2} WHERE user_id = {u1_id}'
 							connect.crsr.execute(query)
 							connect.conn.commit()
-							query = f'UPDATE participants SET total_votes_for = total_votes_for + {votes} WHERE user_id = {u2_id}'
+							query = f'UPDATE participants SET total_votes_for = total_votes_for + {votes}, lb_points = lb_points + {votes * 2} WHERE user_id = {u2_id}'
 							connect.crsr.execute(query)
 							connect.conn.commit()
 							await action_log('participant stats updated')
@@ -185,11 +185,11 @@ async def on_message(message):
 					await action_log('winner round role updated')
 
 					# update participant stats in the database
-					query = f'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1, total_votes_for = total_votes_for + {winning_votes} WHERE user_id = {winner.id}'
+					query = f'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1, total_votes_for = total_votes_for + {winning_votes}, lb_points = lb_points + {(winning_votes * 2) + 50} WHERE user_id = {winner.id}'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('winner participant stats updated')
-					query = f'UPDATE participants SET total_matches = total_matches + 1, match_losses = match_losses + 1, total_votes_for = total_votes_for + {losing_votes} WHERE user_id = {loser.id}'
+					query = f'UPDATE participants SET total_matches = total_matches + 1, match_losses = match_losses + 1, total_votes_for = total_votes_for + {losing_votes} lb_points = lb_points + {losing_votes * 2} WHERE user_id = {loser.id}'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('loser participant stats updated')
