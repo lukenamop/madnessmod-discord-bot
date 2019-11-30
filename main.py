@@ -374,9 +374,9 @@ async def on_message(message):
 								user_found = True
 								# add the user's rank at the bottom
 								if lb_rank < 10:
-									embed_description += f'...\n**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
+									embed_description += f'\n\n**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
 								elif lb_rank >= 10 and lb_rank < 100:
-									embed_description += f'...\n**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
+									embed_description += f'\n\n**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
 				# strip any extraneous newlines
 				embed_description = embed_description.rstrip('\n')
 			else:
