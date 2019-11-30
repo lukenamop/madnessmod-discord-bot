@@ -326,7 +326,7 @@ async def on_message(message):
 	# leaderboard commands (stats-flex channel only)
 	if message.channel.id == 631239602736201728 or message.channel.id == 647495194018709534:
 		# '.top10' command (stats-flex)
-		if message_content == '.top10' or message_content == '.lb' or message_content == '.leaderboard':
+		if message_content.startswith('.top10') or message_content.startswith('.lb') or message_content.startswith('.leaderboard'):
 			await action_log(f'{message.author.display_name} called .lb')
 			# check for a mentioned user
 			if len(message.mentions) == 1:
