@@ -327,9 +327,11 @@ async def on_message(message):
 	if message.channel.id == 631239602736201728 or message.channel.id == 647495194018709534:
 		# '.top10' command (stats-flex)
 		if message_content == '.top10' or message_content == '.lb' or message_content == '.leaderboard':
+			await action_log(f'{message.author.display_name} called .lb')
 			# check for a mentioned user
 			if len(message.mentions) == 1:
 				user = message.mentions[0]
+				await action_log(f'.lb was used on {user.display_name}')
 			else:
 				user = message.author
 
