@@ -327,6 +327,12 @@ async def on_message(message):
 	if message.channel.id == 631239602736201728 or message.channel.id == 647495194018709534:
 		# '.top10' command (stats-flex)
 		if message_content == '.top10' or message_content == '.lb' or message_content == '.leaderboard':
+			# check for a mentioned user
+			if len(message.mentions) == 1:
+				user = message.mentions[0]
+			else:
+				user = message.author
+
 			# pull top 15 participants from database (extras in case some of the top 10 have left the server)
 			query = 'SELECT user_id, lb_points, RANK () OVER (ORDER BY lb_points DESC) lb_rank FROM participants ORDER BY lb_points DESC'
 			# query = 'SELECT user_id, lb_points FROM participants ORDER BY lb_points DESC LIMIT 15'
@@ -353,7 +359,7 @@ async def on_message(message):
 							break
 						# not 10 users printed yet
 						elif iteration <= 10:
-							if member == message.author:
+							if member == user:
 								user_found = True
 							if lb_rank < 10:
 								# add an extra space to align all the ranks
@@ -362,7 +368,7 @@ async def on_message(message):
 								embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
 						# 10 users printed but the base user hasn't been found yet
 						else:
-							if member == message.author:
+							if member == user:
 								user_found = True
 								# add the user's rank at the bottom
 								if lb_rank < 10:
