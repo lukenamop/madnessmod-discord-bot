@@ -189,7 +189,7 @@ async def on_message(message):
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('winner participant stats updated')
-					query = f'UPDATE participants SET total_matches = total_matches + 1, match_losses = match_losses + 1, total_votes_for = total_votes_for + {losing_votes} lb_points = lb_points + {losing_votes * 2} WHERE user_id = {loser.id}'
+					query = f'UPDATE participants SET total_matches = total_matches + 1, match_losses = match_losses + 1, total_votes_for = total_votes_for + {losing_votes}, lb_points = lb_points + {losing_votes * 2} WHERE user_id = {loser.id}'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('loser participant stats updated')
