@@ -94,8 +94,9 @@ async def on_message(message):
 				connect.crsr.execute(query)
 				total_votes = connect.crsr.fetchone()[0]
 
-				while total_votes <= 20:
-					await action_log(f'only {total_votes} votes, extending poll time')
+				extensions = 1
+				while total_votes <= 20 and extensions <= 5:
+					await action_log(f'only {total_votes} votes, extending poll time, this is extension number {extensions}')
 					# sleep for 1 hour (config.POLL_EXTENSION_TIME)
 					await asyncio.sleep(config.POLL_EXTENSION_TIME)
 					await action_log('waking back up in match channel and checking vote counts')
@@ -103,6 +104,7 @@ async def on_message(message):
 					query = f'SELECT COUNT(*) FROM votes WHERE match_id = {db_id}'
 					connect.crsr.execute(query)
 					total_votes = connect.crsr.fetchone()[0]
+					extensions += 1
 
 				await message.delete()
 
@@ -2250,7 +2252,7 @@ async def on_reaction_add(reaction, user):
 						participant_lb_points = result[1]
 
 				# find the ID of the active match
-				query = f'SELECT db_id, u1_id, u2_id FROM matches WHERE channel_id = {message.channel.id} AND start_time >= {time.time() - (config.BASE_POLL_TIME + config.MATCH_TIME + 5)}'
+				query = f'SELECT db_id, u1_id, u2_id FROM matches WHERE channel_id = {message.channel.id} AND start_time >= {time.time() - ((config.BASE_POLL_TIME * 10) + config.MATCH_TIME + 5)}'
 				connect.crsr.execute(query)
 				result = connect.crsr.fetchone()
 				if result is not None:
