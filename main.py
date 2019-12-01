@@ -412,29 +412,7 @@ async def on_message(message):
 		# '.lbsimulation' command (stats-flex)
 		if message_content == '.lbsim':
 			if message.author.id in config.ADMIN_IDS:
-				query = 'UPDATE participants SET lb_points = 10 WHERE user_id = 324273473360887808'
-				connect.crsr.execute(query)
-				query = 'UPDATE participants SET lb_points = 45 WHERE user_id = 380462665358901268'
-				connect.crsr.execute(query)
-				query = 'UPDATE participants SET lb_points = 30 WHERE user_id = 253912048944021508'
-				connect.crsr.execute(query)
-				query = 'UPDATE participants SET lb_points = 30 WHERE user_id = 393137628083388430'
-				connect.crsr.execute(query)
-				query = 'UPDATE participants SET lb_points = 30 WHERE user_id = 557236390060883998'
-				connect.crsr.execute(query)
-				query = 'UPDATE participants SET lb_points = 20 WHERE user_id = 277437604322869259'
-				connect.crsr.execute(query)
-				query = 'UPDATE participants SET lb_points = 25 WHERE user_id = 600460970321772544'
-				connect.crsr.execute(query)
-				query = 'UPDATE participants SET lb_points = 15 WHERE user_id = 406106448205185034'
-				connect.crsr.execute(query)
-				query = 'UPDATE participants SET lb_points = 12 WHERE user_id = 239516219445608449'
-				connect.crsr.execute(query)
-				query = 'UPDATE participants SET lb_points = 12 WHERE user_id = 451274758198394881'
-				connect.crsr.execute(query)
-				query = 'UPDATE participants SET lb_points = 40 WHERE user_id = 539322059537383434'
-				connect.crsr.execute(query)
-				query = 'UPDATE participants SET lb_points = 100 WHERE user_id = 200621124768235521'
+				query = 'UPDATE participants SET lb_points = 175 WHERE user_id = 324273473360887808'
 				connect.crsr.execute(query)
 				connect.conn.commit()
 
@@ -2110,13 +2088,12 @@ async def on_message(message):
 						await client.get_channel(config.ARCHIVE_CHAN_ID).send(embed=embed)
 						await action_log('winning image sent to archive channel')
 
-					# update participant stats in the database
-					query = f'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1, lb_points = lb_points + 50 WHERE user_id = {winner.id}'
-					connect.crsr.execute(query)
-					connect.conn.commit()
-					await action_log('winner participant stats updated')
+						# update participant stats in the database
+						query = f'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1, lb_points = lb_points + 50 WHERE user_id = {winner.id}'
+						connect.crsr.execute(query)
+						connect.conn.commit()
+						await action_log('winner participant stats updated')
 
-					if not config.TESTING:
 						# update winner's round role
 						i = 0
 						while i <= (len(config.ROUND_ROLE_IDS) - 1):
