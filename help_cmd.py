@@ -15,7 +15,8 @@ mod_help = """`.donate` - shows MadnessMod donation info
 	\n`.signuplist` - displays a full list of signups for the current cycle
 	\n`.startmatch @<user> @<user>` - starts a match between two users, if an image is attached it will be supplied as their template (can only be used in a #contest channel)"""
 
-admin_help = """`.clearmatches` - clears all matches and votes from the database (**admin only**)
+admin_help = """`.activematches` - displays all currently active matches and polls
+	\n`.clearmatches` - clears all matches and votes from the database (**admin only**)
 	\n`.clearsignups` - clears all signups from the database (**admin only**)
 	\n`.createbracket <tournament reference>` - creates a Challonge bracket with the given tournament reference (for example, Meme Madness 10) and populates all participants (**admin only**)
 	\n`.creatematchchannels <tournament reference>` - creates a match channel for every "open" match from the specified Challonge bracket (**admin only**)

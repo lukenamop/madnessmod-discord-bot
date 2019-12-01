@@ -81,9 +81,29 @@ async def on_message(message):
 				else:
 					await message.channel.send('This is just a test match, not pinging `Vote Pings` or `here`.')
 
+				query = f'SELECT db_id, channel_id FROM matches WHERE channel_id = {message.channel.id} AND start_time >= {time.time() - (config.MATCH_TIME + 30)}'
+				connect.crsr.execute(query)
+				result = connect.crsr.fetchone()
+				db_id = result[0]
+
 				# sleep for 2 hours (config.BASE_POLL_TIME)
 				await asyncio.sleep(config.BASE_POLL_TIME)
-				await action_log('waking back up in match channel')
+				await action_log('waking back up in match channel and checking vote counts')
+				# check vote count
+				query = f'SELECT COUNT(*) FROM votes WHERE match_id = {db_id}'
+				connect.crsr.execute(query)
+				total_votes = connect.crsr.fetchone()[0]
+
+				while total_votes <= 20:
+					await action_log(f'only {total_votes} votes, extending poll time')
+					# sleep for 1 hour (config.POLL_EXTENSION_TIME)
+					await asyncio.sleep(config.POLL_EXTENSION_TIME)
+					await action_log('waking back up in match channel and checking vote counts')
+					# check vote count
+					query = f'SELECT COUNT(*) FROM votes WHERE match_id = {db_id}'
+					connect.crsr.execute(query)
+					total_votes = connect.crsr.fetchone()[0]
+
 				await message.delete()
 
 				# check to see who submitted each meme
@@ -2035,6 +2055,115 @@ async def on_message(message):
 		# 		await message.channel.send(embed=embed)
 		# 		await action_log('match participants not specified')
 		# 	return
+
+		# '.forcewin' command (contest category)
+		if message_content == '.forcewin':
+			await action_log('forcewin command in match channel')
+			# check to see who has submitted
+			query = f'SELECT db_id, u1_id, u1_submitted, u1_image_url, u2_id, u2_submitted, u2_image_url FROM matches WHERE channel_id = {message.channel.id}'
+			connect.crsr.execute(query)
+			result = connect.crsr.fetchone()
+
+			if result is not None:
+				db_id = result[0]
+				u1_id = result[1]
+				u1_submitted = result[2]
+				u1_image_url = result[3]
+				u2_id = result[4]
+				u2_submitted = result[5]
+				u2_image_url = result[6]
+				forced = False
+
+				if u1_submitted and not u2_submitted:
+					forced = True
+					await action_log('giving the win to user 1')
+					winner = message.guild.get_member(u1_id)
+					winner_image_url = u1_image_url
+				if u2_submitted and not u1_submitted:
+					forced = True
+					await action_log('giving the win to user 2')
+					winner = message.guild.get_member(u2_id)
+					winner_image_url = u2_image_url
+
+				if forced:
+					# build winning image embed for match archive
+					embed_title = functions.escape_underscores(winner.display_name)
+					embed_description = datetime.date.today().strftime("%B %d")
+					embed_link = winning_image_url
+					embed = await generate_embed('green', embed_title, embed_description, embed_link)
+					await message.channel.send(embed=embed)
+					await action_log('image sent to match channel')
+
+					# build notification embed for match channel (win/loss)
+					embed_title = 'Match Results'
+					embed_description = f'Congratulations to {winner.mention}, you have won this match! Good luck in the next round.'
+					embed = await generate_embed('pink', embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log('match results sent in match channel')
+
+					if not config.TESTING:
+						# build winning image embed for match archive
+						embed_title = functions.escape_underscores(winner.display_name)
+						embed_description = datetime.date.today().strftime("%B %d")
+						embed_link = winning_image_url
+						embed = await generate_embed('pink', embed_title, embed_description, embed_link)
+						await client.get_channel(config.ARCHIVE_CHAN_ID).send(embed=embed)
+						await action_log('winning image sent to archive channel')
+
+					# update participant stats in the database
+					query = f'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1, lb_points = lb_points + 50 WHERE user_id = {winner.id}'
+					connect.crsr.execute(query)
+					connect.conn.commit()
+					await action_log('winner participant stats updated')
+
+					if not config.TESTING:
+						# update winner's round role
+						i = 0
+						while i <= (len(config.ROUND_ROLE_IDS) - 1):
+							round_role = message.guild.get_role(config.ROUND_ROLE_IDS[i])
+							if round_role in winner.roles:
+								# remove previous round role
+								await winner.remove_roles(round_role)
+								# check to see if winner is a finalist
+								if round_role.id == 634853736144961580:
+									# add winning role
+									await winner.add_roles(message.guild.get_role(config.WINNER_ROLE_ID))
+								else:
+									# add next round role
+									await winner.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[i + 1]))
+								i = len(config.ROUND_ROLE_IDS)
+							i += 1
+						await action_log('winner round role updated')
+
+					# check to see if challonge info is in the channel topic
+					if base_channel.topic is not None:
+						tournament_shortcut = base_channel.topic.split('/')[0]
+						match_id = base_channel.topic.split('/')[1]
+						player1_id = base_channel.topic.split('/')[2]
+						player2_id = base_channel.topic.split('/')[3]
+
+						# find player names from challonge
+						player1_name = tourney_manager.show_participant(tournament_shortcut, player1_id)['name']
+						player2_name = tourney_manager.show_participant(tournament_shortcut, player2_id)['name']
+
+						# figure out which challonge player won
+						if player1_name == winner.display_name:
+							# player1 wins, 1-0
+							scores_csv = '1-0'
+							tourney_manager.set_match_winner(tournament_shortcut, int(match_id), scores_csv, int(player1_id))
+							await action_log(f'{player1_name} set as match winner in challonge')
+						elif player2_name == winner.display_name:
+							# player2 wins, 0-1
+							scores_csv = '0-1'
+							tourney_manager.set_match_winner(tournament_shortcut, int(match_id), scores_csv, int(player2_id))
+							await action_log(f'{player2_name} set as match winner in challonge')
+					return
+				else:
+					await action_log('not able to force a win in the found match')
+				return
+			else:
+				await action_log('no match found')
+			return
 
 		# '.showresults' command (contest category)
 		if message_content == '.showresults':
