@@ -410,7 +410,7 @@ async def on_message(message):
 			return
 
 		# '.lbsimulation' command (stats-flex)
-		if message_content == '.lbsim':
+		if message_content == '.simlb':
 			if message.author.id in config.ADMIN_IDS:
 				query = 'UPDATE participants SET lb_points = 175 WHERE user_id = 324273473360887808'
 				connect.crsr.execute(query)
