@@ -2065,8 +2065,8 @@ async def on_message(message):
 
 				if forced:
 					# build winning image embed for match archive
-					embed_title = functions.escape_underscores(winner.display_name)
-					embed_description = datetime.date.today().strftime("%B %d")
+					embed_title = 'Final Meme Submission'
+					embed_description = functions.escape_underscores(winner.display_name)
 					embed_link = winning_image_url
 					embed = await generate_embed('green', embed_title, embed_description, embed_link)
 					await message.channel.send(embed=embed)
