@@ -2113,11 +2113,11 @@ async def on_message(message):
 						await action_log('winner round role updated')
 
 					# check to see if challonge info is in the channel topic
-					if base_channel.topic is not None:
-						tournament_shortcut = base_channel.topic.split('/')[0]
-						match_id = base_channel.topic.split('/')[1]
-						player1_id = base_channel.topic.split('/')[2]
-						player2_id = base_channel.topic.split('/')[3]
+					if message.channel.topic is not None:
+						tournament_shortcut = message.channel.topic.split('/')[0]
+						match_id = message.channel.topic.split('/')[1]
+						player1_id = message.channel.topic.split('/')[2]
+						player2_id = message.channel.topic.split('/')[3]
 
 						# find player names from challonge
 						player1_name = tourney_manager.show_participant(tournament_shortcut, player1_id)['name']
