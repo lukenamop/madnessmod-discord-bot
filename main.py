@@ -2078,12 +2078,12 @@ async def on_message(message):
 					forced = True
 					await action_log('giving the win to user 1')
 					winner = message.guild.get_member(u1_id)
-					winner_image_url = u1_image_url
+					winning_image_url = u1_image_url
 				if u2_submitted and not u1_submitted:
 					forced = True
 					await action_log('giving the win to user 2')
 					winner = message.guild.get_member(u2_id)
-					winner_image_url = u2_image_url
+					winning_image_url = u2_image_url
 
 				if forced:
 					# build winning image embed for match archive
