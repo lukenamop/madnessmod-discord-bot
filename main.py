@@ -113,7 +113,8 @@ async def on_message(message):
 					else:
 						embed_description = f'The deadline for this poll has been extended by {extensions} hours.'
 						embed = await generate_embed('pink', embed_title, embed_description)
-						extension_embed_message = await extension_embed_message.edit(embed=embed)
+						new_extension_embed_message = await extension_embed_message.edit(embed=embed)
+						extension_embed_message = new_extension_embed_message
 
 					# sleep for 1 hour (config.POLL_EXTENSION_TIME)
 					await asyncio.sleep(config.POLL_EXTENSION_TIME)
