@@ -77,14 +77,21 @@ async def on_message(message):
 				await action_log('added reactions to poll message')
 				vote_pings_role = message.channel.guild.get_role(600356303033860106)
 				if not config.TESTING:
-					await message.channel.send(f'{vote_pings_role.mention} @here')
+					ping_message = await message.channel.send(f'{vote_pings_role.mention} @here')
 				else:
-					await message.channel.send('This is just a test match, not pinging `Vote Pings` or `here`.')
+					ping_message = await message.channel.send('This is just a test match, not pinging `Vote Pings` or `here`.')
 
-				query = f'SELECT db_id, channel_id FROM matches WHERE channel_id = {message.channel.id} AND start_time >= {time.time() - (config.MATCH_TIME + 30)}'
+				# pull the match data
+				query = f'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url FROM matches WHERE channel_id = {message.channel.id} AND start_time >= {time.time() - (config.MATCH_TIME + 30)}'
 				connect.crsr.execute(query)
 				result = connect.crsr.fetchone()
+				# initialize important variables
 				db_id = result[0]
+				u1_id = result[1]
+				u2_id = result[2]
+				a_meme = result[3]
+				u1_image_url = result[4]
+				u2_image_url = result[5]
 
 				# sleep for 2 hours (config.BASE_POLL_TIME)
 				await asyncio.sleep(config.BASE_POLL_TIME)
@@ -95,8 +102,19 @@ async def on_message(message):
 				total_votes = connect.crsr.fetchone()[0]
 
 				extensions = 1
-				while total_votes <= 20 and extensions <= 5:
+				extension_embed_message = None
+				while total_votes < 20 and extensions <= 5:
 					await action_log(f'only {total_votes} votes, extending poll time, this is extension number {extensions}')
+					embed_title = 'Extending Voting Time'
+					if extensions == 1:
+						embed_description = f'The deadline for this poll has been extended by 1 hour.'
+						embed = await generate_embed('pink', embed_title, embed_description)
+						extension_embed_message = await message.channel.send(embed=embed)
+					else:
+						embed_description = f'The deadline for this poll has been extended by {extensions} hours.'
+						embed = await generate_embed('pink', embed_title, embed_description)
+						extension_embed_message = await extension_embed_message.edit(embed=embed)
+
 					# sleep for 1 hour (config.POLL_EXTENSION_TIME)
 					await asyncio.sleep(config.POLL_EXTENSION_TIME)
 					await action_log('waking back up in match channel and checking vote counts')
@@ -107,18 +125,9 @@ async def on_message(message):
 					extensions += 1
 
 				await message.delete()
-
-				# check to see who submitted each meme
-				query = f'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url FROM matches WHERE channel_id = {message.channel.id} AND start_time >= {time.time() - (config.BASE_POLL_TIME + config.MATCH_TIME + 30)}'
-				connect.crsr.execute(query)
-				result = connect.crsr.fetchone()
-				# initialize important variables
-				db_id = result[0]
-				u1_id = result[1]
-				u2_id = result[2]
-				a_meme = result[3]
-				u1_image_url = result[4]
-				u2_image_url = result[5]
+				await ping_message.delete()
+				if extension_embed_message is not None:
+					await extension_embed_message.delete()
 
 				# check how many votes image A got
 				query = f'SELECT COUNT(*) FROM votes WHERE match_id = {db_id} AND a_vote = True'
@@ -191,17 +200,17 @@ async def on_message(message):
 					# update winner's round role
 					i = 0
 					while i <= (len(config.ROUND_ROLE_IDS) - 1):
-						round_role = message.guild.get_role(config.ROUND_ROLE_IDS[i])
+						round_role = base_channel.guild.get_role(config.ROUND_ROLE_IDS[i])
 						if round_role in winner.roles:
 							# remove previous round role
 							await winner.remove_roles(round_role)
 							# check to see if winner is a finalist
 							if round_role.id == 634853736144961580:
 								# add winning role
-								await winner.add_roles(message.guild.get_role(config.WINNER_ROLE_ID))
+								await winner.add_roles(base_channel.guild.get_role(config.WINNER_ROLE_ID))
 							else:
 								# add next round role
-								await winner.add_roles(message.guild.get_role(config.ROUND_ROLE_IDS[i + 1]))
+								await winner.add_roles(base_channel.guild.get_role(config.ROUND_ROLE_IDS[i + 1]))
 							i = len(config.ROUND_ROLE_IDS)
 						i += 1
 					await action_log('winner round role updated')
@@ -2252,7 +2261,7 @@ async def on_reaction_add(reaction, user):
 						participant_lb_points = result[1]
 
 				# find the ID of the active match
-				query = f'SELECT db_id, u1_id, u2_id FROM matches WHERE channel_id = {message.channel.id} AND start_time >= {time.time() - ((config.BASE_POLL_TIME * 10) + config.MATCH_TIME + 5)}'
+				query = f'SELECT db_id, u1_id, u2_id FROM matches WHERE channel_id = {message.channel.id} AND start_time >= {time.time() - (config.BASE_POLL_TIME + (config.POLL_EXTENSION_TIME * 5) + config.MATCH_TIME + 30)}'
 				connect.crsr.execute(query)
 				result = connect.crsr.fetchone()
 				if result is not None:
