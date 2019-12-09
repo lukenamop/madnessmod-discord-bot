@@ -263,6 +263,22 @@ async def on_message(message):
 						scores_csv = '0-1'
 						tourney_manager.set_match_winner(tournament_shortcut, int(match_id), scores_csv, int(player2_id))
 						await action_log(f'{player2_name} set as match winner in challonge')
+
+				# build winner dm
+				winner_channel = await winner.create_dm()
+				embed_title = 'Match Results'
+				embed_description = f'Your match has ended in {base_channel.mention}, you have earned 50 points for winning the match and {winning_votes * 2} points for the {winning_votes} votes for your meme. Good luck in the next round!'
+				embed = await generate_embed('pink', embed_title, embed_description)
+				await winner_channel.send(embed=embed)
+				await action_log('winner dm sent')
+
+				# build loser dm
+				loser_channel = await loser.create_dm()
+				embed_title = 'Match Results'
+				embed_description = f'Your match has ended in {base_channel.mention}, you have earned {losing_votes * 2} points for the {losing_votes} votes for your meme.'
+				embed = await generate_embed('pink', embed_title, embed_description)
+				await loser_channel.send(embed=embed)
+				await action_log('loser dm sent')
 				return
 			if message.channel.id == config.TEMPLATE_CHAN_ID and message.nonce == 'template':
 				# add reactions to messages in the #templates channel
