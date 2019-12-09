@@ -103,15 +103,15 @@ async def on_message(message):
 
 				extensions = 1
 				extension_embed_message = None
-				while total_votes < 20 and extensions <= 5:
+				while total_votes < 15 and extensions <= 3:
 					await action_log(f'only {total_votes} votes, extending poll time, this is extension number {extensions}')
 					embed_title = 'Extending Voting Time'
 					if extensions == 1:
-						embed_description = f'The deadline for this poll has been extended by 1 hour.'
+						embed_description = f'The deadline for this poll has been extended by 1 hour.\n*Voting for this match will be extended until there are 15 or more votes, max 3 extensions.*'
 						embed = await generate_embed('pink', embed_title, embed_description)
 						extension_embed_message = await message.channel.send(embed=embed)
 					else:
-						embed_description = f'The deadline for this poll has been extended by {extensions} hours.'
+						embed_description = f'The deadline for this poll has been extended by {extensions} hours.\n*Voting for this match will be extended until there are 15 or more votes, max 3 extensions.*'
 						embed = await generate_embed('pink', embed_title, embed_description)
 						await extension_embed_message.edit(embed=embed)
 
