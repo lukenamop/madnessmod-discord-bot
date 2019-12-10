@@ -2242,9 +2242,10 @@ async def on_reaction_add(reaction, user):
 					# add vote info to postgresql via the above queries
 					connect.crsr.execute(query)
 					connect.conn.commit()
+
+
+					vote_streak_bonus = 0
 					if not config.TESTING:
-						# update participant vote count, lb_points, and vote streak
-						vote_streak_bonus = 0
 						# check to see if the user's last vote was within 48 hours
 						if (time.time() <= unvoted_match_start_time + 172800) or (unvoted_match_start_time == None):
 							# check to see if the user's streak was incremented at least 24 hours ago
@@ -2264,10 +2265,13 @@ async def on_reaction_add(reaction, user):
 						else:
 							vote_streak = 1
 							last_vote_streak_time = time.time()
+
+						# update participant vote count, lb_points, and vote streak
 						query = f'UPDATE participants SET match_votes = {match_votes + 1}, lb_points = {lb_points + 10 + vote_streak_bonus}, vote_streak = {vote_streak}, longest_vote_streak = {longest_vote_streak}, unvoted_match_start_time = {unvoted_match_start_time}, last_vote_streak_time = {last_vote_streak_time} WHERE user_id = {user.id}'
 						connect.crsr.execute(query)
 						connect.conn.commit()
 						await action_log('participant stats updated')
+						
 					# send vote confirmation to the user via dm
 					embed_title = 'Vote Confirmation'
 					if vote_streak == 1:
