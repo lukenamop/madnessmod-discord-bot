@@ -93,7 +93,7 @@ async def on_message(message):
 				u1_image_url = result[4]
 				u2_image_url = result[5]
 
-				if not config.Testing:
+				if not config.TESTING:
 					# set participants' unvoted_match_start_time to the current time (if not already set)
 					query = f'UPDATE participants SET unvoted_match_start_time = {time.time()} WHERE unvoted_match_start_time IS NULL'
 					connect.crsr.execute(query)
