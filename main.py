@@ -735,7 +735,7 @@ async def on_message(message):
 		# '.submit' command (DM)
 		if message_content.startswith('.submit'):
 			# check for an active match including the specified user
-			query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, split_match_template_url, creation_time, db_id FROM matches WHERE (u1_id = {message.author.id} OR u2_id = {message.author.id}) AND start_time >= {time.time() - (config.MATCH_TIME + 10)}'
+			query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, template_url, creation_time, db_id FROM matches WHERE (u1_id = {message.author.id} OR u2_id = {message.author.id}) AND start_time >= {time.time() - (config.MATCH_TIME + 10)}'
 			connect.crsr.execute(query)
 			results = connect.crsr.fetchall()
 			result = None
@@ -763,7 +763,7 @@ async def on_message(message):
 				u2_submitted = result[3]
 				match_channel = client.get_channel(result[4])
 				start_time = result[5]
-				split_match_template_url = result[6]
+				template_url = result[6]
 				match_db_id = result[8]
 				if message.author.id == u1_id:
 					if u1_submitted:
@@ -812,7 +812,7 @@ async def on_message(message):
 				await message.channel.send(embed=embed)
 				await action_log(f'final meme attachment sent in by {message.author.name}#{message.author.discriminator}')
 
-				if split_match_template_url is not None:
+				if template_url is not None:
 					# build submission confirmation for match channel
 					embed_title = 'Solo Match Complete'
 					embed_description = f'{message.author.mention} has completed their part of the match!'
@@ -858,10 +858,10 @@ async def on_message(message):
 				# only execute if both users have submitted final memes
 				if result[2] and result[3]:
 					# if it's a split match, send the template to the channel
-					if split_match_template_url is not None:
+					if template_url is not None:
 						try:
 							embed_title = 'Match Template'
-							embed = await generate_embed('green', embed_title, '', split_match_template_url)
+							embed = await generate_embed('green', embed_title, '', template_url)
 							await match_channel.send(embed=embed)
 							await action_log('template sent to split match channel')
 						except:
@@ -1755,7 +1755,7 @@ async def on_message(message):
 				match_channel = message.channel
 				channel_id = message.channel.id
 
-				query = f'SELECT creation_time, u1_id, u2_id, u1_submitted, u2_submitted, split_match_template_url, start_time FROM matches WHERE channel_id = {channel_id}'
+				query = f'SELECT creation_time, u1_id, u2_id, u1_submitted, u2_submitted, template_url, start_time FROM matches WHERE channel_id = {channel_id}'
 				connect.crsr.execute(query)
 				results = connect.crsr.fetchall()
 				result = None
@@ -1829,7 +1829,7 @@ async def on_message(message):
 
 					if template_url is not None:
 						# update match start_time in database
-						query = f'UPDATE matches SET start_time = {time.time()} WHERE channel_id = {channel_id} AND template_message_id IS NULL AND split_match_template_url = \'{template_url}\''
+						query = f'UPDATE matches SET start_time = {time.time()} WHERE channel_id = {channel_id} AND template_message_id IS NULL AND template_url = \'{template_url}\''
 						connect.crsr.execute(query)
 						connect.conn.commit()
 						await action_log('match start_time updated in database')
@@ -2404,8 +2404,8 @@ async def on_reaction_add(reaction, user):
 					embed = await generate_embed('green', embed_title, embed_description)
 					await match_channel.send(embed=embed)
 
-					# update match start_time and split_match_template_url in database
-					query = f'UPDATE matches SET template_message_id = NULL, split_match_template_url = \'{template_url}\' WHERE channel_id = {match_channel.id} AND start_time IS NULL AND template_message_id IS NOT NULL'
+					# update match start_time and template_url in database
+					query = f'UPDATE matches SET template_message_id = NULL, template_url = \'{template_url}\' WHERE channel_id = {match_channel.id} AND start_time IS NULL AND template_message_id IS NOT NULL'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('match template updated in database')
