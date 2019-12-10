@@ -766,7 +766,11 @@ async def on_message(message):
 				template_url = result[6]
 				match_db_id = result[8]
 				template_author_id = result[9]
-				template_author = message.guild.get_member(template_author_id)
+				try:
+					template_author = message.guild.get_member(template_author_id)
+				except:
+					await action_log('template_author was not a valid member')
+					
 				if message.author.id == u1_id:
 					if u1_submitted:
 						await message.channel.send(embed=embed)
