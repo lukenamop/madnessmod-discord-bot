@@ -27,11 +27,6 @@ def db_connect():
 	result = crsr.fetchone()
 	print('participants: ' + str(result[0]))
 
-	crsr.execute('ALTER TABLE matches DROP COLUMN split_match_template_url')
-	crsr.execute('ALTER TABLE matches ADD template_url VARCHAR(200) DEFAULT NULL')
-	crsr.execute('ALTER TABLE matches ADD template_author_id NUMERIC(18) DEFAULT NULL')
-	conn.commit()
-
 	crsr.execute("""SELECT COUNT(*) FROM matches""")
 	result = crsr.fetchone()
 	print('matches: ' + str(result[0]))
