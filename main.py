@@ -2146,30 +2146,29 @@ async def on_reaction_add(reaction, user):
 				# create dm channel with the user
 				user_channel = await user.create_dm()
 
-				if not config.TESTING:
-					# check for existing participant in database
-					query = f'SELECT match_votes, lb_points, vote_streak, longest_vote_streak, unvoted_match_start_time, last_vote_streak_time FROM participants WHERE user_id = {user.id}'
+				# check for existing participant in database
+				query = f'SELECT match_votes, lb_points, vote_streak, longest_vote_streak, unvoted_match_start_time, last_vote_streak_time FROM participants WHERE user_id = {user.id}'
+				connect.crsr.execute(query)
+				result = connect.crsr.fetchone()
+				if result is None:
+					# create participant if none exists
+					query = f'INSERT INTO participants (user_id) VALUES ({user.id})'
 					connect.crsr.execute(query)
-					result = connect.crsr.fetchone()
-					if result is None:
-						# create participant if none exists
-						query = f'INSERT INTO participants (user_id) VALUES ({user.id})'
-						connect.crsr.execute(query)
-						connect.conn.commit()
-						await action_log('no existing user, new user added to participants table in postgresql')
-						match_votes = 0
-						lb_points = 0
-						vote_streak = 0
-						longest_vote_streak = 0
-						unvoted_match_start_time = None
-						last_vote_streak_time = 0
-					else:
-						match_votes = result[0]
-						lb_points = result[1]
-						vote_streak = result[2]
-						longest_vote_streak = result[3]
-						unvoted_match_start_time = result[4]
-						last_vote_streak_time = result[5]
+					connect.conn.commit()
+					await action_log('no existing user, new user added to participants table in postgresql')
+					match_votes = 0
+					lb_points = 0
+					vote_streak = 0
+					longest_vote_streak = 0
+					unvoted_match_start_time = None
+					last_vote_streak_time = 0
+				else:
+					match_votes = result[0]
+					lb_points = result[1]
+					vote_streak = result[2]
+					longest_vote_streak = result[3]
+					unvoted_match_start_time = result[4]
+					last_vote_streak_time = result[5]
 
 				# find the ID of the active match
 				query = f'SELECT db_id, u1_id, u2_id FROM matches WHERE channel_id = {message.channel.id} AND start_time >= {time.time() - (config.BASE_POLL_TIME + (config.POLL_EXTENSION_TIME * 5) + config.MATCH_TIME + 30)}'
