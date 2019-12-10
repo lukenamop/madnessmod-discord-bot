@@ -1729,7 +1729,7 @@ async def on_message(message):
 				await action_log('match added to database')
 
 				# build random template embed
-				embed_title = f'Template for {message.channel.mention}'
+				embed_title = f'Template for #{message.channel.name}'
 				embed_description = f'Here\'s a random template! This template was submitted by {template_author.display_name}'
 				embed = await generate_embed('green', embed_title, embed_description, template_url)
 				nonce = f'spltemp{channel_id}'
