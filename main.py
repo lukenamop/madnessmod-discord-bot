@@ -766,6 +766,7 @@ async def on_message(message):
 				template_url = result[6]
 				match_db_id = result[8]
 				template_author_id = result[9]
+				template_author = message.guild.get_member(template_author_id)
 				if message.author.id == u1_id:
 					if u1_submitted:
 						await message.channel.send(embed=embed)
@@ -1703,7 +1704,6 @@ async def on_message(message):
 						if len(template_message.embeds) == 1:
 							template_url = template_message.embeds[0].image.url
 							template_author = message.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').rstrip('>')))
-							await action_log(template_author.display_name)
 						else:
 							template_url = template_message.attachments[0].url
 							template_author = template_message.author
