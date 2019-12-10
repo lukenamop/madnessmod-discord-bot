@@ -1621,7 +1621,7 @@ async def on_message(message):
 						template_message = random.choice(template_list)
 						if len(template_message.embeds) == 1:
 							template_url = template_message.embeds[0].image.url
-							template_author = template_message.embeds[0].description.embeds[0]
+							template_author = message.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').rstrip('>')))
 						else:
 							template_url = template_message.attachments[0].url
 							template_author = template_message.author
@@ -2261,7 +2261,7 @@ async def on_reaction_add(reaction, user):
 				# get url information from the base message
 				template_url = message.embeds[0].image.url
 				template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
-				template_author = template_message.embeds[0].description.mentions[0]
+				template_author = message.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').rstrip('>')))
 
 				#  find which reaction was added
 				if reaction.emoji == check_emoji:
@@ -2325,6 +2325,7 @@ async def on_reaction_add(reaction, user):
 				u1_channel = await member1.create_dm()
 				member2 = message.guild.get_member(result[1])
 				u2_channel = await member2.create_dm()
+				template_message_id = result[2]
 
 				# get custom emojis from discord
 				check_emoji = client.get_emoji(637394596472815636)
@@ -2335,8 +2336,8 @@ async def on_reaction_add(reaction, user):
 
 				# get url information from the base message
 				template_url = message.embeds[0].image.url
-				template_message_id = result[2]
 				template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
+				template_author = message.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').rstrip('>')))
 
 				#  find which reaction was added
 				if reaction.emoji == check_emoji:
@@ -2350,7 +2351,7 @@ async def on_reaction_add(reaction, user):
 					await action_log('randomized template accepted')
 
 					# update match start_time in database
-					query = f'UPDATE matches SET start_time = {time.time()}, template_message_id = NULL WHERE channel_id = {match_channel.id} AND start_time IS NULL AND template_message_id IS NOT NULL'
+					query = f'UPDATE matches SET start_time = {time.time()}, template_message_id = NULL WHERE channel_id = {match_channel.id} AND start_time IS NULL AND template_message_id = {template_message_id}'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('match start_time updated in database')
@@ -2373,7 +2374,7 @@ async def on_reaction_add(reaction, user):
 						await action_log('one of the participants has DMs turned off')
 
 						# remove match from database
-						query = f'DELETE FROM matches WHERE channel_id = {match_channel.id} AND start_time IS NOT NULL AND template_message_id IS NOT NULL'
+						query = f'DELETE FROM matches WHERE channel_id = {match_channel.id} AND start_time IS NOT NULL AND template_message_id IS NULL'
 						connect.crsr.execute(query)
 						connect.conn.commit()
 						await action_log('match removed from database')
@@ -2383,8 +2384,7 @@ async def on_reaction_add(reaction, user):
 					await match_channel.last_message.delete()
 					# send template to match channel
 					embed_title = 'Match Started'
-					template_author_mention = template_message.embeds[0].description.split(' (')[0]
-					embed_description = f'{member1.mention} and {member2.mention} have 30 minutes to hand in their final memes. Good luck! (Thanks to {template_author_mention} for the template!)'
+					embed_description = f'{member1.mention} and {member2.mention} have 30 minutes to hand in their final memes. Good luck! (Thanks to {template_author.mention} for the template!)'
 					embed = await generate_embed('green', embed_title, embed_description, template_url)
 					await match_channel.send(embed=embed)
 					await action_log(f'match started between {member1.name}#{member1.discriminator} and {member2.name}#{member2.discriminator}')
