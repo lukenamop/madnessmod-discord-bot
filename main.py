@@ -735,15 +735,15 @@ async def on_message(message):
 		# '.submit' command (DM)
 		if message_content.startswith('.submit'):
 			# check for an active match including the specified user
-			query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, template_url, creation_time, db_id FROM matches WHERE (u1_id = {message.author.id} OR u2_id = {message.author.id}) AND start_time >= {time.time() - (config.MATCH_TIME + 10)}'
+			query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, template_url, creation_time, db_id, template_author_id FROM matches WHERE (u1_id = {message.author.id} OR u2_id = {message.author.id}) AND start_time >= {time.time() - (config.MATCH_TIME + 10)}'
 			connect.crsr.execute(query)
 			results = connect.crsr.fetchall()
 			result = None
 			failed = False
 
 			if len(results) > 1:
-				result = [None, None, None, None, None, None, None, 0, None]
-				# find the most recent match by creation_time
+				result = [None, None, None, None, None, None, None, 0, None, None]
+				# find the most recent match by db_id
 				for match in results:
 					if match[7] > result[7]:
 						result = match
@@ -765,6 +765,7 @@ async def on_message(message):
 				start_time = result[5]
 				template_url = result[6]
 				match_db_id = result[8]
+				template_author_id = result[9]
 				if message.author.id == u1_id:
 					if u1_submitted:
 						await message.channel.send(embed=embed)
@@ -861,6 +862,7 @@ async def on_message(message):
 					if template_url is not None:
 						try:
 							embed_title = 'Match Template'
+							embed_description = f'Thanks to {template_author.mention} for the template!'
 							embed = await generate_embed('green', embed_title, '', template_url)
 							await match_channel.send(embed=embed)
 							await action_log('template sent to split match channel')
@@ -1619,15 +1621,13 @@ async def on_message(message):
 						template_message = random.choice(template_list)
 						if len(template_message.embeds) == 1:
 							template_url = template_message.embeds[0].image.url
-							author_string = template_message.embeds[0].description
-							template_author_mention = template_message.embeds[0].description.split(' (')[0]
+							template_author = template_message.embeds[0].description.embeds[0]
 						else:
 							template_url = template_message.attachments[0].url
-							author_string = template_message.author.display_name
-							template_author_mention = template_message.author.mention
+							template_author = template_message.author
 
 						# if the template author is neither of the match members, break out of the loop
-						if not (member1.mention == template_author_mention or member2.mention == template_author_mention):
+						if not (member1.mention == template_author.mention or member2.mention == template_author.mention):
 							found_template = True
 
 					# trigger this if there are no templates
@@ -1648,7 +1648,7 @@ async def on_message(message):
 
 				# build random template embed
 				embed_title = f'Template for #{message.channel.name}'
-				embed_description = f'Here\'s a random template! This template was submitted by {author_string}'
+				embed_description = f'Here\'s a random template! This template was submitted by {template_author.display_name}'
 				embed = await generate_embed('green', embed_title, embed_description, template_url)
 				nonce = f'tempcon{channel_id}'
 				await duelmods_chan.send(embed=embed, nonce=nonce)
@@ -1936,128 +1936,6 @@ async def on_message(message):
 				await action_log('match participant not specified')
 				return
 			return
-
-		########## CURRENTLY IN PROGRESS ##########
-
-		# # '.startfinal' command (contest category)
-		# if message_content.startswith('.startfinal '):
-		# 	if len(message.mentions) == 2:
-		# 		# initialize important variables
-		# 		member1 = message.mentions[0]
-		# 		u1_channel = await member1.create_dm()
-		# 		member2 = message.mentions[1]
-		# 		u2_channel = await member2.create_dm()
-		# 		start_time = time.time()
-		# 		channel_id = message.channel.id
-
-		# 		# add match info to postgresql
-		# 		query = 'INSERT INTO matches (u1_id, u2_id, start_time, channel_id) VALUES (' + str(member1.id) + ', ' + str(member2.id) + ', ' + str(start_time) + ', ' + str(channel_id) + ')'
-		# 		connect.crsr.execute(query)
-		# 		connect.conn.commit()
-		# 		# send notifying DMs to participants
-		# 		embed_title = 'Match Started'
-		# 		if len(message.attachments) == 1:
-		# 			# build match start embed with attached image
-		# 			embed_description = 'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.** Here is your template:'
-		# 			embed_link = message.attachments[0].url
-		# 			embed = await generate_embed('yellow', embed_title, embed_description, embed_link)
-		# 		else:
-		# 			# build match start embed without attached image
-		# 			embed_description = 'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.** Check the match channel for your template.'
-		# 			embed = await generate_embed('yellow', embed_title, embed_description)
-		# 		await u1_channel.send(embed=embed)
-		# 		await u2_channel.send(embed=embed)
-		# 		await action_log('users notified of match')
-
-		# 		# build startmatch confirmation embed for match channel
-		# 		embed_title = 'Match Started'
-		# 		embed_description = member1.mention + ' and ' + member2.mention + ' have 30 minutes to hand in their final memes. Good luck!'
-		# 		embed = await generate_embed('green', embed_title, embed_description)
-		# 		await message.channel.send(embed=embed)
-		# 		await action_log('match started between ' + member1.name + '#' + member1.discriminator + ' and ' + member2.name + '#' + member2.discriminator)
-
-		# 		# sleep for 15 minutes (config.MATCH_WARN1_TIME seconds)
-		# 		await asyncio.sleep(config.MATCH_WARN1_TIME)
-
-		# 		await action_log('checking submission status')
-		# 		# check for submissions, remind users to submit if they haven't yet
-		# 		query = 'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = ' + str(member1.id) + ' AND u2_id = ' + str(member2.id) + ' AND start_time >= ' + str(time.time() - config.MATCH_TIME + 5)
-		# 		connect.crsr.execute(query)
-		# 		result = connect.crsr.fetchone()
-		# 		if result is not None:
-		# 			if result[0] and result[1]:
-		# 				return
-		# 		# build reminder embed
-		# 		embed_title = 'Match Reminder'
-		# 		embed_description = '15 minutes remaining.'
-		# 		embed = await generate_embed('yellow', embed_title, embed_description)
-		# 		# executes if member1 has not submitted
-		# 		if not result[0]:
-		# 			await u1_channel.send(embed=embed)
-		# 		# executes if member2 has not submitted
-		# 		if not result[1]:
-		# 			await u2_channel.send(embed=embed)
-
-		# 		# sleep for 10 minutes (config.MATCH_WARN2_TIME - config.MATCH_WARN1_TIME seconds)
-		# 		await asyncio.sleep(config.MATCH_WARN2_TIME - config.MATCH_WARN1_TIME)
-
-		# 		await action_log('checking submission status')
-		# 		# check for submissions, remind users to submit if they haven't yet
-		# 		query = 'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = ' + str(member1.id) + ' AND u2_id = ' + str(member2.id) + ' AND start_time >= ' + str(time.time() - config.MATCH_TIME + 5)
-		# 		connect.crsr.execute(query)
-		# 		result = connect.crsr.fetchone()
-		# 		if result is not None:
-		# 			if result[0] and result[1]:
-		# 				return
-		# 		# build reminder embed
-		# 		embed_title = 'Match Reminder'
-		# 		embed_description = '5 minutes remaining. Make sure to submit your final meme before the time runs out.'
-		# 		embed = await generate_embed('yellow', embed_title, embed_description)
-		# 		# executes if member1 has not submitted
-		# 		if not result[0]:
-		# 			await u1_channel.send(embed=embed)
-		# 		# executes if member2 has not submitted
-		# 		if not result[1]:
-		# 			await u2_channel.send(embed=embed)
-
-		# 		# sleep for 5 minutes (config.MATCH_TIME - config.MATCH_WARN2_TIME seconds)
-		# 		await asyncio.sleep(config.MATCH_TIME - config.MATCH_WARN2_TIME)
-
-		# 		await action_log('checking submission status')
-		# 		# check for submissions, remind users to submit if they haven't yet
-		# 		query = 'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = ' + str(member1.id) + ' AND u2_id = ' + str(member2.id) + ' AND start_time >= ' + str(time.time() - (config.MATCH_TIME + 5))
-		# 		connect.crsr.execute(query)
-		# 		result = connect.crsr.fetchone()
-		# 		if result[0] and result[1]:
-		# 			return
-		# 		# build match end embed
-		# 		embed_title = 'Match Closed'
-		# 		embed_description = 'Your match has ended without your submission resulting in your disqualification. Next time, please be sure to submit your final meme before the time runs out!'
-		# 		embed1 = await generate_embed('red', embed_title, embed_description)
-		# 		await action_log('closing match')
-		# 		embed_title = 'Competitor Missed Deadline'
-		# 		# executes if member1 has not submitted
-		# 		if not result[0]:
-		# 			await u1_channel.send(embed=embed1)
-		# 			# build missed deadline embed
-		# 			embed_description = member1.mention + ' has missed their submission deadline.'
-		# 			embed2 = await generate_embed('red', embed_title, embed_description)
-		# 			await client.get_channel(config.SUBMISSION_CHAN_ID).send(embed=embed2)
-		# 		# executes if member2 has not submitted
-		# 		if not result[1]:
-		# 			await u2_channel.send(embed=embed1)
-		# 			# build missed deadline embed
-		# 			embed_description = member2.mention + ' has missed their submission deadline.'
-		# 			embed2 = await generate_embed('red', embed_title, embed_description)
-		# 			await client.get_channel(config.SUBMISSION_CHAN_ID).send(embed=embed2)
-		# 	else:
-		# 		# build startmatch error embed (participants not specified)
-		# 		embed_title = 'Participants Not Specified'
-		# 		embed_description = 'The format to use this command is `.startmatch <@user> <@user>`, please be sure you\'re using it correctly.'
-		# 		embed = await generate_embed('red', embed_title, embed_description)
-		# 		await message.channel.send(embed=embed)
-		# 		await action_log('match participants not specified')
-		# 	return
 
 		# '.forcewin' command (contest category)
 		if message_content == '.forcewin':
@@ -2382,6 +2260,7 @@ async def on_reaction_add(reaction, user):
 				# get url information from the base message
 				template_url = message.embeds[0].image.url
 				template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
+				template_author = template_message.embeds[0].description.mentions[0]
 
 				#  find which reaction was added
 				if reaction.emoji == check_emoji:
@@ -2403,7 +2282,7 @@ async def on_reaction_add(reaction, user):
 					await match_channel.send(embed=embed)
 
 					# update match start_time and template_url in database
-					query = f'UPDATE matches SET template_message_id = NULL, template_url = \'{template_url}\' WHERE channel_id = {match_channel.id} AND start_time IS NULL AND template_message_id IS NOT NULL'
+					query = f'UPDATE matches SET template_message_id = NULL, template_url = \'{template_url}\', template_author_id = {template_author.id} WHERE channel_id = {match_channel.id} AND start_time IS NULL AND template_message_id IS NOT NULL'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					await action_log('match template updated in database')
@@ -2503,8 +2382,8 @@ async def on_reaction_add(reaction, user):
 					await match_channel.last_message.delete()
 					# send template to match channel
 					embed_title = 'Match Started'
-					template_user = template_message.embeds[0].description.split(' (')[0]
-					embed_description = f'{member1.mention} and {member2.mention} have 30 minutes to hand in their final memes. Good luck! (thanks to {template_user} for the template)'
+					template_author_mention = template_message.embeds[0].description.split(' (')[0]
+					embed_description = f'{member1.mention} and {member2.mention} have 30 minutes to hand in their final memes. Good luck! (Thanks to {template_author_mention} for the template!)'
 					embed = await generate_embed('green', embed_title, embed_description, template_url)
 					await match_channel.send(embed=embed)
 					await action_log(f'match started between {member1.name}#{member1.discriminator} and {member2.name}#{member2.discriminator}')
