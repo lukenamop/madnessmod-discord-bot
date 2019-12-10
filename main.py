@@ -1632,7 +1632,7 @@ async def on_message(message):
 						template_message = random.choice(template_list)
 						if len(template_message.embeds) == 1:
 							template_url = template_message.embeds[0].image.url
-							template_author = message.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').rstrip('>')))
+							template_author = message.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').lstrip('!').rstrip('>')))
 						else:
 							template_url = template_message.attachments[0].url
 							template_author = template_message.author
@@ -1713,7 +1713,7 @@ async def on_message(message):
 						template_message = random.choice(template_list)
 						if len(template_message.embeds) == 1:
 							template_url = template_message.embeds[0].image.url
-							template_author = message.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').rstrip('>')))
+							template_author = message.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').lstrip('!').rstrip('>')))
 						else:
 							template_url = template_message.attachments[0].url
 							template_author = template_message.author
@@ -2308,7 +2308,7 @@ async def on_reaction_add(reaction, user):
 				# get url information from the base message
 				template_url = message.embeds[0].image.url
 				template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
-				template_author = message.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').rstrip('>')))
+				template_author = message.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').lstrip('!').rstrip('>')))
 
 				#  find which reaction was added
 				if reaction.emoji == check_emoji:
@@ -2384,7 +2384,7 @@ async def on_reaction_add(reaction, user):
 				# get url information from the base message
 				template_url = message.embeds[0].image.url
 				template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
-				template_author = message.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').rstrip('>')))
+				template_author = message.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').lstrip('!').rstrip('>')))
 
 				#  find which reaction was added
 				if reaction.emoji == check_emoji:
