@@ -2243,7 +2243,6 @@ async def on_reaction_add(reaction, user):
 					connect.crsr.execute(query)
 					connect.conn.commit()
 
-
 					vote_streak_bonus = 0
 					if not config.TESTING:
 						# check to see if the user's last vote was within 48 hours
@@ -2271,7 +2270,7 @@ async def on_reaction_add(reaction, user):
 						connect.crsr.execute(query)
 						connect.conn.commit()
 						await action_log('participant stats updated')
-						
+
 					# send vote confirmation to the user via dm
 					embed_title = 'Vote Confirmation'
 					if vote_streak == 1:
