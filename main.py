@@ -93,6 +93,12 @@ async def on_message(message):
 				u1_image_url = result[4]
 				u2_image_url = result[5]
 
+				if not config.Testing:
+					# set participants' unvoted_match_start_time to the current time (if not already set)
+					query = f'UPDATE participants SET unvoted_match_start_time = {time.time()} WHERE unvoted_match_start_time IS NULL'
+					connect.crsr.execute(query)
+					connect.conn.commit()
+
 				# sleep for 2 hours (config.BASE_POLL_TIME)
 				await asyncio.sleep(config.BASE_POLL_TIME)
 				await action_log('waking back up in match channel and checking vote counts')
@@ -2142,7 +2148,7 @@ async def on_reaction_add(reaction, user):
 
 				if not config.TESTING:
 					# check for existing participant in database
-					query = f'SELECT match_votes, lb_points FROM participants WHERE user_id = {user.id}'
+					query = f'SELECT match_votes, lb_points, vote_streak, longest_vote_streak, unvoted_match_start_time, last_vote_streak_time FROM participants WHERE user_id = {user.id}'
 					connect.crsr.execute(query)
 					result = connect.crsr.fetchone()
 					if result is None:
@@ -2151,11 +2157,19 @@ async def on_reaction_add(reaction, user):
 						connect.crsr.execute(query)
 						connect.conn.commit()
 						await action_log('no existing user, new user added to participants table in postgresql')
-						participant_match_votes = 0
-						participant_lb_points = 0
+						match_votes = 0
+						lb_points = 0
+						vote_streak = 0
+						longest_vote_streak = 0
+						unvoted_match_start_time = None
+						last_vote_streak_time = 0
 					else:
-						participant_match_votes = result[0]
-						participant_lb_points = result[1]
+						match_votes = result[0]
+						lb_points = result[1]
+						vote_streak = result[2]
+						longest_vote_streak = result[3]
+						unvoted_match_start_time = result[4]
+						last_vote_streak_time = result[5]
 
 				# find the ID of the active match
 				query = f'SELECT db_id, u1_id, u2_id FROM matches WHERE channel_id = {message.channel.id} AND start_time >= {time.time() - (config.BASE_POLL_TIME + (config.POLL_EXTENSION_TIME * 5) + config.MATCH_TIME + 30)}'
@@ -2207,7 +2221,7 @@ async def on_reaction_add(reaction, user):
 							await action_log(f'vote removed from match by {user.name}#{user.discriminator}')
 							if not config.TESTING:
 								# update participant stats
-								query = f'UPDATE participants SET match_votes = {participant_match_votes - 1}, lb_points = {participant_lb_points - 10} WHERE user_id = {user.id}'
+								query = f'UPDATE participants SET match_votes = {match_votes - 1}, lb_points = {lb_points - 10} WHERE user_id = {user.id}'
 								connect.crsr.execute(query)
 								connect.conn.commit()
 								await action_log('participant stats updated')
@@ -2229,14 +2243,41 @@ async def on_reaction_add(reaction, user):
 					connect.crsr.execute(query)
 					connect.conn.commit()
 					if not config.TESTING:
-						# update participant stats
-						query = f'UPDATE participants SET match_votes = {participant_match_votes + 1}, lb_points = {participant_lb_points + 10} WHERE user_id = {user.id}'
+						# update participant vote count, lb_points, and vote streak
+						vote_streak_bonus = 0
+						# check to see if the user's last vote was within 48 hours
+						if (time.time() <= unvoted_match_start_time + 172800) or (unvoted_match_start_time == None):
+							# check to see if the user's streak was incremented at least 24 hours ago
+							if time.time() >= last_vote_streak_time + 86400:
+								# increment the user's vote streak
+								vote_streak += 1
+								last_vote_streak_time = time.time()
+								# check to see if the user has voted at least 2 days in a row
+								if vote_streak >= 2:
+									if vote_streak < len(config.VOTE_STREAK_BONUSES):
+										vote_streak_bonus = config.VOTE_STREAK_BONUSES[vote_streak - 1]
+									else:
+										vote_streak_bonus = config.VOTE_STREAK_BONUSES[-1]
+								# check to see if this is the user's longes vote streak
+								if vote_streak > longest_vote_streak:
+									longest_vote_streak = vote_streak
+						else:
+							vote_streak = 1
+							last_vote_streak_time = time.time()
+						query = f'UPDATE participants SET match_votes = {match_votes + 1}, lb_points = {lb_points + 10 + vote_streak_bonus}, vote_streak = {vote_streak}, longest_vote_streak = {longest_vote_streak}, unvoted_match_start_time = {unvoted_match_start_time}, last_vote_streak_time = {last_vote_streak_time} WHERE user_id = {user.id}'
 						connect.crsr.execute(query)
 						connect.conn.commit()
 						await action_log('participant stats updated')
 					# send vote confirmation to the user via dm
 					embed_title = 'Vote Confirmation'
-					embed_description = f'Your vote for image {vote_position} has been confirmed. If you\'d like to change your vote, remove this vote by using the same emoji.\n\nYou have earned 10 points!'
+					if vote_streak == 1:
+						vote_streak_string = '1 day'
+					else:
+						vote_streak_string = f'{vote_streak} days'
+					if vote_streak_bonus > 0:
+						embed_description = f'Your vote for image {vote_position} has been confirmed. If you\'d like to change your vote, remove this vote by using the same emoji.\n\nYou have earned 10 points for voting!\nYou have earned {vote_streak_bonus} bonus points for increasing your voting streak!\nYour current voting streak is {vote_streak_string}.'
+					else:
+						embed_description = f'Your vote for image {vote_position} has been confirmed. If you\'d like to change your vote, remove this vote by using the same emoji.\n\nYou have earned 10 points for voting!\nYour current voting streak is {vote_streak_string}.'
 					embed = await generate_embed('green', embed_title, embed_description)
 					await user_channel.send(embed=embed)
 					await action_log('vote confirmation sent to user')
