@@ -1702,15 +1702,13 @@ async def on_message(message):
 						template_message = random.choice(template_list)
 						if len(template_message.embeds) == 1:
 							template_url = template_message.embeds[0].image.url
-							author_string = template_message.embeds[0].description
-							template_author_mention = template_message.embeds[0].description.split(' (')[0]
+							template_author = template_message.embeds[0].description.mentions[0]
 						else:
 							template_url = template_message.attachments[0].url
-							author_string = template_message.author.display_name
-							template_author_mention = template_message.author.mention
+							template_author = template_message.author
 
 						# if the template author is neither of the match members, break out of the loop
-						if not (member1.mention == template_author_mention or member2.mention == template_author_mention):
+						if not (member1 == template_author or member2 == template_author):
 							found_template = True
 
 					# trigger this if there are no templates
@@ -1730,8 +1728,8 @@ async def on_message(message):
 				await action_log('match added to database')
 
 				# build random template embed
-				embed_title = f'Template for #{message.channel.name}'
-				embed_description = f'Here\'s a random template! This template was submitted by {functions.escape_underscores(author_string)}'
+				embed_title = f'Template for {message.channel.mention}'
+				embed_description = f'Here\'s a random template! This template was submitted by {template_author.display_name}'
 				embed = await generate_embed('green', embed_title, embed_description, template_url)
 				nonce = f'spltemp{channel_id}'
 				await duelmods_chan.send(embed=embed, nonce=nonce)
