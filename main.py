@@ -341,7 +341,7 @@ async def on_message(message):
 			user = message.author
 
 		# check participants database for the specified user
-		query = f'SELECT total_matches, match_wins, match_losses, total_votes_for, avg_final_meme_time, templates_submitted, match_votes FROM participants WHERE user_id = {user.id}'
+		query = f'SELECT total_matches, match_wins, match_losses, total_votes_for, avg_final_meme_time, templates_submitted, match_votes, longest_vote_streak FROM participants WHERE user_id = {user.id}'
 		connect.crsr.execute(query)
 		results = connect.crsr.fetchone()
 		if results is not None:
@@ -353,9 +353,9 @@ async def on_message(message):
 			# build stats embed
 			embed_title = f'Stats for {functions.escape_underscores(user.display_name)}'
 			try:
-				embed_description = f'**Total matches:** `{results[0]}`\n**Match wins/losses:** `{results[1]}/{results[2]}`\n**Win percentage:** `{round((float(results[1]) / float(results[0])) * 100)}%`\n**Total votes for your memes:** `{results[3]}`\n**Avg. time per meme:** `{avg_time}`\n**Templates submitted:** `{results[5]}`\n**Matches voted in:** `{results[6]}`'
+				embed_description = f'**Total matches:** `{results[0]}`\n**Match wins/losses:** `{results[1]}/{results[2]}`\n**Win percentage:** `{round((float(results[1]) / float(results[0])) * 100)}%`\n**Total votes for your memes:** `{results[3]}`\n**Avg. time per meme:** `{avg_time}`\n**Templates submitted:** `{results[5]}`\n**Matches voted in:** `{results[6]}`\n**Longest voting streak:** `{results[7]}` days'
 			except ZeroDivisionError:
-				embed_description = f'**Total matches:** `{results[0]}`\n**Match wins/losses:** `{results[1]}/{results[2]}`\n**Win percentage:** `N/A`\n**Total votes for your memes:** `{results[3]}`\n**Avg. time per meme:** `{avg_time}`\n**Templates submitted:** `{results[5]}`\n**Matches voted in:** `{results[6]}`'
+				embed_description = f'**Total matches:** `{results[0]}`\n**Match wins/losses:** `{results[1]}/{results[2]}`\n**Win percentage:** `N/A`\n**Total votes for your memes:** `{results[3]}`\n**Avg. time per meme:** `{avg_time}`\n**Templates submitted:** `{results[5]}`\n**Matches voted in:** `{results[6]}`\n**Longest voting streak:** `{results[7]}` days'
 			embed = await generate_embed('blue', embed_title, embed_description)
 			nonce = f'stats{message.author.id}'
 			await message.channel.send(embed=embed, nonce=nonce)
@@ -770,7 +770,7 @@ async def on_message(message):
 					template_author = message.guild.get_member(template_author_id)
 				except:
 					await action_log('template_author was not a valid member')
-					
+
 				if message.author.id == u1_id:
 					if u1_submitted:
 						await message.channel.send(embed=embed)
