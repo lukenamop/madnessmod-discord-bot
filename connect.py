@@ -23,12 +23,6 @@ def db_connect():
 	for row in crsr.fetchall():
 		print('settings: ' + str(row))
 
-	crsr.execute('ALTER TABLE participants ADD longest_vote_streak NUMERIC(5) DEFAULT 0')
-	crsr.execute('ALTER TABLE participants ADD vote_streak NUMERIC(5) DEFAULT 0')
-	crsr.execute('ALTER TABLE participants ADD last_vote_streak_time NUMERIC(10) DEFAULT 0')
-	crsr.execute('ALTER TABLE participants ADD unvoted_match_start_time NUMERIC(10) DEFAULT NULL')
-	conn.commit()
-
 	crsr.execute("""SELECT COUNT(*) FROM participants""")
 	result = crsr.fetchone()
 	print('participants: ' + str(result[0]))
@@ -61,6 +55,10 @@ db_connect()
 # templates_submitted NUMERIC(7) DEFAULT 0
 # match_votes NUMERIC(7) DEFAULT 0
 # lb_points NUMERIC(10) DEFAULT 0
+# longest_vote_streak NUMERIC(5) DEFAULT 0
+# vote_streak NUMERIC(5) DEFAULT 0
+# last_vote_streak_time NUMERIC(10) DEFAULT 0
+# unvoted_match_start_time NUMERIC(10) DEFAULT NULL
 
 # TABLE signups
 # db_id SERIAL PRIMARY KEY

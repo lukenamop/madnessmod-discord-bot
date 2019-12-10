@@ -353,9 +353,9 @@ async def on_message(message):
 			# build stats embed
 			embed_title = f'Stats for {functions.escape_underscores(user.display_name)}'
 			try:
-				embed_description = f'**Total matches:** `{results[0]}`\n**Match wins/losses:** `{results[1]}/{results[2]}`\n**Win percentage:** `{round((float(results[1]) / float(results[0])) * 100)}%`\n**Total votes for your memes:** `{results[3]}`\n**Avg. time per meme:** `{avg_time}`\n**Templates submitted:** `{results[5]}`\n**Matches voted in:** `{results[6]}`\n**Longest voting streak:** `{results[7]}` days'
+				embed_description = f'**Total matches:** `{results[0]}`\n**Match wins/losses:** `{results[1]}/{results[2]}`\n**Win percentage:** `{round((float(results[1]) / float(results[0])) * 100)}%`\n**Total votes for your memes:** `{results[3]}`\n**Avg. time per meme:** `{avg_time}`\n**Templates submitted:** `{results[5]}`\n**Matches voted in:** `{results[6]}`\n**Longest voting streak:** `{results[7]} days`'
 			except ZeroDivisionError:
-				embed_description = f'**Total matches:** `{results[0]}`\n**Match wins/losses:** `{results[1]}/{results[2]}`\n**Win percentage:** `N/A`\n**Total votes for your memes:** `{results[3]}`\n**Avg. time per meme:** `{avg_time}`\n**Templates submitted:** `{results[5]}`\n**Matches voted in:** `{results[6]}`\n**Longest voting streak:** `{results[7]}` days'
+				embed_description = f'**Total matches:** `{results[0]}`\n**Match wins/losses:** `{results[1]}/{results[2]}`\n**Win percentage:** `N/A`\n**Total votes for your memes:** `{results[3]}`\n**Avg. time per meme:** `{avg_time}`\n**Templates submitted:** `{results[5]}`\n**Matches voted in:** `{results[6]}`\n**Longest voting streak:** `{results[7]} days`'
 			embed = await generate_embed('blue', embed_title, embed_description)
 			nonce = f'stats{message.author.id}'
 			await message.channel.send(embed=embed, nonce=nonce)
