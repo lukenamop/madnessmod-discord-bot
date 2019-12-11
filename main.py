@@ -424,18 +424,30 @@ async def on_message(message):
 								user_found = True
 							if lb_rank < 10:
 								# add an extra space to align all the ranks
-								embed_description += f'**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
+								if lb_points == 420:
+									embed_description += f'**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points 🌿\n'
+								else:
+									embed_description += f'**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
 							elif lb_rank >= 10 and lb_rank < 100:
-								embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
+								if lb_points == 420:
+									embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points 🌿\n'
+								else:
+									embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
 						# 10 users printed but the base user hasn't been found yet
 						else:
 							if member == user:
 								user_found = True
 								# add the user's rank at the bottom
 								if lb_rank < 10:
-									embed_description += f'\nUser\'s rank:\n**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
+									if lb_points == 420:
+										embed_description += f'\nUser\'s rank:\n**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points 🌿'
+									else:
+										embed_description += f'\nUser\'s rank:\n**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
 								elif lb_rank >= 10 and lb_rank < 100:
-									embed_description += f'\nUser\'s rank:\n**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
+									if lb_points == 420:
+										embed_description += f'\nUser\'s rank:\n**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points 🌿'
+									else:
+										embed_description += f'\nUser\'s rank:\n**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
 				# strip any extraneous newlines
 				embed_description = embed_description.rstrip('\n')
 			else:
