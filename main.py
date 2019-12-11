@@ -2251,7 +2251,16 @@ async def on_reaction_add(reaction, user):
 					vote_streak_bonus = 0
 					if not config.TESTING:
 						# check to see if the user's last vote was within 48 hours
-						if (time.time() <= unvoted_match_start_time + 172800) or (unvoted_match_start_time == None):
+						streak_kept = False
+						try:
+							if unvoted_match_start_time is None:
+								streak_kept = True
+							elif time.time() <= unvoted_match_start_time + 172800:
+								streak_kept = True
+						except TypeError:
+							await action_log('ERROR - unvoted_match_start_time caused a Type Error')
+
+						if streak_kept:
 							# check to see if the user's streak was incremented at least 23 hours ago
 							if time.time() >= last_vote_streak_time + 82800:
 								# increment the user's vote streak
