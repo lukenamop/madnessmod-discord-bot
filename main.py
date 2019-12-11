@@ -2295,13 +2295,17 @@ async def on_reaction_add(reaction, user):
 						embed_description = f'Your vote for image {vote_position} has been confirmed. If you\'d like to change your vote, remove this vote by using the same emoji.\n\nYou have earned 10 points for voting!\nYour new voting streak is {vote_streak_string}, next streak available in 23 hours.\nYou have earned {vote_streak_bonus} bonus points for increasing your voting streak!'
 					else:
 						# calculate seconds until the user's next voting streak
-						next_streak_seconds = last_vote_streak_time + 82800 - time.time()
-						if round(next_streak_seconds / (60 * 60)) > 1:
-							# round to the nearest hour
-							next_streak_string = f'{round(next_streak_seconds / (60 * 60))} hours'
-						else:
-							# round to the nearest minute
-							next_streak_string = f'{round(next_streak_string / 60)} minutes'
+						try:
+							next_streak_seconds = last_vote_streak_time + 82800 - time.time()
+							if round(next_streak_seconds / (60 * 60)) > 1:
+								# round to the nearest hour
+								next_streak_string = f'{round(next_streak_seconds / (60 * 60))} hours'
+							else:
+								# round to the nearest minute
+								next_streak_string = f'{round(next_streak_string / 60)} minutes'
+						except TypeError:
+							await action_log('ERROR - next_streak_seconds caused a TypeError')
+							next_streak_string = '`N/A`'
 
 						embed_description = f'Your vote for image {vote_position} has been confirmed. If you\'d like to change your vote, remove this vote by using the same emoji.\n\nYou have earned 10 points for voting!\nYour current voting streak is {vote_streak_string}, next streak available in {next_streak_string}.'
 					embed = await generate_embed('green', embed_title, embed_description)
