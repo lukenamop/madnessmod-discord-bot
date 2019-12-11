@@ -435,8 +435,8 @@ async def on_message(message):
 									embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
 						# 10 users printed but the base user hasn't been found yet
 						else:
-							embed_description += '\nUser\'s rank:\n'
 							if member == user:
+								embed_description += '\nUser\'s rank:\n'
 								user_found = True
 								# add the user's rank at the bottom
 								if lb_rank < 10:
