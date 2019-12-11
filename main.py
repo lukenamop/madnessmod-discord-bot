@@ -95,7 +95,7 @@ async def on_message(message):
 
 				if not config.TESTING:
 					# set participants' unvoted_match_start_time to the current time (if not already set)
-					query = f'UPDATE participants SET unvoted_match_start_time = {time.time()} WHERE unvoted_match_start_time IS NULL'
+					query = f'UPDATE participants SET unvoted_match_start_time = {time.time()} WHERE unvoted_match_start_time IS NULL AND user_id IS NOT {u1_id} AND user_id IS NOT {u2_id}'
 					connect.crsr.execute(query)
 					connect.conn.commit()
 
@@ -351,17 +351,23 @@ async def on_message(message):
 		connect.crsr.execute(query)
 		results = connect.crsr.fetchone()
 		if results is not None:
+			# format the user's average time per meme
 			if results[4] is not None:
 				avg_time = strftime("%Mm %Ss", gmtime(results[4]))
 			else:
 				avg_time = 'N/A'
+			# format the user's longest voting streak
+			if results[7] == 1:
+				voting_streak = '1 day'
+			else:
+				voting_streak = f'{results[7]} days'
 
 			# build stats embed
 			embed_title = f'Stats for {functions.escape_underscores(user.display_name)}'
 			try:
-				embed_description = f'**Total matches:** `{results[0]}`\n**Match wins/losses:** `{results[1]}/{results[2]}`\n**Win percentage:** `{round((float(results[1]) / float(results[0])) * 100)}%`\n**Total votes for your memes:** `{results[3]:,}`\n**Avg. time per meme:** `{avg_time}`\n**Templates submitted:** `{results[5]:,}`\n**Matches voted in:** `{results[6]:,}`\n**Longest voting streak:** `{results[7]} days`'
+				embed_description = f'**Total matches:** `{results[0]}`\n**Match wins/losses:** `{results[1]}/{results[2]}`\n**Win percentage:** `{round((float(results[1]) / float(results[0])) * 100)}%`\n**Total votes for your memes:** `{results[3]:,}`\n**Avg. time per meme:** `{avg_time}`\n**Templates submitted:** `{results[5]:,}`\n**Matches voted in:** `{results[6]:,}`\n**Longest voting streak:** `{voting_streak}`'
 			except ZeroDivisionError:
-				embed_description = f'**Total matches:** `{results[0]}`\n**Match wins/losses:** `{results[1]}/{results[2]}`\n**Win percentage:** `N/A`\n**Total votes for your memes:** `{results[3]:,}`\n**Avg. time per meme:** `{avg_time}`\n**Templates submitted:** `{results[5]:,}`\n**Matches voted in:** `{results[6]:,}`\n**Longest voting streak:** `{results[7]} days`'
+				embed_description = f'**Total matches:** `{results[0]}`\n**Match wins/losses:** `{results[1]}/{results[2]}`\n**Win percentage:** `N/A`\n**Total votes for your memes:** `{results[3]:,}`\n**Avg. time per meme:** `{avg_time}`\n**Templates submitted:** `{results[5]:,}`\n**Matches voted in:** `{results[6]:,}`\n**Longest voting streak:** `{voting_streak}`'
 			embed = await generate_embed('blue', embed_title, embed_description)
 			nonce = f'stats{message.author.id}'
 			await message.channel.send(embed=embed, nonce=nonce)
@@ -2246,8 +2252,8 @@ async def on_reaction_add(reaction, user):
 					if not config.TESTING:
 						# check to see if the user's last vote was within 48 hours
 						if (time.time() <= unvoted_match_start_time + 172800) or (unvoted_match_start_time == None):
-							# check to see if the user's streak was incremented at least 24 hours ago
-							if time.time() >= last_vote_streak_time + 86400:
+							# check to see if the user's streak was incremented at least 23 hours ago
+							if time.time() >= last_vote_streak_time + 82800:
 								# increment the user's vote streak
 								vote_streak += 1
 								last_vote_streak_time = time.time()
@@ -2265,7 +2271,7 @@ async def on_reaction_add(reaction, user):
 							last_vote_streak_time = time.time()
 
 						# update participant vote count, lb_points, and vote streak
-						query = f'UPDATE participants SET match_votes = {match_votes + 1}, lb_points = {lb_points + 10 + vote_streak_bonus}, vote_streak = {vote_streak}, longest_vote_streak = {longest_vote_streak}, unvoted_match_start_time = {unvoted_match_start_time}, last_vote_streak_time = {last_vote_streak_time} WHERE user_id = {user.id}'
+						query = f'UPDATE participants SET match_votes = {match_votes + 1}, lb_points = {lb_points + 10 + vote_streak_bonus}, vote_streak = {vote_streak}, longest_vote_streak = {longest_vote_streak}, unvoted_match_start_time = NULL, last_vote_streak_time = {last_vote_streak_time} WHERE user_id = {user.id}'
 						connect.crsr.execute(query)
 						connect.conn.commit()
 						await action_log('participant stats updated')
