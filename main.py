@@ -37,6 +37,7 @@ async def continue_polls(client):
 	for match_channel in match_category.channels:
 		message = match_channel.last_message
 		if message is not None:
+			await action_log(f'{message.author.name}')
 			if len(message.embeds) == 1:
 				await action_log(f'title: {message.embeds[0].title}')
 				if message.embeds[0].title == 'Match Voting':
