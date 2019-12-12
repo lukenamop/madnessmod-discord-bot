@@ -36,7 +36,7 @@ async def continue_polls(client):
 	connected_polls = 0
 	for match_channel in match_category.channels:
 		await action_log(f'{match_channel.name}')
-		message = match_channel.last_message
+		message = await match_channel.fetch_message(match_channel.last_message_id)
 		if message is not None:
 			await action_log(f'{message.author.name}')
 			if len(message.embeds) == 1:
@@ -132,7 +132,7 @@ async def on_message(message):
 					connect.conn.commit()
 
 				# set poll start time in the match database
-				query = f'UPDATE matches SET poll_start_time = {time.time()} WHERE channel_id = {message.channel.id} AND start_time >= {time.time() - (config.MATCH_TIME + 30)}'
+				query = f'UPDATE matches SET poll_start_time = {time.time()} WHERE db_id = {db_id}'
 				await execute_sql(query)
 				connect.conn.commit()
 
