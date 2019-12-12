@@ -49,7 +49,7 @@ async def continue_polls(client):
 						if result is not None:
 							db_id = result[0]
 							poll_start_time = result[1]
-							await action_log(f'time left: {time.time() - poll_start_time}')
+							await action_log(f'time left: {round(time.time()) - int(poll_start_time)}')
 
 						# build voting embed
 						# embed_title = 'Match Voting'
