@@ -43,7 +43,14 @@ async def continue_polls(client):
 				if len(message.embeds) == 1:
 					await action_log(f'title: {message.embeds[0].title}')
 					if message.embeds[0].title == 'Match Voting':
-						await action_log(f'the timestamp is: {message.embeds[0].timestamp}')
+						query = f'SELECT db_id, poll_start_time FROM matches ORDER BY poll_start_time DESC WHERE channel_id = {match_channel.id}'
+						await execute_sql(query)
+						result = connect.crsr.fetchone()
+						if result is not None:
+							db_id = result[0]
+							poll_start_time = result[1]
+							await action_log(f'time left: {time.time() - poll_start_time}')
+
 						# build voting embed
 						# embed_title = 'Match Voting'
 						# embed_description = '**Vote for your favorite!** Results will be sent to this channel when voting ends in 2 hours.\n🇦 First image\n🇧 Second image'
