@@ -42,7 +42,7 @@ async def continue_polls(client):
 				await action_log(f'{message.author.name}')
 				if len(message.embeds) == 1:
 					await action_log(f'title: {message.embeds[0].title}')
-					if message.embeds[0].title == 'Match Voting':
+					if message.embeds[0].title == 'Match Voting' or message.embeds[0].title == 'Extending Voting Time':
 						query = f'SELECT db_id, poll_start_time FROM matches ORDER BY poll_start_time DESC WHERE channel_id = {match_channel.id}'
 						await execute_sql(query)
 						result = connect.crsr.fetchone()
