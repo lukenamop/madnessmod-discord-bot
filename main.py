@@ -115,11 +115,6 @@ async def on_message(message):
 				await message.add_reaction('🇦')
 				await message.add_reaction('🇧')
 				await action_log('added reactions to poll message')
-				vote_pings_role = message.channel.guild.get_role(600356303033860106)
-				if not config.TESTING:
-					ping_message = await message.channel.send(f'{vote_pings_role.mention} @here')
-				else:
-					ping_message = await message.channel.send('This is just a test match, not pinging `Vote Pings` or `here`.')
 
 				# pull the match data
 				query = f'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url FROM matches WHERE channel_id = {message.channel.id} AND start_time >= {time.time() - (config.MATCH_TIME + 30)}'
@@ -1023,6 +1018,12 @@ async def on_message(message):
 					embed_link = u2_link
 					embed = await generate_embed('green', embed_title, embed_description, embed_link)
 					await match_channel.send(embed=embed)
+
+					vote_pings_role = match_channel.guild.get_role(600356303033860106)
+					if not config.TESTING:
+						ping_message = await match_channel.send(f'{vote_pings_role.mention} @here')
+					else:
+						ping_message = await match_channel.send('This is just a test match, not pinging `Vote Pings` or `here`.')
 
 					# build voting embed
 					embed_title = 'Match Voting'
