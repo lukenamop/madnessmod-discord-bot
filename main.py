@@ -609,7 +609,10 @@ async def on_message(message):
 					else:
 						# build verification failure embed (verification key error)
 						embed_title = 'Verification Key Incorrect'
-						embed_description = 'To try again, please send `.verify` in #verification.'
+						if base_message.guild.id == 581695290986332160:
+							embed_description = f'To try again, please send `.verify` in {client.get_channel(config.VERIFICATION_CHAN_ID).mention}.'
+						else:
+							embed_description = 'To try again, please send `.verify` in #verification.'
 						embed = await generate_embed('red', embed_title, embed_description)
 						await user_channel.send(embed=embed)
 						await action_log(f'verification key incorrect from {username_discriminator}')
@@ -618,13 +621,19 @@ async def on_message(message):
 					await action_log(f'verification username error for {username_discriminator}, attempted name: {attempted_name}')
 					# build verification failure embed (username error)
 					embed_title = 'Username Error'
-					embed_description = 'To try again, please send `.verify` in #verification.'
+					if base_message.guild.id == 581695290986332160:
+						embed_description = f'To try again, please send `.verify` in {client.get_channel(config.VERIFICATION_CHAN_ID).mention}.'
+					else:
+						embed_description = 'To try again, please send `.verify` in #verification.'
 					embed = await generate_embed('red', embed_title, embed_description)
 					await user_channel.send(embed=embed)
 			except asyncio.TimeoutError:
 				# build verification failure embed (timed out)
 				embed_title = 'Verification Attempt Timed Out'
-				embed_description = 'To try again, please send `.verify` in #verification.'
+				if base_message.guild.id == 581695290986332160:
+					embed_description = f'To try again, please send `.verify` in {client.get_channel(config.VERIFICATION_CHAN_ID).mention}.'
+				else:
+					embed_description = 'To try again, please send `.verify` in #verification.'
 				embed = await generate_embed('red', embed_title, embed_description)
 				await user_channel.send(embed=embed)
 				await action_log(f'verification timed out for {username_discriminator}')
