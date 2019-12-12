@@ -43,7 +43,7 @@ async def continue_polls(client):
 				if len(message.embeds) == 1:
 					await action_log(f'title: {message.embeds[0].title}')
 					if message.embeds[0].title == 'Match Voting' or message.embeds[0].title == 'Extending Voting Time':
-						query = f'SELECT db_id, poll_start_time FROM matches ORDER BY poll_start_time DESC WHERE channel_id = {match_channel.id}'
+						query = f'SELECT db_id, poll_start_time FROM matches WHERE channel_id = {match_channel.id} ORDER BY poll_start_time DESC'
 						await execute_sql(query)
 						result = connect.crsr.fetchone()
 						if result is not None:
@@ -91,7 +91,7 @@ async def generate_embed(color, title, description, attachment=None):
 async def execute_sql(query):
 	try:
 		connect.crsr.execute(query)
-	except psycopg2.errors.InFailedSqlTransaction:
+	except config.psycopg2.errors.InFailedSqlTransaction:
 		await action_log('ERROR - failed SQL transaction, reconnecting automatically')
 		success = connect.db_connect()
 		if success:
