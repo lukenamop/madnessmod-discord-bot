@@ -35,6 +35,7 @@ async def continue_polls(client):
 	match_category = client.get_channel(config.MATCH_CATEGORY_ID)
 	connected_polls = 0
 	for match_channel in match_category.channels:
+		await action_log(f'{match_channel.name}')
 		message = match_channel.last_message
 		if message is not None:
 			await action_log(f'{message.author.name}')
@@ -129,6 +130,11 @@ async def on_message(message):
 					query = f'UPDATE participants SET unvoted_match_start_time = {time.time()} WHERE unvoted_match_start_time IS NULL AND user_id != {u1_id} AND user_id != {u2_id}'
 					await execute_sql(query)
 					connect.conn.commit()
+
+				# set poll start time in the match database
+				query = f'UPDATE matches SET poll_start_time = {time.time()} WHERE channel_id = {message.channel.id} AND start_time >= {time.time() - (config.MATCH_TIME + 30)}'
+				await execute_sql(query)
+				connect.conn.commit()
 
 				# sleep for 2 hours (config.BASE_POLL_TIME)
 				await asyncio.sleep(config.BASE_POLL_TIME)
