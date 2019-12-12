@@ -38,6 +38,7 @@ async def continue_polls(client):
 		message = match_channel.last_message
 		if message is not None:
 			if len(message.embeds) == 1:
+				await action_log(f'title: {message.embeds[0].title}')
 				if message.embeds[0].title == 'Match Voting':
 					await action_log(f'the timestamp is: {message.embeds[0].timestamp}')
 					# build voting embed
