@@ -2329,12 +2329,12 @@ async def on_reaction_add(reaction, user):
 						# calculate seconds until the user's next voting streak
 						try:
 							next_streak_seconds = last_vote_streak_time + 82800 - time.time()
-							if round(next_streak_seconds / (60 * 60)) > 1:
+							if round(float(next_streak_seconds / (60 * 60))) > 1:
 								# round to the nearest hour
-								next_streak_string = f'{round(next_streak_seconds / (60 * 60))} hours'
+								next_streak_string = f'{round(float(next_streak_seconds / (60 * 60)))} hours'
 							else:
 								# round to the nearest minute
-								next_streak_string = f'{round(next_streak_string / 60)} minutes'
+								next_streak_string = f'{round(float(next_streak_string / 60))} minutes'
 						except TypeError:
 							await action_log('ERROR - next_streak_seconds caused a TypeError')
 							next_streak_string = '`N/A`'
