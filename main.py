@@ -57,7 +57,16 @@ async def generate_embed(color, title, description, attachment=None):
 		embed.set_image(url=attachment)
 	return embed
 
-async def start_match(type, competitor1_id, competitor2_id=None):
+async def execute_sql(query):
+	try:
+		connect.crsr.execute(query)
+	except psycopg2.errors.InFailedSqlTransaction:
+		await action_log('ERROR - failed SQL transaction, reconnecting automatically')
+		success = connect.db_connect()
+		if success:
+			await action_log('reconnection was a success')
+		else:
+			await action_log('ERROR - connection failed')
 	return
 
 # client event triggers on any discord message
@@ -83,7 +92,7 @@ async def on_message(message):
 
 				# pull the match data
 				query = f'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url FROM matches WHERE channel_id = {message.channel.id} AND start_time >= {time.time() - (config.MATCH_TIME + 30)}'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				result = connect.crsr.fetchone()
 				# initialize important variables
 				db_id = result[0]
@@ -95,8 +104,8 @@ async def on_message(message):
 
 				if not config.TESTING:
 					# set participants' unvoted_match_start_time to the current time (if not already set)
-					query = f'UPDATE participants SET unvoted_match_start_time = {time.time()} WHERE unvoted_match_start_time IS NULL AND user_id IS NOT {u1_id} AND user_id IS NOT {u2_id}'
-					connect.crsr.execute(query)
+					query = f'UPDATE participants SET unvoted_match_start_time = {time.time()} WHERE unvoted_match_start_time IS NULL AND user_id != {u1_id} AND user_id != {u2_id}'
+					await execute_sql(query)
 					connect.conn.commit()
 
 				# sleep for 2 hours (config.BASE_POLL_TIME)
@@ -104,7 +113,7 @@ async def on_message(message):
 				await action_log('waking back up in match channel and checking vote counts')
 				# check vote count
 				query = f'SELECT COUNT(*) FROM votes WHERE match_id = {db_id}'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				total_votes = connect.crsr.fetchone()[0]
 
 				extensions = 1
@@ -126,7 +135,7 @@ async def on_message(message):
 					await action_log('waking back up in match channel and checking vote counts')
 					# check vote count
 					query = f'SELECT COUNT(*) FROM votes WHERE match_id = {db_id}'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					total_votes = connect.crsr.fetchone()[0]
 					extensions += 1
 
@@ -137,11 +146,11 @@ async def on_message(message):
 
 				# check how many votes image A got
 				query = f'SELECT COUNT(*) FROM votes WHERE match_id = {db_id} AND a_vote = True'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				a_votes = connect.crsr.fetchone()[0]
 				# check how many votes image B got
 				query = f'SELECT COUNT(*) FROM votes WHERE match_id = {db_id} AND b_vote = True'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				b_votes = connect.crsr.fetchone()[0]
 
 				# find winning image
@@ -188,10 +197,10 @@ async def on_message(message):
 						if not config.TESTING:
 							# update participant stats in the databsee (tie)
 							query = f'UPDATE participants SET total_votes_for = total_votes_for + {votes}, lb_points = lb_points + {votes * 2} WHERE user_id = {u1_id}'
-							connect.crsr.execute(query)
+							await execute_sql(query)
 							connect.conn.commit()
 							query = f'UPDATE participants SET total_votes_for = total_votes_for + {votes}, lb_points = lb_points + {votes * 2} WHERE user_id = {u2_id}'
-							connect.crsr.execute(query)
+							await execute_sql(query)
 							connect.conn.commit()
 							await action_log('participant stats updated')
 						return
@@ -223,11 +232,11 @@ async def on_message(message):
 
 					# update participant stats in the database
 					query = f'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1, total_votes_for = total_votes_for + {winning_votes}, lb_points = lb_points + {(winning_votes * 2) + 50} WHERE user_id = {winner.id}'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					connect.conn.commit()
 					await action_log('winner participant stats updated')
 					query = f'UPDATE participants SET total_matches = total_matches + 1, match_losses = match_losses + 1, total_votes_for = total_votes_for + {losing_votes}, lb_points = lb_points + {losing_votes * 2} WHERE user_id = {loser.id}'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					connect.conn.commit()
 					await action_log('loser participant stats updated')
 
@@ -294,7 +303,7 @@ async def on_message(message):
 
 				# update signup info with the message_id
 				query = 'UPDATE signups SET message_id = ' + str(message.id) + ' WHERE message_id = 0'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				connect.conn.commit()
 				await action_log('message_id added to postgresql signup info')
 				return
@@ -348,7 +357,7 @@ async def on_message(message):
 
 		# check participants database for the specified user
 		query = f'SELECT total_matches, match_wins, match_losses, total_votes_for, avg_final_meme_time, templates_submitted, match_votes, longest_vote_streak FROM participants WHERE user_id = {user.id}'
-		connect.crsr.execute(query)
+		await execute_sql(query)
 		results = connect.crsr.fetchone()
 		if results is not None:
 			# format the user's average time per meme
@@ -397,7 +406,7 @@ async def on_message(message):
 			# pull top 15 participants from database (extras in case some of the top 10 have left the server)
 			query = 'SELECT user_id, lb_points, RANK () OVER (ORDER BY lb_points DESC) lb_rank FROM participants ORDER BY lb_points DESC'
 			# query = 'SELECT user_id, lb_points FROM participants ORDER BY lb_points DESC LIMIT 15'
-			connect.crsr.execute(query)
+			await execute_sql(query)
 			results = connect.crsr.fetchall()
 			embed_title = 'Points Leaderboard - Top 10'
 			# check to make sure there are signups
@@ -465,7 +474,7 @@ async def on_message(message):
 		if message_content == '.simlb':
 			if message.author.id in config.ADMIN_IDS:
 				query = 'UPDATE participants SET lb_points = 175 WHERE user_id = 324273473360887808'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				connect.conn.commit()
 
 				await message.channel.send('done')
@@ -642,7 +651,7 @@ async def on_message(message):
 
 			# check tournament settings via database (template requirement)
 			query = f'SELECT template_required FROM settings WHERE guild_id = {config.MM_GUILD_ID}'
-			connect.crsr.execute(query)
+			await execute_sql(query)
 			results = connect.crsr.fetchone()
 			template_required = results[0]
 
@@ -679,7 +688,7 @@ async def on_message(message):
 
 					# check to see if user has signed up in the last 7 days (config.CYCLE seconds)
 					query = f'SELECT * FROM signups WHERE user_id = {message.author.id} AND submission_time >= {time.time() - config.CYCLE}'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					result = connect.crsr.fetchone()
 					# don't create a new signup for previously signed up users
 					if result is None:
@@ -700,7 +709,7 @@ async def on_message(message):
 
 						# add signup info to postgresql
 						query = f'INSERT INTO signups (user_id, message_id, submission_time) VALUES ({message.author.id}, 0, {time.time()})'
-						connect.crsr.execute(query)
+						await execute_sql(query)
 						connect.conn.commit()
 						await action_log('signup info added to postgresql')
 					else:
@@ -715,7 +724,7 @@ async def on_message(message):
 				# signup process when no template is required
 				# check to see if user has signed up in the last 7 days (config.CYCLE seconds)
 				query = f'SELECT * FROM signups WHERE user_id = {message.author.id} AND submission_time >= {time.time() - config.CYCLE}'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				result = connect.crsr.fetchone()
 				# don't create a new signup for previously signed up users
 				if result is None:
@@ -734,7 +743,7 @@ async def on_message(message):
 
 					# add signup info to postgresql
 					query = f'INSERT INTO signups (user_id, message_id, submission_time) VALUES ({message.author.id}, 0, {time.time()})'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					connect.conn.commit()
 					await action_log('signup info added to postgresql')
 				else:
@@ -748,11 +757,11 @@ async def on_message(message):
 
 			# check for existing participant in database
 			query = f'SELECT * FROM participants WHERE user_id = {message.author.id}'
-			connect.crsr.execute(query)
+			await execute_sql(query)
 			if connect.crsr.fetchone() is None:
 				# create participant if none exists
 				query = f'INSERT INTO participants (user_id) VALUES ({message.author.id})'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				connect.conn.commit()
 				await action_log('user added to participants table in postgresql')
 			return
@@ -761,7 +770,7 @@ async def on_message(message):
 		if message_content.startswith('.submit'):
 			# check for an active match including the specified user
 			query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, template_url, creation_time, db_id, template_author_id FROM matches WHERE (u1_id = {message.author.id} OR u2_id = {message.author.id}) AND start_time >= {time.time() - (config.MATCH_TIME + 10)}'
-			connect.crsr.execute(query)
+			await execute_sql(query)
 			results = connect.crsr.fetchall()
 			result = None
 			failed = False
@@ -854,19 +863,19 @@ async def on_message(message):
 				# add submission info to postgresql database
 				if u_order == 1:
 					query = f'UPDATE matches SET u1_submitted = true, u1_image_url = \'{message.attachments[0].url}\' WHERE db_id = {match_db_id}'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					connect.conn.commit()
 					await action_log('match info updated in postgresql')
 				if u_order == 2:
 					query = f'UPDATE matches SET u2_submitted = true, u2_image_url = \'{message.attachments[0].url}\' WHERE db_id = {match_db_id}'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					connect.conn.commit()
 					await action_log('match info updated in postgresql')
 
 				if not config.TESTING:
 					# pull participant info from database
 					query = f'SELECT avg_final_meme_time, total_matches FROM participants WHERE user_id = {message.author.id}'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					results = connect.crsr.fetchone()
 					# check to see if avg_final_meme_time exists
 					if results[0] is None:
@@ -875,13 +884,13 @@ async def on_message(message):
 						new_avg_final_meme_time = ((float(results[0] * results[1]) + (time.time() - float(start_time))) / float(results[1] + 1))
 					# update participant stats in database
 					query = f'UPDATE participants SET avg_final_meme_time = {new_avg_final_meme_time} WHERE user_id = {message.author.id}'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					connect.conn.commit()
 					await action_log('participant stats updated')
 
 				# pull match info from database
 				query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, u1_image_url, u2_image_url, channel_id FROM matches WHERE db_id = {match_db_id}'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				result = connect.crsr.fetchone()
 				# find match_channel and submissions_channel from discord
 				match_channel = client.get_channel(result[6])
@@ -913,7 +922,7 @@ async def on_message(message):
 							return
 						# update match info in database
 						query = f'UPDATE matches SET a_meme = 1 WHERE db_id = {match_db_id}'
-						connect.crsr.execute(query)
+						await execute_sql(query)
 						connect.conn.commit()
 					if u_order == 2:
 						try:
@@ -929,7 +938,7 @@ async def on_message(message):
 							return
 						# update match info in database
 						query = f'UPDATE matches SET a_meme = 2 WHERE db_id = {match_db_id}'
-						connect.crsr.execute(query)
+						await execute_sql(query)
 						connect.conn.commit()
 
 					# send final memes to #submissions channel
@@ -1022,18 +1031,18 @@ async def on_message(message):
 			if not config.TESTING:
 				# check for existing participant in database
 				query = f'SELECT templates_submitted FROM participants WHERE user_id = {message.author.id}'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				result = connect.crsr.fetchone()
 				if result is None:
 					# create participant if none exists
 					query = f'INSERT INTO participants (user_id, templates_submitted) VALUES ({message.author.id}, 1)'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					connect.conn.commit()
 					await action_log('no existing user, new user added to participants table in postgresql')
 				else:
 					# update participant stats if they already exist
 					query = f'UPDATE participants SET templates_submitted = {result[0] + 1} WHERE user_id = {message.author.id}'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					connect.conn.commit()
 					await action_log('user already existed, participant stats updated in postgresql')
 			return
@@ -1067,7 +1076,7 @@ async def on_message(message):
 		# '.activematches' command (duel-mods)
 		if message_content == '.activematches':
 			query = f'SELECT channel_id FROM matches WHERE start_time >= {time.time() - (config.MATCH_TIME + config.BASE_POLL_TIME)}'
-			connect.crsr.execute(query)
+			await execute_sql(query)
 			results = connect.crsr.fetchall()
 			embed_title = 'Active Matches'
 			# check to make sure there are active matches
@@ -1117,7 +1126,7 @@ async def on_message(message):
 
 				# check signups database for specified user_id
 				query = f'SELECT message_id FROM signups WHERE user_id = {user_id} AND submission_time >= {time.time() - config.CYCLE}'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				result = connect.crsr.fetchone()
 				if result is not None:
 					# DM user to notify of resignup
@@ -1145,7 +1154,7 @@ async def on_message(message):
 
 					# remove signup info from postgresql
 					query = f'DELETE FROM signups WHERE user_id = {user_id} AND submission_time >= {time.time() - config.CYCLE}'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					connect.conn.commit()
 					await action_log('signup info deleted')
 
@@ -1184,7 +1193,7 @@ async def on_message(message):
 		if message_content == '.signuplist' or message_content == '.signups':
 			# pull all signups from database
 			query = f'SELECT user_id FROM signups WHERE submission_time >= {time.time() - config.CYCLE}'
-			connect.crsr.execute(query)
+			await execute_sql(query)
 			results = connect.crsr.fetchall()
 			embed_title = 'Signup List'
 			# check to make sure there are signups
@@ -1229,7 +1238,7 @@ async def on_message(message):
 
 				# pull all signups from database
 				query = f'SELECT user_id FROM signups WHERE submission_time >= {time.time() - config.CYCLE}'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				results = connect.crsr.fetchall()
 				# check to make sure there are signups
 				if results is not None:
@@ -1346,13 +1355,13 @@ async def on_message(message):
 				await action_log('signup templates toggled')
 				# check to see if templates are required
 				query = f'SELECT template_required FROM settings WHERE guild_id = {config.MM_GUILD_ID}'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				results = connect.crsr.fetchone()
 				template_required = results[0]
 				if template_required:
 					# set templates to no longer be required
 					query = f'UPDATE settings SET template_required = False WHERE guild_id = {config.MM_GUILD_ID}'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					connect.conn.commit()
 					await action_log('templates no longer required')
 
@@ -1366,7 +1375,7 @@ async def on_message(message):
 				else:
 					# set templates to now be required
 					query = f'UPDATE settings SET template_required = True WHERE guild_id = {config.MM_GUILD_ID}'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					connect.conn.commit()
 					await action_log('templates now required')
 
@@ -1395,7 +1404,7 @@ async def on_message(message):
 
 				# pull all signups from database
 				query = f'SELECT user_id FROM signups WHERE submission_time >= {time.time() - config.CYCLE}'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				results = connect.crsr.fetchall()
 				# check to make sure there are signups
 				if results is not None:
@@ -1502,7 +1511,7 @@ async def on_message(message):
 			if message.author.id in config.ADMIN_IDS:
 				# set participant stats to defaults in database
 				query = 'UPDATE participants SET total_matches = DEFAULT, match_wins = DEFAULT, match_losses = DEFAULT, total_votes_for = DEFAULT, avg_final_meme_time = DEFAULT'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				connect.conn.commit()
 
 				# build clearparticipantstats confirmation embed
@@ -1520,7 +1529,7 @@ async def on_message(message):
 			if message.author.id in config.ADMIN_IDS:
 				# reset participant lb_points to default in database
 				query = 'UPDATE participants SET lb_points = DEFAULT'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				connect.conn.commit()
 
 				# build clearlbpoints confirmation embed
@@ -1538,7 +1547,7 @@ async def on_message(message):
 			if message.author.id in config.ADMIN_IDS:
 				# delete all rows from signups database
 				query = 'DELETE FROM signups'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				connect.conn.commit()
 
 				# build clearsignups confirmation embed
@@ -1556,11 +1565,11 @@ async def on_message(message):
 			if message.author.id in config.ADMIN_IDS:
 				# delete all rows from matches database
 				query = 'DELETE FROM matches'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				connect.conn.commit()
 				# delete all rows from votes database
 				query = 'DELETE FROM votes'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				connect.conn.commit()
 
 				# build clearmatches confirmation embed
@@ -1577,14 +1586,14 @@ async def on_message(message):
 			# check to be sure only admin user uses command
 			if message.author.id in config.ADMIN_IDS:
 				query = 'SELECT user_id FROM participants'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				results = connect.crsr.fetchall()
 				total = 0
 				for result in results:
 					user = message.guild.get_member(result[0])
 					if user is None:
 						query = f'DELETE FROM participants WHERE user_id = {result[0]}'
-						connect.crsr.execute(query)
+						await execute_sql(query)
 						connect.conn.commit()
 						total += 1
 				await message.channel.send(f'{total} users in the database are no longer in this server. They have been removed from the database.')
@@ -1672,7 +1681,7 @@ async def on_message(message):
 
 				# add match info to postgresql
 				query = f'INSERT INTO matches (u1_id, u2_id, channel_id, template_message_id, creation_time) VALUES ({member1.id}, {member2.id}, {channel_id}, {template_message.id}, {time.time()})'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				connect.conn.commit()
 				await action_log('match added to database')
 
@@ -1753,7 +1762,7 @@ async def on_message(message):
 
 				# add match info to postgresql
 				query = f'INSERT INTO matches (u1_id, u2_id, channel_id, creation_time, template_message_id) VALUES ({member1.id}, {member2.id}, {channel_id}, {time.time()}, {template_message.id})'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				connect.conn.commit()
 				await action_log('match added to database')
 
@@ -1784,7 +1793,7 @@ async def on_message(message):
 				channel_id = message.channel.id
 
 				query = f'SELECT creation_time, u1_id, u2_id, u1_submitted, u2_submitted, template_url, start_time FROM matches WHERE channel_id = {channel_id}'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				results = connect.crsr.fetchall()
 				result = None
 				failed = False
@@ -1858,7 +1867,7 @@ async def on_message(message):
 					if template_url is not None:
 						# update match start_time in database
 						query = f'UPDATE matches SET start_time = {time.time()} WHERE channel_id = {channel_id} AND template_message_id IS NULL AND template_url = \'{template_url}\''
-						connect.crsr.execute(query)
+						await execute_sql(query)
 						connect.conn.commit()
 						await action_log('match start_time updated in database')
 
@@ -1892,7 +1901,7 @@ async def on_message(message):
 						await action_log('checking submission status')
 						# check for submissions, remind users to submit if they haven't yet
 						query = f'SELECT {submitted} FROM matches WHERE {match_udb} = {match_user.id} AND start_time >= {time.time() - config.MATCH_TIME + 5}'
-						connect.crsr.execute(query)
+						await execute_sql(query)
 						result = connect.crsr.fetchone()
 						if result is not None:
 							if result[0]:
@@ -1911,7 +1920,7 @@ async def on_message(message):
 						await action_log('checking submission status')
 						# check for submissions, remind users to submit if they haven't yet
 						query = f'SELECT {submitted} FROM matches WHERE {match_udb} = {match_user.id} AND start_time >= {time.time() - config.MATCH_TIME + 5}'
-						connect.crsr.execute(query)
+						await execute_sql(query)
 						result = connect.crsr.fetchone()
 						if result is not None:
 							if result[0]:
@@ -1930,7 +1939,7 @@ async def on_message(message):
 						await action_log('checking submission status')
 						# check for submissions, remind users to submit if they haven't yet
 						query = f'SELECT {submitted} FROM matches WHERE {match_udb} = {match_user.id} AND start_time >= {time.time() - (config.MATCH_TIME + 5)}'
-						connect.crsr.execute(query)
+						await execute_sql(query)
 						result = connect.crsr.fetchone()
 						if result is not None:
 							if result[0]:
@@ -1972,7 +1981,7 @@ async def on_message(message):
 			await action_log('forcewin command in match channel')
 			# check to see who has submitted
 			query = f'SELECT db_id, u1_id, u1_submitted, u1_image_url, u2_id, u2_submitted, u2_image_url FROM matches WHERE channel_id = {message.channel.id}'
-			connect.crsr.execute(query)
+			await execute_sql(query)
 			result = connect.crsr.fetchone()
 
 			if result is not None:
@@ -2023,7 +2032,7 @@ async def on_message(message):
 
 						# update participant stats in the database
 						query = f'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1, lb_points = lb_points + 50 WHERE user_id = {winner.id}'
-						connect.crsr.execute(query)
+						await execute_sql(query)
 						connect.conn.commit()
 						await action_log('winner participant stats updated')
 
@@ -2080,7 +2089,7 @@ async def on_message(message):
 			await action_log('showresults command in match channel')
 			# check to see who submitted each meme
 			query = f'SELECT db_id, u1_id, u2_id, a_meme, start_time FROM matches WHERE channel_id = {message.channel.id}'
-			connect.crsr.execute(query)
+			await execute_sql(query)
 			results = connect.crsr.fetchall()
 			if len(results) > 1:
 				result = [0, 0, 0, 0, 0]
@@ -2101,11 +2110,11 @@ async def on_message(message):
 
 			# check how many votes image A got
 			query = f'SELECT COUNT(*) FROM votes WHERE match_id = {result[0]} AND a_vote = True'
-			connect.crsr.execute(query)
+			await execute_sql(query)
 			a_votes = connect.crsr.fetchone()[0]
 			# check how many votes image B got
 			query = f'SELECT COUNT(*) FROM votes WHERE match_id = {result[0]} AND b_vote = True'
-			connect.crsr.execute(query)
+			await execute_sql(query)
 			b_votes = connect.crsr.fetchone()[0]
 			# find winning image
 			if a_votes > b_votes:
@@ -2167,12 +2176,12 @@ async def on_reaction_add(reaction, user):
 
 				# check for existing participant in database
 				query = f'SELECT match_votes, lb_points, vote_streak, longest_vote_streak, unvoted_match_start_time, last_vote_streak_time FROM participants WHERE user_id = {user.id}'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				result = connect.crsr.fetchone()
 				if result is None:
 					# create participant if none exists
 					query = f'INSERT INTO participants (user_id) VALUES ({user.id})'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					connect.conn.commit()
 					await action_log('no existing user, new user added to participants table in postgresql')
 					match_votes = 0
@@ -2191,7 +2200,7 @@ async def on_reaction_add(reaction, user):
 
 				# find the ID of the active match
 				query = f'SELECT db_id, u1_id, u2_id FROM matches WHERE channel_id = {message.channel.id} AND start_time >= {time.time() - (config.BASE_POLL_TIME + (config.POLL_EXTENSION_TIME * 5) + config.MATCH_TIME + 30)}'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				result = connect.crsr.fetchone()
 				if result is not None:
 					match_id = result[0]
@@ -2210,7 +2219,7 @@ async def on_reaction_add(reaction, user):
 
 					# check postgresql database for an existing vote by the user in the specified match
 					query = f'SELECT a_vote, b_vote FROM votes WHERE user_id = {user.id} AND match_id = {match_id}'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					result = connect.crsr.fetchone()
 					if result is not None:
 						if result[0] or result[1]:
@@ -2219,8 +2228,17 @@ async def on_reaction_add(reaction, user):
 								vote_position = 'A'
 							elif result[1] and reaction.emoji == '🇧':
 								vote_position = 'B'
+							elif (result[0] and reaction.emoji == '🇧') or (result[1] and reaction.emoji == '🇦'):
+								# send the user a warning if their vote was for the wrong image
+								embed_title = 'Invalid Vote'
+								embed_description = 'You have previously voted for the other image, please remove your vote before attempting to vote again.'
+								embed = await generate_embed('red', embed_title, embed_description)
+								# send embed to the user via dm
+								await user_channel.send(embed=embed)
+								await action_log(f'invalid vote in match by {user.name}#{user.discriminator}')
+								return
 							else:
-								# send the user a warning if their vote broke any rules
+								# send the user a warning if their vote broke any other rules
 								embed_title = 'Invalid Vote'
 								embed_description = 'You attempted to react to a match poll with an invalid emoji.'
 								embed = await generate_embed('red', embed_title, embed_description)
@@ -2234,13 +2252,13 @@ async def on_reaction_add(reaction, user):
 							embed = await generate_embed('yellow', embed_title, embed_description)
 							# remove vote from postgresql
 							query = f'DELETE FROM votes WHERE user_id = {user.id} AND match_id = {match_id}'
-							connect.crsr.execute(query)
+							await execute_sql(query)
 							connect.conn.commit()
-							await action_log(f'vote removed from match by {user.name}#{user.discriminator}')
+							await action_log('vote removed from database')
 							if not config.TESTING:
 								# update participant stats
 								query = f'UPDATE participants SET match_votes = {match_votes - 1}, lb_points = {lb_points - 10} WHERE user_id = {user.id}'
-								connect.crsr.execute(query)
+								await execute_sql(query)
 								connect.conn.commit()
 								await action_log('participant stats updated')
 							# send embed to the user via dm
@@ -2258,8 +2276,9 @@ async def on_reaction_add(reaction, user):
 						await action_log('no vote position specified')
 						return
 					# add vote info to postgresql via the above queries
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					connect.conn.commit()
+					await action_log('vote inserted into database')
 
 					vote_streak_bonus = 0
 					if not config.TESTING:
@@ -2282,7 +2301,7 @@ async def on_reaction_add(reaction, user):
 								# check to see if the user has voted at least 2 days in a row
 								if vote_streak >= 2:
 									if vote_streak < len(config.VOTE_STREAK_BONUSES):
-										vote_streak_bonus = config.VOTE_STREAK_BONUSES[vote_streak - 1]
+										vote_streak_bonus = config.VOTE_STREAK_BONUSES[int(vote_streak - 1)]
 									else:
 										vote_streak_bonus = config.VOTE_STREAK_BONUSES[-1]
 								# check to see if this is the user's longes vote streak
@@ -2294,7 +2313,7 @@ async def on_reaction_add(reaction, user):
 
 						# update participant vote count, lb_points, and vote streak
 						query = f'UPDATE participants SET match_votes = {match_votes + 1}, lb_points = {lb_points + 10 + vote_streak_bonus}, vote_streak = {vote_streak}, longest_vote_streak = {longest_vote_streak}, unvoted_match_start_time = NULL, last_vote_streak_time = {last_vote_streak_time} WHERE user_id = {user.id}'
-						connect.crsr.execute(query)
+						await execute_sql(query)
 						connect.conn.commit()
 						await action_log('participant stats updated')
 
@@ -2333,7 +2352,7 @@ async def on_reaction_add(reaction, user):
 
 				# pull match data from database
 				query = f'SELECT template_message_id, u1_id, u2_id FROM matches WHERE start_time IS NULL AND template_message_id IS NOT NULL AND channel_id = {match_channel.id}'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				result = connect.crsr.fetchone()
 				template_message_id = result[0]
 				u1 = message.guild.get_member(result[1])
@@ -2372,7 +2391,7 @@ async def on_reaction_add(reaction, user):
 
 					# update match start_time and template_url in database
 					query = f'UPDATE matches SET template_message_id = NULL, template_url = \'{template_url}\', template_author_id = {template_author.id} WHERE channel_id = {match_channel.id} AND start_time IS NULL AND template_message_id IS NOT NULL'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					connect.conn.commit()
 					await action_log('match template updated in database')
 				elif reaction.emoji == x_emoji:
@@ -2393,7 +2412,7 @@ async def on_reaction_add(reaction, user):
 
 					# remove match from database
 					query = f'DELETE FROM matches WHERE channel_id = {match_channel.id} AND start_time IS NULL AND template_message_id IS NOT NULL'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					connect.conn.commit()
 					await action_log('match removed from database')
 
@@ -2406,7 +2425,7 @@ async def on_reaction_add(reaction, user):
 
 				# pull match data from database
 				query = f'SELECT u1_id, u2_id, template_message_id FROM matches WHERE start_time IS NULL AND template_message_id IS NOT NULL AND channel_id = {match_channel.id}'
-				connect.crsr.execute(query)
+				await execute_sql(query)
 				result = connect.crsr.fetchone()
 				# save match data to variables and start DM channels with participants
 				member1 = message.guild.get_member(result[0])
@@ -2440,7 +2459,7 @@ async def on_reaction_add(reaction, user):
 
 					# update match start_time in database
 					query = f'UPDATE matches SET start_time = {time.time()}, template_message_id = NULL WHERE channel_id = {match_channel.id} AND start_time IS NULL AND template_message_id = {template_message_id}'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					connect.conn.commit()
 					await action_log('match start_time updated in database')
 
@@ -2463,7 +2482,7 @@ async def on_reaction_add(reaction, user):
 
 						# remove match from database
 						query = f'DELETE FROM matches WHERE channel_id = {match_channel.id} AND start_time IS NOT NULL AND template_message_id IS NULL'
-						connect.crsr.execute(query)
+						await execute_sql(query)
 						connect.conn.commit()
 						await action_log('match removed from database')
 						return
@@ -2488,7 +2507,7 @@ async def on_reaction_add(reaction, user):
 					await action_log('checking submission status')
 					# check for submissions, remind users to submit if they haven't yet
 					query = f'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} AND start_time >= {time.time() - config.MATCH_TIME + 5}'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					result = connect.crsr.fetchone()
 					if result is not None:
 						if result[0] and result[1]:
@@ -2510,7 +2529,7 @@ async def on_reaction_add(reaction, user):
 					await action_log('checking submission status')
 					# check for submissions, remind users to submit if they haven't yet
 					query = f'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} AND start_time >= {time.time() - config.MATCH_TIME + 5}'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					result = connect.crsr.fetchone()
 					if result is not None:
 						if result[0] and result[1]:
@@ -2532,7 +2551,7 @@ async def on_reaction_add(reaction, user):
 					await action_log('checking submission status')
 					# check for submissions, remind users to submit if they haven't yet
 					query = f'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} AND start_time >= {time.time() - (config.MATCH_TIME + 5)}'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					result = connect.crsr.fetchone()
 					if result[0] and result[1]:
 						return
@@ -2574,7 +2593,7 @@ async def on_reaction_add(reaction, user):
 
 					# remove match from database
 					query = f'DELETE FROM matches WHERE channel_id = {match_channel.id} AND start_time IS NULL AND template_message_id IS NOT NULL'
-					connect.crsr.execute(query)
+					await execute_sql(query)
 					connect.conn.commit()
 					await action_log('match removed from database')
 			return
