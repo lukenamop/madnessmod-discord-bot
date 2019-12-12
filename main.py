@@ -49,7 +49,11 @@ async def continue_polls(client):
 						if result is not None:
 							db_id = result[0]
 							poll_start_time = result[1]
-							await action_log(f'time left: {round(time.time()) - int(poll_start_time)}')
+							try:
+								await action_log(f'time left: {round(time.time()) - int(poll_start_time)}')
+							except TypeError:
+								await action_log('ERROR - poll_start_time caused a TypeError')
+								return
 
 						# build voting embed
 						# embed_title = 'Match Voting'
