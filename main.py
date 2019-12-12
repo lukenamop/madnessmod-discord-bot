@@ -36,19 +36,20 @@ async def continue_polls(client):
 	connected_polls = 0
 	for match_channel in match_category.channels:
 		await action_log(f'{match_channel.name}')
-		message = await match_channel.fetch_message(match_channel.last_message_id)
-		if message is not None:
-			await action_log(f'{message.author.name}')
-			if len(message.embeds) == 1:
-				await action_log(f'title: {message.embeds[0].title}')
-				if message.embeds[0].title == 'Match Voting':
-					await action_log(f'the timestamp is: {message.embeds[0].timestamp}')
-					# build voting embed
-					# embed_title = 'Match Voting'
-					# embed_description = '**Vote for your favorite!** Results will be sent to this channel when voting ends in 2 hours.\n🇦 First image\n🇧 Second image'
-					# embed = await generate_embed('pink', embed_title, embed_description)
-					# await match_channel.send(embed=embed, nonce='poll')
-					connected_polls += 1
+		if match_channel.last_message_id is not None:
+			message = await match_channel.fetch_message(match_channel.last_message_id)
+			if message is not None:
+				await action_log(f'{message.author.name}')
+				if len(message.embeds) == 1:
+					await action_log(f'title: {message.embeds[0].title}')
+					if message.embeds[0].title == 'Match Voting':
+						await action_log(f'the timestamp is: {message.embeds[0].timestamp}')
+						# build voting embed
+						# embed_title = 'Match Voting'
+						# embed_description = '**Vote for your favorite!** Results will be sent to this channel when voting ends in 2 hours.\n🇦 First image\n🇧 Second image'
+						# embed = await generate_embed('pink', embed_title, embed_description)
+						# await match_channel.send(embed=embed, nonce='poll')
+						connected_polls += 1
 
 	await action_log(f'connected to {connected_polls} active polls')
 	return
