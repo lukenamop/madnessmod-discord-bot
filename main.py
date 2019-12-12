@@ -35,13 +35,10 @@ async def continue_polls(client):
 	match_category = client.get_channel(config.MATCH_CATEGORY_ID)
 	connected_polls = 0
 	for match_channel in match_category.channels:
-		await action_log(f'{match_channel.name}')
 		if match_channel.last_message_id is not None:
 			message = await match_channel.fetch_message(match_channel.last_message_id)
 			if message is not None:
-				await action_log(f'{message.author.name}')
 				if len(message.embeds) == 1:
-					await action_log(f'title: {message.embeds[0].title}')
 					if message.embeds[0].title == 'Match Voting' or message.embeds[0].title == 'Extending Voting Time':
 						query = f'SELECT db_id, poll_start_time FROM matches WHERE channel_id = {match_channel.id} ORDER BY poll_start_time DESC'
 						await execute_sql(query)
@@ -50,7 +47,7 @@ async def continue_polls(client):
 							db_id = result[0]
 							poll_start_time = result[1]
 							try:
-								await action_log(f'time left: {round(time.time()) - int(poll_start_time)}')
+								time_since_start = round(time.time()) - int(poll_start_time)
 							except TypeError:
 								await action_log('ERROR - poll_start_time caused a TypeError')
 								return
@@ -121,7 +118,7 @@ async def on_message(message):
 				await action_log('added reactions to poll message')
 
 				# pull the match data
-				query = f'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url FROM matches WHERE channel_id = {message.channel.id} AND start_time >= {time.time() - (config.MATCH_TIME + 30)}'
+				query = f'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url FROM matches WHERE channel_id = {message.channel.id} ORDER BY start_time DESC'
 				await execute_sql(query)
 				result = connect.crsr.fetchone()
 				# initialize important variables
@@ -825,20 +822,9 @@ async def on_message(message):
 		# '.submit' command (DM)
 		if message_content.startswith('.submit'):
 			# check for an active match including the specified user
-			query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, template_url, creation_time, db_id, template_author_id FROM matches WHERE (u1_id = {message.author.id} OR u2_id = {message.author.id}) AND start_time >= {time.time() - (config.MATCH_TIME + 10)}'
+			query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, template_url, creation_time, db_id, template_author_id FROM matches WHERE (u1_id = {message.author.id} OR u2_id = {message.author.id}) ORDER BY db_id DESC'
 			await execute_sql(query)
-			results = connect.crsr.fetchall()
-			result = None
-			failed = False
-
-			if len(results) > 1:
-				result = [None, None, None, None, None, None, None, 0, None, None]
-				# find the most recent match by db_id
-				for match in results:
-					if match[7] > result[7]:
-						result = match
-			elif len(results) == 1:
-				result = results[0]
+			result = connect.crsr.fetchone()
 
 			# build duplicate submission embed
 			embed_title = 'Error: Already Submitted'
@@ -857,7 +843,7 @@ async def on_message(message):
 				match_db_id = result[8]
 				template_author_id = result[9]
 				try:
-					template_author = message.guild.get_member(template_author_id)
+					template_author = message.guild.get_member(int(template_author_id))
 				except:
 					await action_log('template_author was not a valid member')
 
@@ -1854,22 +1840,13 @@ async def on_message(message):
 				match_channel = message.channel
 				channel_id = message.channel.id
 
-				query = f'SELECT creation_time, u1_id, u2_id, u1_submitted, u2_submitted, template_url, start_time FROM matches WHERE channel_id = {channel_id}'
+				query = f'SELECT creation_time, u1_id, u2_id, u1_submitted, u2_submitted, template_url, start_time FROM matches WHERE channel_id = {channel_id} ORDER BY creation_time DESC'
 				await execute_sql(query)
-				results = connect.crsr.fetchall()
-				result = None
-				failed = False
+				result = connect.crsr.fetchone()
 
-				if len(results) > 1:
-					result = [0, None, None, None, None, None, None]
-					# find the most recent match by creation_time
-					for match in results:
-						if match[0] > result[0]:
-							result = match
-				elif len(results) == 1:
-					result = results[0]
+				if result is not None:
+					failed = False
 				else:
-					# failed is true if there was never a match created in the active channel
 					failed = True
 
 				if not failed:
@@ -1962,7 +1939,7 @@ async def on_message(message):
 
 						await action_log('checking submission status')
 						# check for submissions, remind users to submit if they haven't yet
-						query = f'SELECT {submitted} FROM matches WHERE {match_udb} = {match_user.id} AND start_time >= {time.time() - config.MATCH_TIME + 5}'
+						query = f'SELECT {submitted} FROM matches WHERE {match_udb} = {match_user.id} ORDER BY start_time DESC'
 						await execute_sql(query)
 						result = connect.crsr.fetchone()
 						if result is not None:
@@ -1981,7 +1958,7 @@ async def on_message(message):
 
 						await action_log('checking submission status')
 						# check for submissions, remind users to submit if they haven't yet
-						query = f'SELECT {submitted} FROM matches WHERE {match_udb} = {match_user.id} AND start_time >= {time.time() - config.MATCH_TIME + 5}'
+						query = f'SELECT {submitted} FROM matches WHERE {match_udb} = {match_user.id} ORDER BY start_time DESC'
 						await execute_sql(query)
 						result = connect.crsr.fetchone()
 						if result is not None:
@@ -2000,7 +1977,7 @@ async def on_message(message):
 
 						await action_log('checking submission status')
 						# check for submissions, remind users to submit if they haven't yet
-						query = f'SELECT {submitted} FROM matches WHERE {match_udb} = {match_user.id} AND start_time >= {time.time() - (config.MATCH_TIME + 5)}'
+						query = f'SELECT {submitted} FROM matches WHERE {match_udb} = {match_user.id} ORDER BY start_time DESC'
 						await execute_sql(query)
 						result = connect.crsr.fetchone()
 						if result is not None:
@@ -2261,7 +2238,7 @@ async def on_reaction_add(reaction, user):
 					last_vote_streak_time = result[5]
 
 				# find the ID of the active match
-				query = f'SELECT db_id, u1_id, u2_id FROM matches WHERE channel_id = {message.channel.id} AND start_time >= {time.time() - (config.BASE_POLL_TIME + (config.POLL_EXTENSION_TIME * 5) + config.MATCH_TIME + 30)}'
+				query = f'SELECT db_id, u1_id, u2_id FROM matches WHERE channel_id = {message.channel.id} ORDER BY start_time DESC'
 				await execute_sql(query)
 				result = connect.crsr.fetchone()
 				if result is not None:
@@ -2569,7 +2546,7 @@ async def on_reaction_add(reaction, user):
 
 					await action_log('checking submission status')
 					# check for submissions, remind users to submit if they haven't yet
-					query = f'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} AND start_time >= {time.time() - config.MATCH_TIME + 5}'
+					query = f'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} ORDER BY start_time DESC'
 					await execute_sql(query)
 					result = connect.crsr.fetchone()
 					if result is not None:
@@ -2591,7 +2568,7 @@ async def on_reaction_add(reaction, user):
 
 					await action_log('checking submission status')
 					# check for submissions, remind users to submit if they haven't yet
-					query = f'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} AND start_time >= {time.time() - config.MATCH_TIME + 5}'
+					query = f'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} ORDER BY start_time DESC'
 					await execute_sql(query)
 					result = connect.crsr.fetchone()
 					if result is not None:
@@ -2613,7 +2590,7 @@ async def on_reaction_add(reaction, user):
 
 					await action_log('checking submission status')
 					# check for submissions, remind users to submit if they haven't yet
-					query = f'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} AND start_time >= {time.time() - (config.MATCH_TIME + 5)}'
+					query = f'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} ORDER BY start_time DESC'
 					await execute_sql(query)
 					result = connect.crsr.fetchone()
 					if result[0] and result[1]:
