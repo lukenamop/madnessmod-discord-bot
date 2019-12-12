@@ -481,6 +481,15 @@ async def on_message(message):
 				return
 			return
 
+		# '.points' command (stats-flex)
+		if message_content == '.points':
+			embed_title = 'Meme Madness Point System'
+			embed_description = '**What are points?**\nPoints are a scoring system we use that is cummulative and separate from the individual tournaments.\n**How do I get points?**\nYou get 10 points for voting in a match, you get bonus points for voting multiple days in a row, and you get points for competing in matches.\n**What happens when I get lots of points?**\nNothing specific, you just get bragging rights! You can always check where you stand on the leaderboard by using `.leaderboard` or `.lb`. Have fun!'
+			embed = await generate_embed('yellow', embed_title, embed_description)
+			await message.channel.send(embed=embed)
+			await action_log('.points used in #stats-flex')
+			return
+
 	# verification specific commands
 	if message.channel.id == 581705191703838720 or message.channel.id == 607344923481473054:
 		# '.verify' command (verification)
