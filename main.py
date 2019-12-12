@@ -30,6 +30,26 @@ client = discord.Client()
 async def action_log(reason):
 	print(f'{datetime.datetime.utcnow()} - {reason}')
 
+async def continue_polls(client):
+	await action_log('checking for active polls')
+	match_category = client.get_channel(config.MATCH_CATEGORY_ID)
+	connected_polls = 0
+	for match_channel in match_category.channels:
+		message = match_channel.last_message
+		if message is not None:
+			if len(message.embeds) == 1:
+				if message.embeds[0].title == 'Match Voting':
+					await action_log(f'the timestamp is: {message.embeds[0].timestamp}')
+					# build voting embed
+					# embed_title = 'Match Voting'
+					# embed_description = '**Vote for your favorite!** Results will be sent to this channel when voting ends in 2 hours.\n🇦 First image\n🇧 Second image'
+					# embed = await generate_embed('pink', embed_title, embed_description)
+					# await match_channel.send(embed=embed, nonce='poll')
+					connected_polls += 1
+
+	await action_log(f'connected to {connected_polls} active polls')
+	return
+
 # generate a discord embed with an optional attached image
 async def generate_embed(color, title, description, attachment=None):
 	# given color string, create color hex
@@ -1473,7 +1493,7 @@ async def on_message(message):
 				await action_log('attempting to create match channels')
 				tournament_shortcut = f'mmcycle{message_content.split()[1]}'
 				mm_guild = message.guild
-				contest_category = mm_guild.get_channel(config.MATCH_CATEGORY_ID)
+				match_category = mm_guild.get_channel(config.MATCH_CATEGORY_ID)
 
 				try:
 					tournament_index = tourney_manager.index_tournament(tournament_shortcut)
@@ -1501,7 +1521,7 @@ async def on_message(message):
 						participant2 = tourney_manager.show_participant(tournament_shortcut, match['player2-id'])['name']
 						channel_name = 'match-' + str(match['suggested-play-order']) + '-' + participant1[:5] + '-v-' + participant2[:5]
 						channel_topic = tournament_shortcut + '/' + str(match['id']) + '/' + str(match['player1-id']) + '/' + str(match['player2-id'])
-						match_channel = await contest_category.create_text_channel(channel_name, topic=channel_topic)
+						match_channel = await match_category.create_text_channel(channel_name, topic=channel_topic)
 						member1 = match_channel.guild.get_member_named(participant1)
 						member2 = match_channel.guild.get_member_named(participant2)
 						await match_channel.send(f'Please DM each other to find a 30 minute window to complete your match. Good luck!\n{member1.mention} {member2.mention}')
@@ -2649,6 +2669,7 @@ async def on_ready():
 	if config.TESTING:
 		print('Currently in TESTING MODE')
 	print('------')
+	await continue_polls(client)
 
 # starts instance of discord bot client
 client.run(config.TOKEN)
