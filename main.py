@@ -598,9 +598,9 @@ async def on_message(message):
 							await client.get_channel(607342999751491585).send(embed=embed)
 						elif base_message.guild.id == 581695290986332160:
 							# build welcome embed
-							announcements_chan = await client.get_channel(config.ANNOUNCEMENTS_CHAN_ID)
-							info_chan = await client.get_channel(config.INFO_CHAN_ID)
-							rules_chan = await client.get_channel(config.RULES_CHAN_ID)
+							announcements_chan = client.get_channel(config.ANNOUNCEMENTS_CHAN_ID)
+							info_chan = client.get_channel(config.INFO_CHAN_ID)
+							rules_chan = client.get_channel(config.RULES_CHAN_ID)
 							embed_description = f'{base_member.mention}, welcome to Meme Madness! Signup info is always posted in {announcements_chan.mention}. Check out {info_chan.mention} and {rules_chan.mention} to see how this place is run and let a member of the mod team know if you need any help!'
 							embed = await generate_embed('green', embed_title, embed_description)
 							await client.get_channel(581695290986332162).send(embed=embed)
