@@ -557,7 +557,7 @@ async def on_message(message):
 			except discord.errors.Forbidden:
 				await base_bot_response.delete()
 				embed_title = 'Verification Error'
-				embed_description = f'{base_member.mention}, I\'m unable to send you DMs! Please check your Discord settings, in `Privacy & Safety`, and check the `Allow direct messages from server members` option before trying again.'
+				embed_description = f'{base_member.mention}, I\'m unable to send you DMs! Please check your Discord settings, in `Privacy & Safety`, and enable the `Allow direct messages from server members` option before trying again.'
 				embed = await generate_embed('red', embed_title, embed_description)
 				await message.channel.send(embed=embed)
 				await action_log(f'{username_discriminator} has Discord DMs disabled')
