@@ -552,7 +552,16 @@ async def on_message(message):
 			embed_title = 'Verification Attempt (Step 1/2)'
 			embed_description = 'Please send the name of your reddit account here:'
 			embed = await generate_embed('yellow', embed_title, embed_description)
-			await user_channel.send(embed=embed)
+			try:
+				await user_channel.send(embed=embed)
+			except discord.errors.Forbidden:
+				await base_bot_response.delete()
+				embed_title = 'Verification Error'
+				embed_description = f'{base_member.mention}, I\'m unable to send you DMs! Please check your Discord settings, in `Privacy & Safety`, and check the `Allow direct messages from server members` option before trying again.'
+				embed = await generate_embed('red', embed_title, embed_description)
+				await message.channel.send(embed=embed)
+				await action_log(f'{username_discriminator} has Discord DMs disabled')
+				return
 
 			# asyncio.TimeoutError triggers if client.wait_for(message) times out
 			try:
