@@ -27,6 +27,9 @@ def db_connect():
 	result = crsr.fetchone()
 	print('participants: ' + str(result[0]))
 
+	crsr.execute('ALTER TABLE matches ADD poll_extensions NUMERIC(1) DEFAULT 0')
+	conn.commit()
+
 	crsr.execute("""SELECT COUNT(*) FROM matches""")
 	result = crsr.fetchone()
 	print('matches: ' + str(result[0]))
@@ -82,6 +85,7 @@ db_connect()
 # template_url VARCHAR(200) DEFAULT NULL
 # template_author_id NUMERIC(18) DEFAULT NULL
 # poll_start_time NUMERIC(10) DEFAULT NULL
+# poll_extensions NUMERIC(1) DEFAULT 0
 
 # TABLE votes
 # db_id SERIAL PRIMARY KEY
