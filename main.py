@@ -72,7 +72,7 @@ async def continue_polls(client):
 	return
 
 # generate a discord embed with an optional attached image
-async def generate_embed(color, title, description, attachment=None):
+async def generate_embed(color, title, description, attachment=None, timestamp=None):
 	# given color string, create color hex
 	if color == 'green':
 		color = 0x00cc00
@@ -87,12 +87,18 @@ async def generate_embed(color, title, description, attachment=None):
 	elif color == 'orange':
 		color = 0xff9900
 
+	# given timestamp string, create datetime object
+	if timestamp is not None:
+		datetime_obj = datetime.datetime.fromtimestamp(timestamp)
+	else:
+		datetime_obj = datetime.datetime.now()
+
 	# create discord embed
 	embed = discord.Embed(
 		color=color,
 		title=title,
 		description=description,
-		timestamp=datetime.datetime.now())
+		timestamp=datetime_obj)
 	embed.set_footer(text='Developed by lukenamop#0918')
 	if attachment is not None:
 		embed.set_image(url=attachment)
