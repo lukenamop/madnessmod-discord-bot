@@ -50,10 +50,10 @@ async def continue_polls(client):
 					if message.embeds[0].title == 'Match Voting' or message.embeds[0].title == 'Extending Voting Time':
 						if message.embeds[0].title == 'Match Voting':
 							# delete the poll message
-							await channel.purge(limit=1, check=is_me)
+							await channel.purge(limit=1)
 						elif message.embeds[0].title == 'Extending Voting Time':
 							# delete the poll extension and base poll messages
-							await channel.purge(limit=2, check=is_me)
+							await channel.purge(limit=2)
 
 						# build voting embed
 						embed_title = 'Match Voting'
