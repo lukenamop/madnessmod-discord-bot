@@ -57,10 +57,15 @@ async def continue_polls(client):
 							await match_channel.purge(limit=2)
 							await action_log(f'old poll deleted in #{match_channel.name}')
 
+						query = f'SELECT poll_start_time FROM matches WHERE channel_id = {match_channel.id} ORDER BY start_time DESC'
+						await execute_sql(query)
+						result = connect.crsr.fetchone()
+						poll_start_time = int(result[0])
+
 						# build voting embed
 						embed_title = 'Match Voting'
 						embed_description = '**Vote for your favorite!** Results will be sent to this channel when voting ends.\n🇦 First image\n🇧 Second image'
-						embed = await generate_embed('pink', embed_title, embed_description)
+						embed = await generate_embed('pink', embed_title, embed_description, timestamp=poll_start_time)
 						await match_channel.send(embed=embed, nonce='poll')
 						await action_log(f'new poll sent in #{match_channel.name}')
 						connected_polls += 1
@@ -346,7 +351,7 @@ async def on_message(message):
 					embed_title = functions.escape_underscores(winner.display_name)
 					embed_description = datetime.date.today().strftime("%B %d")
 					embed_link = winning_image_url
-					embed = await generate_embed('pink', embed_title, embed_description, embed_link)
+					embed = await generate_embed('pink', embed_title, embed_description, attachment=embed_link)
 					await client.get_channel(config.ARCHIVE_CHAN_ID).send(embed=embed)
 					await action_log('winning image sent to archive channel')
 
@@ -827,7 +832,7 @@ async def on_message(message):
 						embed_title = 'Template Submission'
 						embed_description = f'{member.mention} ({functions.escape_underscores(member.display_name)}, {member.id})'
 						embed_link = message.attachments[0].url
-						embed = await generate_embed('green', embed_title, embed_description, embed_link)
+						embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
 						template_chan = client.get_channel(config.TEMPLATE_CHAN_ID)
 						template_message = await template_chan.send(embed=embed, nonce='template')
 						await action_log(f'signup attachment sent to #templates by {message.author.name}#{message.author.discriminator}')
@@ -1060,12 +1065,12 @@ async def on_message(message):
 					embed_title = 'Final Meme Submission'
 					embed_description = f'{u1_mention} ({functions.escape_underscores(u1.display_name)}, {result[0]})'
 					embed_link = u1_link
-					embed = await generate_embed('green', embed_title, embed_description, embed_link)
+					embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
 					await submissions_channel.send(embed=embed)
 					# submission embed for user 2
 					embed_description = f'{u2_mention} ({functions.escape_underscores(u2.display_name)}, {result[1]})'
 					embed_link = u2_link
-					embed = await generate_embed('green', embed_title, embed_description, embed_link)
+					embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
 					await submissions_channel.send(embed=embed)
 					await action_log('final memes sent to #submissions')
 
@@ -1073,12 +1078,12 @@ async def on_message(message):
 					# submission embed for image A
 					embed_description = 'Image A'
 					embed_link = u1_link
-					embed = await generate_embed('green', embed_title, embed_description, embed_link)
+					embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
 					await match_channel.send(embed=embed)
 					# submission embed for image B
 					embed_description = 'Image B'
 					embed_link = u2_link
-					embed = await generate_embed('green', embed_title, embed_description, embed_link)
+					embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
 					await match_channel.send(embed=embed)
 
 					vote_pings_role = match_channel.guild.get_role(600356303033860106)
@@ -1143,7 +1148,7 @@ async def on_message(message):
 			embed_title = 'Voluntary Template Submission'
 			embed_description = f'{member.mention} ({functions.escape_underscores(member.display_name)}, {member.id})'
 			embed_link = message.attachments[0].url
-			embed = await generate_embed('green', embed_title, embed_description, embed_link)
+			embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
 			template_chan = client.get_channel(config.TEMPLATE_CHAN_ID)
 			template_message = await template_chan.send(embed=embed, nonce='voluntary_template')
 			await action_log(f'template attachment sent to #templates by {message.author.name}#{message.author.discriminator}')
@@ -1808,7 +1813,7 @@ async def on_message(message):
 				# build random template embed
 				embed_title = f'Template for #{message.channel.name}'
 				embed_description = f'Here\'s a random template! This template was submitted by {template_author.display_name}'
-				embed = await generate_embed('green', embed_title, embed_description, template_url)
+				embed = await generate_embed('green', embed_title, embed_description, attachment=template_url)
 				nonce = f'tempcon{channel_id}'
 				await duelmods_chan.send(embed=embed, nonce=nonce)
 				await duelmods_chan.send(message.author.mention)
@@ -1889,7 +1894,7 @@ async def on_message(message):
 				# build random template embed
 				embed_title = f'Template for #{message.channel.name}'
 				embed_description = f'Here\'s a random template! This template was submitted by {template_author.display_name}'
-				embed = await generate_embed('green', embed_title, embed_description, template_url)
+				embed = await generate_embed('green', embed_title, embed_description, attachment=template_url)
 				nonce = f'spltemp{channel_id}'
 				await duelmods_chan.send(embed=embed, nonce=nonce)
 				await duelmods_chan.send(message.author.mention)
@@ -1985,7 +1990,7 @@ async def on_message(message):
 						# send notifying DMs to participant
 						embed_title = 'Match Started'
 						embed_description = 'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.** Here is your template:'
-						embed = await generate_embed('yellow', embed_title, embed_description, template_url)
+						embed = await generate_embed('yellow', embed_title, embed_description, attachment=template_url)
 						# discord.errors.Forbidden triggers if u_channel.send() is stopped
 						try:
 							await u_channel.send(embed=embed)
@@ -2121,7 +2126,7 @@ async def on_message(message):
 					embed_title = 'Final Meme Submission'
 					embed_description = functions.escape_underscores(winner.display_name)
 					embed_link = winning_image_url
-					embed = await generate_embed('green', embed_title, embed_description, embed_link)
+					embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
 					await message.channel.send(embed=embed)
 					await action_log('image sent to match channel')
 
@@ -2137,7 +2142,7 @@ async def on_message(message):
 						embed_title = functions.escape_underscores(winner.display_name)
 						embed_description = datetime.date.today().strftime("%B %d")
 						embed_link = winning_image_url
-						embed = await generate_embed('pink', embed_title, embed_description, embed_link)
+						embed = await generate_embed('pink', embed_title, embed_description, attachment=embed_link)
 						await client.get_channel(config.ARCHIVE_CHAN_ID).send(embed=embed)
 						await action_log('winning image sent to archive channel')
 
@@ -2584,7 +2589,7 @@ async def on_reaction_add(reaction, user):
 					# send notifying DMs to participants
 					embed_title = 'Match Started'
 					embed_description = 'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.** Here is your template:'
-					embed = await generate_embed('yellow', embed_title, embed_description, template_url)
+					embed = await generate_embed('yellow', embed_title, embed_description, attachment=template_url)
 					# discord.errors.Forbidden triggers if u_channel.send() is stopped
 					try:
 						await u1_channel.send(embed=embed)
@@ -2610,7 +2615,7 @@ async def on_reaction_add(reaction, user):
 					# send template to match channel
 					embed_title = 'Match Started'
 					embed_description = f'{member1.mention} and {member2.mention} have 30 minutes to hand in their final memes. Good luck! (Thanks to {template_author.mention} for the template!)'
-					embed = await generate_embed('green', embed_title, embed_description, template_url)
+					embed = await generate_embed('green', embed_title, embed_description, attachment=template_url)
 					await match_channel.send(embed=embed)
 					await action_log(f'match started between {member1.name}#{member1.discriminator} and {member2.name}#{member2.discriminator}')
 
