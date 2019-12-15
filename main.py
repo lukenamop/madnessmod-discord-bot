@@ -132,10 +132,8 @@ async def on_message(message):
 				u1_image_url = result[4]
 				u2_image_url = result[5]
 				try:
-					await action_log(f'poll_start_time pulled from database ({result[6]})')
 					poll_start_time = int(result[6])
 				except:
-					await action_log('ERROR - poll_start_time caused an error')
 					poll_start_time = None
 				poll_extensions = int(result[7])
 				# these two will be used later
@@ -2390,7 +2388,7 @@ async def on_reaction_add(reaction, user):
 						elif time.time() <= unvoted_match_start_time + 172800:
 							streak_kept = True
 					except TypeError:
-						await action_log('ERROR - unvoted_match_start_time caused a Type Error')
+						await action_log('ERROR - unvoted_match_start_time caused a TypeError')
 
 					if streak_kept:
 						# check to see if the user's streak was incremented at least 23 hours ago
