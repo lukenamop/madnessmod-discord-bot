@@ -152,7 +152,7 @@ async def on_message(message):
 					poll_start_time = time_now
 					f'UPDATE matches SET poll_start_time = {poll_start_time} WHERE db_id = {db_id}'
 					await execute_sql(query)
-					connect.comm.commit()
+					connect.conn.commit()
 					await action_log('poll_start_time set in database')
 
 					if not config.TESTING:
@@ -2418,7 +2418,7 @@ async def on_reaction_add(reaction, user):
 						vote_streak = 1
 						last_vote_streak_time = time.time()
 
-					if not config.Testing:
+					if not config.TESTING:
 						# update participant vote count, lb_points, and vote streak
 						query = f'UPDATE participants SET match_votes = {match_votes + 1}, lb_points = {lb_points + 10 + vote_streak_bonus}, vote_streak = {vote_streak}, longest_vote_streak = {longest_vote_streak}, unvoted_match_start_time = NULL, last_vote_streak_time = {last_vote_streak_time} WHERE user_id = {user.id}'
 						await execute_sql(query)
