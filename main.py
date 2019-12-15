@@ -57,7 +57,7 @@ async def continue_polls(client):
 							await match_channel.purge(limit=2)
 							await action_log(f'old poll deleted in #{match_channel.name}')
 
-						query = f'SELECT poll_start_time FROM matches WHERE channel_id = {match_channel.id} ORDER BY start_time DESC'
+						query = f'SELECT poll_start_time FROM matches WHERE channel_id = {match_channel.id} ORDER BY db_id DESC'
 						await execute_sql(query)
 						result = connect.crsr.fetchone()
 						poll_start_time = int(result[0])
@@ -138,7 +138,7 @@ async def on_message(message):
 				await action_log('added reactions to poll message')
 
 				# pull the match data
-				query = f'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url, poll_start_time, poll_extensions FROM matches WHERE channel_id = {message.channel.id} ORDER BY start_time DESC'
+				query = f'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url, poll_start_time, poll_extensions FROM matches WHERE channel_id = {message.channel.id} ORDER BY db_id DESC'
 				await execute_sql(query)
 				result = connect.crsr.fetchone()
 				# initialize important variables
@@ -1917,7 +1917,7 @@ async def on_message(message):
 				match_channel = message.channel
 				channel_id = message.channel.id
 
-				query = f'SELECT creation_time, u1_id, u2_id, u1_submitted, u2_submitted, template_url, start_time FROM matches WHERE channel_id = {channel_id} ORDER BY creation_time DESC'
+				query = f'SELECT creation_time, u1_id, u2_id, u1_submitted, u2_submitted, template_url, start_time FROM matches WHERE channel_id = {channel_id} ORDER BY db_id DESC'
 				await execute_sql(query)
 				result = connect.crsr.fetchone()
 
@@ -2016,7 +2016,7 @@ async def on_message(message):
 
 						await action_log('checking submission status')
 						# check for submissions, remind users to submit if they haven't yet
-						query = f'SELECT {submitted} FROM matches WHERE {match_udb} = {match_user.id} ORDER BY start_time DESC'
+						query = f'SELECT {submitted} FROM matches WHERE {match_udb} = {match_user.id} ORDER BY db_id DESC'
 						await execute_sql(query)
 						result = connect.crsr.fetchone()
 						if result is not None:
@@ -2035,7 +2035,7 @@ async def on_message(message):
 
 						await action_log('checking submission status')
 						# check for submissions, remind users to submit if they haven't yet
-						query = f'SELECT {submitted} FROM matches WHERE {match_udb} = {match_user.id} ORDER BY start_time DESC'
+						query = f'SELECT {submitted} FROM matches WHERE {match_udb} = {match_user.id} ORDER BY db_id DESC'
 						await execute_sql(query)
 						result = connect.crsr.fetchone()
 						if result is not None:
@@ -2054,7 +2054,7 @@ async def on_message(message):
 
 						await action_log('checking submission status')
 						# check for submissions, remind users to submit if they haven't yet
-						query = f'SELECT {submitted} FROM matches WHERE {match_udb} = {match_user.id} ORDER BY start_time DESC'
+						query = f'SELECT {submitted} FROM matches WHERE {match_udb} = {match_user.id} ORDER BY db_id DESC'
 						await execute_sql(query)
 						result = connect.crsr.fetchone()
 						if result is not None:
@@ -2315,7 +2315,7 @@ async def on_reaction_add(reaction, user):
 					last_vote_streak_time = result[5]
 
 				# find the ID of the active match
-				query = f'SELECT db_id, u1_id, u2_id FROM matches WHERE channel_id = {message.channel.id} ORDER BY start_time DESC'
+				query = f'SELECT db_id, u1_id, u2_id FROM matches WHERE channel_id = {message.channel.id} ORDER BY db_id DESC'
 				await execute_sql(query)
 				result = connect.crsr.fetchone()
 				if result is not None:
@@ -2629,7 +2629,7 @@ async def on_reaction_add(reaction, user):
 
 					await action_log('checking submission status')
 					# check for submissions, remind users to submit if they haven't yet
-					query = f'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} ORDER BY start_time DESC'
+					query = f'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} ORDER BY db_id DESC'
 					await execute_sql(query)
 					result = connect.crsr.fetchone()
 					if result is not None:
@@ -2651,7 +2651,7 @@ async def on_reaction_add(reaction, user):
 
 					await action_log('checking submission status')
 					# check for submissions, remind users to submit if they haven't yet
-					query = f'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} ORDER BY start_time DESC'
+					query = f'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} ORDER BY db_id DESC'
 					await execute_sql(query)
 					result = connect.crsr.fetchone()
 					if result is not None:
@@ -2673,7 +2673,7 @@ async def on_reaction_add(reaction, user):
 
 					await action_log('checking submission status')
 					# check for submissions, remind users to submit if they haven't yet
-					query = f'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} ORDER BY start_time DESC'
+					query = f'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} ORDER BY db_id DESC'
 					await execute_sql(query)
 					result = connect.crsr.fetchone()
 					if result[0] and result[1]:
