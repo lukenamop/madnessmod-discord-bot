@@ -1818,7 +1818,7 @@ async def on_message(message):
 				match_is_final = result[0]
 
 				# add match info to postgresql
-				query = f'INSERT INTO matches (u1_id, u2_id, channel_id, template_message_id, creation_time, is_final) VALUES ({member1.id}, {member2.id}, {channel_id}, {template_message.id}, {time.time(), {match_is_final}})'
+				query = f'INSERT INTO matches (u1_id, u2_id, channel_id, template_message_id, creation_time, is_final) VALUES ({member1.id}, {member2.id}, {channel_id}, {template_message.id}, {time.time()}, {match_is_final})'
 				await execute_sql(query)
 				connect.conn.commit()
 				await action_log('match added to database')
@@ -1905,8 +1905,14 @@ async def on_message(message):
 						await action_log('no templates for .startmatch')
 						return
 
+				# check if match is final
+				query = f'SELECT next_match_is_final FROM settings WHERE guild_id = {config.MM_GUILD_ID}'
+				await execute_sql(query)
+				result = connect.crsr.fetchone()
+				match_is_final = result[0]
+
 				# add match info to postgresql
-				query = f'INSERT INTO matches (u1_id, u2_id, channel_id, creation_time, template_message_id) VALUES ({member1.id}, {member2.id}, {channel_id}, {time.time()}, {template_message.id})'
+				query = f'INSERT INTO matches (u1_id, u2_id, channel_id, creation_time, template_message_id, is_final) VALUES ({member1.id}, {member2.id}, {channel_id}, {time.time()}, {template_message.id}, {match_is_final})'
 				await execute_sql(query)
 				connect.conn.commit()
 				await action_log('match added to database')
