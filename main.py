@@ -51,7 +51,7 @@ async def continue_polls(client):
 						if message.embeds[0].title == 'Match Voting':
 							# delete the poll message
 							await message.delete()
-						elif message.embeds[0].title == 'Extending Vote Time':
+						elif message.embeds[0].title == 'Extending Voting Time':
 							# delete the poll extension message
 							await message.delete()
 							try:
@@ -138,6 +138,7 @@ async def on_message(message):
 				u1_image_url = result[4]
 				u2_image_url = result[5]
 				try:
+					await action_log(f'poll_start_time pulled from database ({result[6]})')
 					poll_start_time = int(result[6])
 				except:
 					await action_log('ERROR - poll_start_time caused an error')
@@ -153,7 +154,7 @@ async def on_message(message):
 					f'UPDATE matches SET poll_start_time = {poll_start_time} WHERE db_id = {db_id}'
 					await execute_sql(query)
 					connect.conn.commit()
-					await action_log('poll_start_time set in database')
+					await action_log(f'poll_start_time set in database ({poll_start_time})')
 
 					if not config.TESTING:
 						# set participants' unvoted_match_start_time to the current time (if not already set)
