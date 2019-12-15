@@ -1091,7 +1091,7 @@ async def on_message(message):
 					if match_is_final:
 						verified_role = match_channel.guild.get_role(599354132771504128)
 						await verified_role.edit(mentionable=True)
-						await match_channel.send(f'{verified_role} @everyone')
+						await match_channel.send(f'Vote in the final!\n{verified_role} @everyone')
 						await verified_role.edit(mentionable=False)
 					else:
 						if not config.TESTING:

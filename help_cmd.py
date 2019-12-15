@@ -11,6 +11,7 @@ stats_help = """`.donate` - shows MadnessMod donation info
 mod_help = """`.donate` - shows MadnessMod donation info
 	\n`.forcewin` - ends a match by forcing one of the participants to win (use in split matches when one participant hasn't competed)
 	\n`.help` - returns this help menu
+	\n`.matchisfinal` - sets the next match as a final match which will ping `Verified` and `everyone`
 	\n`.resignup <user ID> <reason>` - deletes a user's template and DMs them with `<reason>`, prompting them to re-signup
 	\n`.showresults` - shows the results of the most recent match in the match channel it's called in
 	\n`.signuplist` - displays a full list of signups for the current cycle
@@ -26,6 +27,7 @@ admin_help = """`.activematches` - displays all currently active matches and pol
 	\n`.donate` - shows MadnessMod donation info
 	\n`.forcewin` - ends a match by forcing one of the participants to win (use in split matches when one participant hasn't competed)
 	\n`.help` - returns this help menu
+	\n`.matchisfinal` - sets the next match as a final match which will ping `Verified` and `everyone`
 	\n`.prelim <user ID>` - sets a user's tournament role to `Preliminary` (**admin only**)
 	\n`.reconnect` - forces the bot to reconnect to its database (**admin only**)
 	\n`.removetournamentroles` - remove past participants' round roles (**admin only**)
