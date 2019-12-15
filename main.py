@@ -1008,9 +1008,10 @@ async def on_message(message):
 					await action_log('participant stats updated')
 
 				# pull match info from database
-				query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, u1_image_url, u2_image_url, channel_id FROM matches WHERE db_id = {match_db_id}'
+				query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, u1_image_url, u2_image_url, channel_id, is_final FROM matches WHERE db_id = {match_db_id}'
 				await execute_sql(query)
 				result = connect.crsr.fetchone()
+				match_is_final = result[7]
 				# find match_channel and submissions_channel from discord
 				match_channel = client.get_channel(result[6])
 				submissions_channel = client.get_channel(config.SUBMISSION_CHAN_ID)
@@ -1087,10 +1088,16 @@ async def on_message(message):
 					await match_channel.send(embed=embed)
 
 					vote_pings_role = match_channel.guild.get_role(600356303033860106)
-					if not config.TESTING:
-						await match_channel.send(f'{vote_pings_role.mention} @here')
+					if match_is_final:
+						verified_role = match_channel.guild.get_role(599354132771504128)
+						await verified_role.edit(mentionable=True)
+						await match_channel.send(f'{verified_role} @everyone')
+						await verified_role.edit(mentionable=False)
 					else:
-						await match_channel.send('This is just a test match, not pinging `Vote Pings` or `here`.')
+						if not config.TESTING:
+							await match_channel.send(f'{vote_pings_role.mention} @here')
+						else:
+							await match_channel.send('This is just a test match, not pinging `Vote Pings` or `here`.')
 
 					# build voting embed
 					embed_title = 'Match Voting'

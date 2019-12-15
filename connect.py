@@ -19,9 +19,6 @@ def db_connect():
 	print('postgres connection info:')
 	print(conn.get_dsn_parameters())
 
-	crsr.execute('ALTER TABLE settings ADD next_match_is_final BOOLEAN DEFAULT False')
-	conn.commit()
-
 	crsr.execute("""SELECT * FROM settings""")
 	for row in crsr.fetchall():
 		print('settings: ' + str(row))
@@ -29,9 +26,6 @@ def db_connect():
 	crsr.execute("""SELECT COUNT(*) FROM participants""")
 	result = crsr.fetchone()
 	print('participants: ' + str(result[0]))
-
-	crsr.execute('ALTER TABLE matches ADD is_final BOOLEAN DEFAULT False')
-	conn.commit()
 
 	crsr.execute("""SELECT COUNT(*) FROM matches""")
 	result = crsr.fetchone()
