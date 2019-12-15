@@ -1804,11 +1804,24 @@ async def on_message(message):
 						await action_log('no templates for .startmatch')
 						return
 
+				# check if match is final
+				query = f'SELECT next_match_is_final FROM settings WHERE guild_id = {config.MM_GUILD_ID}'
+				await execute_sql(query)
+				result = connect.crsr.fetchone()
+				match_is_final = result[0]
+
 				# add match info to postgresql
-				query = f'INSERT INTO matches (u1_id, u2_id, channel_id, template_message_id, creation_time) VALUES ({member1.id}, {member2.id}, {channel_id}, {template_message.id}, {time.time()})'
+				query = f'INSERT INTO matches (u1_id, u2_id, channel_id, template_message_id, creation_time, is_final) VALUES ({member1.id}, {member2.id}, {channel_id}, {template_message.id}, {time.time(), {match_is_final}})'
 				await execute_sql(query)
 				connect.conn.commit()
 				await action_log('match added to database')
+
+				if match_is_final:
+					# reset guild final settings
+					query = f'UPDATE settings SET next_match_is_final = False WHERE guild_id = {config.MM_GUILD_ID}'
+					await execute_sql(query)
+					connect.conn.commit()
+					await action_log('current match set as final, guild settings reset')
 
 				# build random template embed
 				embed_title = f'Template for #{message.channel.name}'
@@ -2270,6 +2283,20 @@ async def on_message(message):
 			embed = await generate_embed('pink', embed_title, embed_description)
 			await message.channel.send(embed=embed)
 			await action_log('voting results sent in match channel')
+			return
+
+		# '.matchisfinal' command (contest category)
+		if message_content == '.matchisfinal':
+			await action_log('setting next match as final in database settings')
+			query = f'UPDATE settings SET next_match_is_final = True WHERE guild_id = {config.MM_GUILD_ID}'
+			await execute_sql(query)
+			connect.conn.commit()
+			await action_log('next match set as final')
+
+			embed_title = 'Set as Final'
+			embed_description = 'The next match has been set as final in the database.'
+			embed = await generate_embed('green', embed_title, embed_description)
+			await message.channel.send(embed=embed)
 			return
 		return
 

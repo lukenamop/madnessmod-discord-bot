@@ -19,6 +19,9 @@ def db_connect():
 	print('postgres connection info:')
 	print(conn.get_dsn_parameters())
 
+	crsr.execute('ALTER TABLE settings ADD next_match_is_final BOOLEAN DEFAULT False')
+	conn.commit()
+
 	crsr.execute("""SELECT * FROM settings""")
 	for row in crsr.fetchall():
 		print('settings: ' + str(row))
@@ -26,6 +29,9 @@ def db_connect():
 	crsr.execute("""SELECT COUNT(*) FROM participants""")
 	result = crsr.fetchone()
 	print('participants: ' + str(result[0]))
+
+	crsr.execute('ALTER TABLE matches ADD is_final BOOLEAN DEFAULT False')
+	conn.commit()
 
 	crsr.execute("""SELECT COUNT(*) FROM matches""")
 	result = crsr.fetchone()
@@ -43,6 +49,7 @@ db_connect()
 # db_id SERIAL PRIMARY KEY
 # template_required BOOLEAN DEFAULT True
 # guild_id NUMERIC(18) NOT NULL
+# next_match_is_final BOOLEAN DEFAULT False
 
 # TABLE participants
 # db_id SERIAL PRIMARY KEY
@@ -83,6 +90,7 @@ db_connect()
 # template_author_id NUMERIC(18) DEFAULT NULL
 # poll_start_time NUMERIC(10) DEFAULT NULL
 # poll_extensions NUMERIC(1) DEFAULT 0
+# is_final BOOLEAN DEFAULT False
 
 # TABLE votes
 # db_id SERIAL PRIMARY KEY
