@@ -175,9 +175,9 @@ async def on_message(message):
 					if poll_extensions > 0:
 						embed_title = 'Extending Voting Time'
 						if poll_extensions == 1:
-							embed_description = f'The deadline for this poll has been extended by 1 hour.\n*Voting for this match will be extended until there are 15 or more votes, max 3 extensions.*'
+							embed_description = f'The deadline for this poll has been extended by 1 hour.\n*Voting for this match will be extended until there are 15 or more votes, max {config.MAX_POLL_EXTENSIONS} extensions.*'
 						else:
-							embed_description = f'The deadline for this poll has been extended by {poll_extensions} hours.\n*Voting for this match will be extended until there are 15 or more votes, max 3 extensions.*'
+							embed_description = f'The deadline for this poll has been extended by {poll_extensions} hours.\n*Voting for this match will be extended until there are 15 or more votes, max {config.MAX_POLL_EXTENSIONS} extensions.*'
 						embed = await generate_embed('pink', embed_title, embed_description)
 						extension_embed_message = await message.channel.send(embed=embed)
 
@@ -200,11 +200,11 @@ async def on_message(message):
 
 						embed_title = 'Extending Voting Time'
 						if poll_extensions == 1:
-							embed_description = f'The deadline for this poll has been extended by 1 hour.\n*Voting for this match will be extended until there are 15 or more votes, max 3 extensions.*'
+							embed_description = f'The deadline for this poll has been extended by 1 hour.\n*Voting for this match will be extended until there are 15 or more votes, max {config.MAX_POLL_EXTENSIONS} extensions.*'
 							embed = await generate_embed('pink', embed_title, embed_description)
 							extension_embed_message = await message.channel.send(embed=embed)
 						else:
-							embed_description = f'The deadline for this poll has been extended by {poll_extensions} hours.\n*Voting for this match will be extended until there are 15 or more votes, max 3 extensions.*'
+							embed_description = f'The deadline for this poll has been extended by {poll_extensions} hours.\n*Voting for this match will be extended until there are 15 or more votes, max {config.MAX_POLL_EXTENSIONS} extensions.*'
 							embed = await generate_embed('pink', embed_title, embed_description)
 							await extension_embed_message.edit(embed=embed)
 
