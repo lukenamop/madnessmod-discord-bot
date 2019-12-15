@@ -50,16 +50,10 @@ async def continue_polls(client):
 					if message.embeds[0].title == 'Match Voting' or message.embeds[0].title == 'Extending Voting Time':
 						if message.embeds[0].title == 'Match Voting':
 							# delete the poll message
-							await message.delete()
+							await channel.purge(limit=1, check=is_me)
 						elif message.embeds[0].title == 'Extending Voting Time':
-							# delete the poll extension message
-							await message.delete()
-							try:
-								# try to delete the original poll message
-								message = await match_channel.fetch_message(match_channel.last_message_id)
-								await message.delete()
-							except:
-								await action_log('ERROR - poll message for extended poll could not be found or deleted')
+							# delete the poll extension and base poll messages
+							await channel.purge(limit=2, check=is_me)
 
 						# build voting embed
 						embed_title = 'Match Voting'
