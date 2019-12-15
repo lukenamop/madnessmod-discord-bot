@@ -2387,36 +2387,38 @@ async def on_reaction_add(reaction, user):
 					await action_log('vote inserted into database')
 
 					vote_streak_bonus = 0
-					if not config.TESTING:
-						# check to see if the user's last vote was within 48 hours
-						streak_kept = False
-						try:
-							if unvoted_match_start_time is None:
-								streak_kept = True
-							elif time.time() <= unvoted_match_start_time + 172800:
-								streak_kept = True
-						except TypeError:
-							await action_log('ERROR - unvoted_match_start_time caused a Type Error')
+					# check to see if the user's last vote was within 48 hours
+					streak_kept = False
+					try:
+						if unvoted_match_start_time is None:
+							streak_kept = True
+						elif time.time() <= unvoted_match_start_time + 172800:
+							streak_kept = True
+					except TypeError:
+						await action_log('ERROR - unvoted_match_start_time caused a Type Error')
 
-						if streak_kept:
-							# check to see if the user's streak was incremented at least 23 hours ago
-							if time.time() >= last_vote_streak_time + 82800:
-								# increment the user's vote streak
-								vote_streak += 1
-								last_vote_streak_time = time.time()
-								# check to see if the user has voted at least 2 days in a row
-								if vote_streak >= 2:
-									if vote_streak < len(config.VOTE_STREAK_BONUSES):
-										vote_streak_bonus = config.VOTE_STREAK_BONUSES[int(vote_streak - 1)]
-									else:
-										vote_streak_bonus = config.VOTE_STREAK_BONUSES[-1]
-								# check to see if this is the user's longes vote streak
-								if vote_streak > longest_vote_streak:
-									longest_vote_streak = vote_streak
-						else:
-							vote_streak = 1
+					if streak_kept:
+						# check to see if the user's streak was incremented at least 23 hours ago
+						if time.time() >= last_vote_streak_time + 82800:
+							# increment the user's vote streak
+							vote_streak += 1
 							last_vote_streak_time = time.time()
+							# check to see if the user has voted at least 2 days in a row
+							if vote_streak >= 2:
+								if vote_streak < len(config.VOTE_STREAK_BONUSES):
+									vote_streak_bonus = config.VOTE_STREAK_BONUSES[int(vote_streak - 1)]
+									last_vote_streak_time = time.time()
+								else:
+									vote_streak_bonus = config.VOTE_STREAK_BONUSES[-1]
+									last_vote_streak_time = time.time()
+							# check to see if this is the user's longest vote streak
+							if vote_streak > longest_vote_streak:
+								longest_vote_streak = vote_streak
+					else:
+						vote_streak = 1
+						last_vote_streak_time = time.time()
 
+					if not config.Testing:
 						# update participant vote count, lb_points, and vote streak
 						query = f'UPDATE participants SET match_votes = {match_votes + 1}, lb_points = {lb_points + 10 + vote_streak_bonus}, vote_streak = {vote_streak}, longest_vote_streak = {longest_vote_streak}, unvoted_match_start_time = NULL, last_vote_streak_time = {last_vote_streak_time} WHERE user_id = {user.id}'
 						await execute_sql(query)
@@ -2436,12 +2438,16 @@ async def on_reaction_add(reaction, user):
 						# calculate seconds until the user's next voting streak
 						try:
 							next_streak_seconds = int(last_vote_streak_time) + 82800 - round(time.time())
-							if round(float(next_streak_seconds / (60 * 60))) > 1:
+							if round(next_streak_seconds / (60 * 60)) > 1:
 								# round to the nearest hour
 								next_streak_string = f'{round(next_streak_seconds / (60 * 60))} hours'
-							else:
+							elif round(next_streak_seconds / 60) > 0:
 								# round to the nearest minute
 								next_streak_string = f'{round(next_streak_seconds / 60)} minutes'
+							else:
+								# there was some kind of error
+								await action_log('CRITICAL ERROR - next_streak_seconds was negative')
+								return
 						except TypeError:
 							await action_log('ERROR - next_streak_seconds caused a TypeError')
 							next_streak_string = '`N/A`'
