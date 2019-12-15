@@ -151,7 +151,7 @@ async def on_message(message):
 				if poll_start_time is None:
 					# set poll start time in the match database
 					poll_start_time = time_now
-					f'UPDATE matches SET poll_start_time = {poll_start_time} WHERE db_id = {db_id}'
+					query = f'UPDATE matches SET poll_start_time = {poll_start_time} WHERE db_id = {db_id}'
 					await execute_sql(query)
 					connect.conn.commit()
 					await action_log(f'poll_start_time set in database ({poll_start_time})')
@@ -2355,7 +2355,7 @@ async def on_reaction_add(reaction, user):
 								return
 							# generate vote removal embed
 							embed_title = 'Vote Removal'
-							embed_description = f'Your vote for image {vote_position} has been removed.'
+							embed_description = f'Your vote for **image {vote_position}** has been removed.'
 							embed = await generate_embed('yellow', embed_title, embed_description)
 							# remove vote from postgresql
 							query = f'DELETE FROM votes WHERE user_id = {user.id} AND match_id = {match_id}'
