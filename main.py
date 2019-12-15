@@ -50,16 +50,19 @@ async def continue_polls(client):
 					if message.embeds[0].title == 'Match Voting' or message.embeds[0].title == 'Extending Voting Time':
 						if message.embeds[0].title == 'Match Voting':
 							# delete the poll message
-							await channel.purge(limit=1)
+							await match_channel.purge(limit=1)
+							await action_log(f'old poll deleted in #{match_channel.name}')
 						elif message.embeds[0].title == 'Extending Voting Time':
 							# delete the poll extension and base poll messages
-							await channel.purge(limit=2)
+							await match_channel.purge(limit=2)
+							await action_log(f'old poll deleted in #{match_channel.name}')
 
 						# build voting embed
 						embed_title = 'Match Voting'
 						embed_description = '**Vote for your favorite!** Results will be sent to this channel when voting ends.\n🇦 First image\n🇧 Second image'
 						embed = await generate_embed('pink', embed_title, embed_description)
 						await match_channel.send(embed=embed, nonce='poll')
+						await action_log(f'new poll sent in #{match_channel.name}')
 						connected_polls += 1
 
 	await action_log(f'connected to {connected_polls} active polls')
