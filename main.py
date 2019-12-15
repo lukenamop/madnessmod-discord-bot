@@ -906,7 +906,7 @@ async def on_message(message):
 				match_db_id = result[8]
 				template_author_id = result[9]
 				try:
-					template_author = message.guild.get_member(int(template_author_id))
+					template_author = client.get_guild(config.MM_GUILD_ID).get_member(template_author_id)
 				except:
 					await action_log('template_author was not a valid member')
 
