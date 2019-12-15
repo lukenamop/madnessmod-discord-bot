@@ -65,7 +65,10 @@ async def continue_polls(client):
 						await action_log(f'new poll sent in #{match_channel.name}')
 						connected_polls += 1
 
-	await action_log(f'connected to {connected_polls} active polls')
+	if connected_polls == 0:
+		await action_log('no active polls')
+	else:
+		await action_log(f'safely relaunched {connected_polls} active polls')
 	return
 
 # generate a discord embed with an optional attached image
