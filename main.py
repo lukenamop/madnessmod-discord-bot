@@ -330,7 +330,7 @@ async def on_message(message):
 					await action_log('winner round role updated')
 
 					# update participant stats in the database
-					query = f'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1, total_votes_for = total_votes_for + {winning_votes}, lb_points = lb_points + {(winning_votes * 2) + 50} WHERE user_id = {winner.id}'
+					query = f'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1, total_votes_for = total_votes_for + {winning_votes}, lb_points = lb_points + {(winning_votes * 2) + 100} WHERE user_id = {winner.id}'
 					await execute_sql(query)
 					connect.conn.commit()
 					await action_log('winner participant stats updated')
