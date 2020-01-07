@@ -2320,13 +2320,9 @@ async def on_reaction_add(reaction, user):
 	message = reaction.message
 
 	if message.author.id == 622139031756734492:
-		await action_log('author good')
 		if message.embeds is not None:
-			await action_log('embeds good')
 			if message.embeds[0].title == 'Match Voting' and message.embeds[0].description.startswith('**Vote for your favorite!'):
-				await action_log('embed match success')
 				if not user.bot:
-					await action_log('all good')
 					# remove the user's reaction from the bot (anonymous polling)
 					await reaction.remove(user)
 					await action_log(f'reaction added to poll by {user.name}#{user.discriminator}')
