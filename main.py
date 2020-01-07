@@ -2506,7 +2506,7 @@ async def on_reaction_add(reaction, user):
 						embed = await generate_embed('green', embed_title, embed_description)
 						await user_channel.send(embed=embed)
 						await action_log('vote confirmation sent to user')
-			return
+				return
 
 	if message.nonce is not None:
 		# act on template confirmations for split matches
