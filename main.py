@@ -2323,7 +2323,7 @@ async def on_reaction_add(reaction, user):
 		await action_log('author good')
 		if message.embeds is not None:
 			await action_log('embeds good')
-			if message.embeds[0].title == 'Match Voting' and message.embeds[0].description.startswith('Vote for your favorite!'):
+			if message.embeds[0].title == 'Match Voting' and message.embeds[0].description.startswith('**Vote for your favorite!'):
 				await action_log('embed match success')
 				if not user.bot:
 					await action_log('all good')
