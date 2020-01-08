@@ -2579,10 +2579,13 @@ async def on_reaction_add(reaction, user):
 				# check to see which emoji was used
 				if reaction.emoji == '⬅️':
 					# previous page
+					'back'
 				elif reaction.emoji == '🔅':
 					# jump to self
+					'self'
 				elif reaction.emoji == '➡️':
 					# next page
+					'next'
 				return
 
 				"""
