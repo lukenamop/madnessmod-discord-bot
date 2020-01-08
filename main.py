@@ -2042,11 +2042,13 @@ async def on_message(message):
 
 						await action_log('checking submission status')
 						# check for submissions, remind users to submit if they haven't yet
-						query = f'SELECT {submitted} FROM matches WHERE {match_udb} = {match_user.id} ORDER BY db_id DESC'
+						query = f'SELECT {submitted}, cancelled FROM matches WHERE {match_udb} = {match_user.id} ORDER BY db_id DESC'
 						await execute_sql(query)
-						result = connect.crsr.fetchone()
-						if result is not None:
-							if result[0]:
+						results = connect.crsr.fetchone()
+						if results[1]:
+							return
+						if results[0] is not None:
+							if results[0]:
 								await action_log('user already submitted')
 								return
 						# build reminder embed
@@ -2061,11 +2063,13 @@ async def on_message(message):
 
 						await action_log('checking submission status')
 						# check for submissions, remind users to submit if they haven't yet
-						query = f'SELECT {submitted} FROM matches WHERE {match_udb} = {match_user.id} ORDER BY db_id DESC'
+						query = f'SELECT {submitted}, cancelled FROM matches WHERE {match_udb} = {match_user.id} ORDER BY db_id DESC'
 						await execute_sql(query)
-						result = connect.crsr.fetchone()
-						if result is not None:
-							if result[0]:
+						results = connect.crsr.fetchone()
+						if results[1]:
+							return
+						if results[0] is not None:
+							if results[0]:
 								await action_log('user already submitted')
 								return
 						# build reminder embed
@@ -2080,11 +2084,13 @@ async def on_message(message):
 
 						await action_log('checking submission status')
 						# check for submissions, remind users to submit if they haven't yet
-						query = f'SELECT {submitted} FROM matches WHERE {match_udb} = {match_user.id} ORDER BY db_id DESC'
+						query = f'SELECT {submitted}, cancelled FROM matches WHERE {match_udb} = {match_user.id} ORDER BY db_id DESC'
 						await execute_sql(query)
-						result = connect.crsr.fetchone()
-						if result is not None:
-							if result[0]:
+						results = connect.crsr.fetchone()
+						if results[1]:
+							return
+						if results[0] is not None:
+							if results[0]:
 								await action_log('user already submitted')
 								return
 						# build match end embed
@@ -2670,10 +2676,12 @@ async def on_reaction_add(reaction, user):
 
 					await action_log('checking submission status')
 					# check for submissions, remind users to submit if they haven't yet
-					query = f'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} ORDER BY db_id DESC'
+					query = f'SELECT u1_submitted, u2_submitted, cancelled FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} ORDER BY db_id DESC'
 					await execute_sql(query)
 					result = connect.crsr.fetchone()
 					if result is not None:
+						if result[2]:
+							return
 						if result[0] and result[1]:
 							return
 					# build reminder embed
@@ -2692,10 +2700,12 @@ async def on_reaction_add(reaction, user):
 
 					await action_log('checking submission status')
 					# check for submissions, remind users to submit if they haven't yet
-					query = f'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} ORDER BY db_id DESC'
+					query = f'SELECT u1_submitted, u2_submitted, cancelled FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} ORDER BY db_id DESC'
 					await execute_sql(query)
 					result = connect.crsr.fetchone()
 					if result is not None:
+						if result[2]:
+							return
 						if result[0] and result[1]:
 							return
 					# build reminder embed
@@ -2714,11 +2724,14 @@ async def on_reaction_add(reaction, user):
 
 					await action_log('checking submission status')
 					# check for submissions, remind users to submit if they haven't yet
-					query = f'SELECT u1_submitted, u2_submitted FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} ORDER BY db_id DESC'
+					query = f'SELECT u1_submitted, u2_submitted, cancelled FROM matches WHERE u1_id = {member1.id} AND u2_id = {member2.id} ORDER BY db_id DESC'
 					await execute_sql(query)
 					result = connect.crsr.fetchone()
-					if result[0] and result[1]:
-						return
+					if result is not None:
+						if result[2]:
+							return
+						if result[0] and result[1]:
+							return
 					# build match end embed
 					embed_title = 'Match Closed'
 					embed_description = 'Your match has ended without your submission resulting in your disqualification. Next time, please be sure to submit your final meme before the time runs out!'

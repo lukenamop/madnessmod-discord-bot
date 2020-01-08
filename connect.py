@@ -27,9 +27,6 @@ def db_connect():
 	result = crsr.fetchone()
 	print('participants: ' + str(result[0]))
 
-	crsr.execute("""ALTER TABLE matches ADD COLUMN cancelled BOOLEAN DEFAULT False""")
-	conn.commit()
-
 	crsr.execute("""SELECT COUNT(*) FROM matches""")
 	result = crsr.fetchone()
 	print('matches: ' + str(result[0]))
