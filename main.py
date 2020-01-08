@@ -2173,7 +2173,7 @@ async def on_message(message):
 						await action_log('winning image sent to archive channel')
 
 						# update participant stats in the database
-						query = f'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1, lb_points = lb_points + 50 WHERE user_id = {winner.id}'
+						query = f'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1, lb_points = lb_points + 100 WHERE user_id = {winner.id}'
 						await execute_sql(query)
 						connect.conn.commit()
 						await action_log('winner participant stats updated')

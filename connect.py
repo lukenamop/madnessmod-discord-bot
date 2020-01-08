@@ -27,6 +27,9 @@ def db_connect():
 	result = crsr.fetchone()
 	print('participants: ' + str(result[0]))
 
+	crsr.execute("""ALTER TABLE matches ADD COLUMN cancelled BOOLEAN DEFAULT False""")
+	conn.commit()
+
 	crsr.execute("""SELECT COUNT(*) FROM matches""")
 	result = crsr.fetchone()
 	print('matches: ' + str(result[0]))
@@ -85,6 +88,7 @@ db_connect()
 # poll_start_time NUMERIC(10) DEFAULT NULL
 # poll_extensions NUMERIC(1) DEFAULT 0
 # is_final BOOLEAN DEFAULT False
+# cancelled BOOLEAN DEFAULT False
 
 # TABLE votes
 # db_id SERIAL PRIMARY KEY
