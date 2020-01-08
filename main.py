@@ -518,7 +518,7 @@ async def on_message(message):
 			# check to make sure there are signups
 			if results is not None:
 				# build signuplist embed
-				embed_description = ''
+				embed_description = '**Page 1:**\n'
 				iteration = 0
 				user_found = False
 				# iterate through the participants in the database
@@ -539,15 +539,9 @@ async def on_message(message):
 								user_found = True
 							if lb_rank < 10:
 								# add an extra space to align all the ranks
-								if lb_points == 420:
-									embed_description += f'**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points 🌿\n'
-								else:
-									embed_description += f'**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
+								embed_description += f'**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
 							elif lb_rank >= 10 and lb_rank < 100:
-								if lb_points == 420:
-									embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points 🌿\n'
-								else:
-									embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
+								embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
 						# 10 users printed but the base user hasn't been found yet
 						else:
 							if member == user:
@@ -555,15 +549,9 @@ async def on_message(message):
 								user_found = True
 								# add the user's rank at the bottom
 								if lb_rank < 10:
-									if lb_points == 420:
-										embed_description += f'**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points 🌿'
-									else:
-										embed_description += f'**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
+									embed_description += f'**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
 								elif lb_rank >= 10 and lb_rank < 100:
-									if lb_points == 420:
-										embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points 🌿'
-									else:
-										embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
+									embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
 				# strip any extraneous newlines
 				embed_description = embed_description.rstrip('\n')
 			else:
@@ -572,7 +560,6 @@ async def on_message(message):
 			embed = await generate_embed('blue', embed_title, embed_description)
 			# send signuplist embed
 			lb_message = await message.channel.send(embed=embed)
-			# lb_message.add_reaction('➡️')
 			await action_log('leaderboard sent to stats-flex')
 			return
 
@@ -2531,7 +2518,7 @@ async def on_reaction_add(reaction, user):
 						await action_log('vote confirmation sent to user')
 				return
 
-			# navigating the mod help guide
+			# mod help guide
 			if message.embeds[0].title == 'Mod Help Guide':
 				if not user.bot:
 					# remove the user's reaction from the bot
@@ -2541,6 +2528,7 @@ async def on_reaction_add(reaction, user):
 					embed_title = 'Mod Help Guide'
 					# check to see which emoji was used
 					if reaction.emoji == '⚔️':
+						# match commands
 						embed_description = """**⚔️ Match Commands**
 							\n`.cancelmatch` - cancels the match in a given match channel
 							\n`.forcewin` - ends a match by forcing one of the participants to win (use in matches when one participant hasn't submitted)
@@ -2550,6 +2538,7 @@ async def on_reaction_add(reaction, user):
 							\n`.startmatch @<user> @<user>` - starts a match between two users
 							\n`.startsolo @<user>` - starts a user's solo match (use after `.splitmatch`)"""
 					elif reaction.emoji == '🏆':
+						# tournament commands
 						embed_description = """**🏆 Tournament Commands**
 							\n`.createbracket <tournament reference>` - creates a Challonge bracket with the given tournament reference (for example, use `10` to get Meme Madness 10) and populates all participants
 							\n`.creatematchchannels <tournament reference>` - creates a match channel for every "open" match from the specified Challonge bracket
@@ -2559,6 +2548,7 @@ async def on_reaction_add(reaction, user):
 							\n`.settournamentroles` - removes all past tournament roles and initializes the tournament's participants' round roles (sets them to Round 1)
 							\n`.signuplist` - displays a full list of signups for the current tournament"""
 					elif reaction.emoji == '📎':
+						# admin commands
 						embed_description = """**📎 Admin Commands**
 							\n`.activematches` - displays all currently active matches
 							\n`.clearmatches` - clears all matches and votes from the database
@@ -2566,12 +2556,14 @@ async def on_reaction_add(reaction, user):
 							\n`.reconnect` - forces the bot to reconnect to its database
 							\n`.toggletemplates` - enable or disable template requirements with `.signup`"""
 					elif reaction.emoji == '↩️':
+						# back to main help menu
 						embed_description = """Use the emojis to navigate this help guide:
 							\n⚔️ Match Commands
 							\n🏆 Tournament Commands
 							\n📎 Admin Commands
 							\n↩️ Return Here"""
 					else:
+						# invalid emoji, do nothing
 						return
 
 					# update the help guide
@@ -2579,6 +2571,84 @@ async def on_reaction_add(reaction, user):
 					await message.edit(embed=embed)
 					await action_log('mod help guide edited')
 				return
+
+			# points leaderboard (overall)
+			if message.embeds[0].title == 'Overall Points Leaderboard':
+				# check which page the leaderboard is currently on
+
+				# check to see which emoji was used
+				if reaction.emoji == '⬅️':
+					# previous page
+				elif reaction.emoji == '🔅':
+					# jump to self
+				elif reaction.emoji == '➡️':
+					# next page
+				return
+
+				"""
+		if message_content.startswith('.top10') or message_content.startswith('.lb') or message_content.startswith('.leaderboard'):
+			await action_log(f'{message.author.display_name} called .lb')
+			# check for a mentioned user
+			if len(message.mentions) == 1:
+				user = message.mentions[0]
+				await action_log(f'.lb was used on {user.display_name}')
+			else:
+				user = message.author
+
+			# pull top 15 participants from database (extras in case some of the top 10 have left the server)
+			query = 'SELECT user_id, lb_points, RANK () OVER (ORDER BY lb_points DESC) lb_rank FROM participants ORDER BY lb_points DESC'
+			# query = 'SELECT user_id, lb_points FROM participants ORDER BY lb_points DESC LIMIT 15'
+			await execute_sql(query)
+			results = connect.crsr.fetchall()
+			embed_title = 'Overall Points Leaderboard'
+			# check to make sure there are signups
+			if results is not None:
+				# build signuplist embed
+				embed_description = '**Page 1:**\n'
+				iteration = 0
+				user_found = False
+				# iterate through the participants in the database
+				for entry in results:
+					# initialize variables for the member and their info
+					member = message.guild.get_member(entry[0])
+					lb_points = entry[1]
+					lb_rank = entry[2]
+					# check to be sure the member is still in the guild
+					if member is not None:
+						iteration += 1
+						# 10 users printed and the base user was one of them
+						if iteration > 10 and user_found:
+							break
+						# not 10 users printed yet
+						elif iteration <= 10:
+							if member == user:
+								user_found = True
+							if lb_rank < 10:
+								# add an extra space to align all the ranks
+								embed_description += f'**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
+							elif lb_rank >= 10 and lb_rank < 100:
+								embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
+						# 10 users printed but the base user hasn't been found yet
+						else:
+							if member == user:
+								embed_description += '\nUser\'s rank:\n'
+								user_found = True
+								# add the user's rank at the bottom
+								if lb_rank < 10:
+									embed_description += f'**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
+								elif lb_rank >= 10 and lb_rank < 100:
+									embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
+				# strip any extraneous newlines
+				embed_description = embed_description.rstrip('\n')
+			else:
+				# send this message if no participants were found
+				embed_description = 'The leaderboard seems to be empty in the database.'
+			embed = await generate_embed('blue', embed_title, embed_description)
+			# send signuplist embed
+			lb_message = await message.channel.send(embed=embed)
+			await action_log('leaderboard sent to stats-flex')
+			return
+			"""
 
 	if message.nonce is not None:
 		# act on template confirmations for split matches
