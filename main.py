@@ -2232,6 +2232,22 @@ async def on_message(message):
 				await action_log('no match found')
 			return
 
+		# '.cancelmatch' command (contest category)
+		if message_content == '.cancelmatch':
+			# update match in postgresql
+			query = f'UPDATE matches SET cancelled = True WHERE channel_id = {message.channel.id} ORDER BY db_id DESC'
+			await execute_sql(query)
+			conn.commit()
+			await action_log('cancelled match in database')
+
+			# send cancelled embed to match channel
+			embed_title = 'Match Cancelled'
+			embed_description = 'This match has been cancelled. To start a new match, use `.startmatch` or `.startsolo`.'
+			embed = await generate_embed('red', embed_title, embed_description)
+			await message.channel.send(embed=embed)
+			await action_log('match channel notified of cancellation')
+			return
+
 		# '.showresults' command (contest category)
 		if message_content == '.showresults':
 			await action_log('showresults command in match channel')
