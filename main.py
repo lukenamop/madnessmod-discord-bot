@@ -431,6 +431,12 @@ async def on_message(message):
 					await message.add_reaction('🏆')
 					await message.add_reaction('📎')
 					await message.add_reaction('↩️')
+					return
+				if message.embeds[0].title == 'Overall Points Leaderboard':
+					await message.add_reaction('⬅️')
+					await message.add_reaction('🔅')
+					await message.add_reaction('➡️')
+					return
 			return
 		return
 
@@ -508,7 +514,7 @@ async def on_message(message):
 			# query = 'SELECT user_id, lb_points FROM participants ORDER BY lb_points DESC LIMIT 15'
 			await execute_sql(query)
 			results = connect.crsr.fetchall()
-			embed_title = 'Points Leaderboard - Top 10'
+			embed_title = 'Overall Points Leaderboard'
 			# check to make sure there are signups
 			if results is not None:
 				# build signuplist embed
@@ -2337,6 +2343,7 @@ async def on_reaction_add(reaction, user):
 
 	if message.author.id == 622139031756734492:
 		if message.embeds is not None:
+			# match voting (polls)
 			if message.embeds[0].title == 'Match Voting' and message.embeds[0].description.startswith('**Vote for your favorite!'):
 				if not user.bot:
 					# remove the user's reaction from the bot (anonymous polling)
@@ -2524,6 +2531,7 @@ async def on_reaction_add(reaction, user):
 						await action_log('vote confirmation sent to user')
 				return
 
+			# navigating the mod help guide
 			if message.embeds[0].title == 'Mod Help Guide':
 				if not user.bot:
 					# remove the user's reaction from the bot
@@ -2832,24 +2840,11 @@ async def on_reaction_add(reaction, user):
 					connect.conn.commit()
 					await action_log('match removed from database')
 			return
-
-		# act on dynamic stats menus
-		# if message.nonce.startswith('stats'):
-		# 	if not user.bot:
-
-		# 		await reaction.remove(user)
-
-		# 		user_id = int(message.nonce.lstrip('stats'))
-		# 		if user.id == user_id:
-		# 			if reaction.emoji == '1️⃣':
-		# 				return
-		# 			if reaction.emoji == '2️⃣':
-		# 				return
-		# 	return
 		return
 	return
 
 left_emoji = '⬅️'
+find_self_emoji = '🔅'
 right_emoji = '➡️'
 
 # client event triggers when discord bot client is fully loaded and ready
