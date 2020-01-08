@@ -425,12 +425,11 @@ async def on_message(message):
 					await message.add_reaction('<:check_mark:637394596472815636>')
 					await message.add_reaction('<:x_mark:637394622200676396>')
 					return
-			# if message.nonce is not None:
-			# 	if message.nonce.startswith('stats'):
-			# 		# add reactions to dynamic stats menu
-			# 		await message.add_reaction('1️⃣')
-			# 		await message.add_reaction('2️⃣')
-			# 		return
+			if message.embeds is not None:
+				if message.embeds[0].title == 'Mod Help Guide':
+					await message.add_reaction('⚔️')
+					await message.add_reaction('🏆')
+					await message.add_reaction('📎')
 			return
 		return
 
@@ -568,17 +567,6 @@ async def on_message(message):
 			lb_message = await message.channel.send(embed=embed)
 			# lb_message.add_reaction('➡️')
 			await action_log('leaderboard sent to stats-flex')
-			return
-
-		# '.lbsimulation' command (stats-flex)
-		if message_content == '.simlb':
-			if message.author.id in config.ADMIN_IDS:
-				query = 'UPDATE participants SET lb_points = 175 WHERE user_id = 324273473360887808'
-				await execute_sql(query)
-				connect.conn.commit()
-
-				await message.channel.send('done')
-				return
 			return
 
 		# '.points' command (stats-flex)
@@ -899,7 +887,7 @@ async def on_message(message):
 		# '.submit' command (DM)
 		if message_content.startswith('.submit'):
 			# check for an active match including the specified user
-			query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, template_url, creation_time, db_id, template_author_id FROM matches WHERE (u1_id = {message.author.id} OR u2_id = {message.author.id}) ORDER BY db_id DESC'
+			query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, template_url, creation_time, db_id, template_author_id, cancelled FROM matches WHERE (u1_id = {message.author.id} OR u2_id = {message.author.id}) ORDER BY db_id DESC'
 			await execute_sql(query)
 			result = connect.crsr.fetchone()
 
@@ -908,7 +896,6 @@ async def on_message(message):
 			embed_description = 'It looks like you\'ve already submitted for your current match! If this is incorrect, contact a moderator.'
 			embed = await generate_embed('red', embed_title, embed_description)
 
-			# check for duplicate submissions
 			if result is not None:
 				u1_id = result[0]
 				u2_id = result[1]
@@ -919,11 +906,23 @@ async def on_message(message):
 				template_url = result[6]
 				match_db_id = result[8]
 				template_author_id = result[9]
+				cancelled = result[10]
 				try:
 					template_author = client.get_guild(config.MM_GUILD_ID).get_member(template_author_id)
 				except:
 					await action_log('template_author was not a valid member')
 
+				# check to see if the match has been cancelled
+				if cancelled:
+					# build submission error embed (match cancelled)
+					embed_title = 'Match Cancelled'
+					embed_description = 'Your match has been cancelled, please check the match channel for more info.'
+					embed = await generate_embed('red', embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log(f'cancelled submission by {message.author.name}#{message.author.discriminator}')
+					return
+
+				# check for duplicate submissions
 				if message.author.id == u1_id:
 					if u1_submitted:
 						await message.channel.send(embed=embed)
@@ -1182,7 +1181,7 @@ async def on_message(message):
 		# '.help' command (DM)
 		if message_content == '.help':
 			# build help embed
-			embed_title = 'Commands'
+			embed_title = 'Help: Commands'
 			embed_description = help_cmd.dm_help
 			embed = await generate_embed('yellow', embed_title, embed_description)
 			await message.channel.send(embed=embed)
@@ -1195,7 +1194,7 @@ async def on_message(message):
 		# '.help' command (stats-flex)
 		if message_content == '.help':
 			# build help embed
-			embed_title = 'Commands'
+			embed_title = 'Help: Commands'
 			embed_description = help_cmd.stats_help
 			embed = await generate_embed('yellow', embed_title, embed_description)
 			await message.channel.send(embed=embed)
@@ -1735,23 +1734,16 @@ async def on_message(message):
 
 		# '.help' command (duel-mods)
 		if message_content == '.help':
-			# check to see who is asking for help
-			if message.author.id in config.ADMIN_IDS:
-				# build admin help embed
-				embed_title = 'Admin Commands'
-				embed_description = help_cmd.admin_help
-				embed = await generate_embed('yellow', embed_title, embed_description)
-				await message.channel.send(embed=embed)
-				await action_log('help query sent to duel-mods')
-				return
-			else:
-				# build mod help embed
-				embed_title = 'Mod Commands'
-				embed_description = help_cmd.mod_help
-				embed = await generate_embed('yellow', embed_title, embed_description)
-				await message.channel.send(embed=embed)
-				await action_log('help query sent to duel-mods')
-				return
+			# build base embed
+			embed_title = 'Mod Help Guide'
+			embed_description = """Use the emojis to navigate this help guide.\n
+				\n⚔️ Match Commands
+				\n🏆 Tournament Commands
+				\n📎 Admin Commands"""
+			embed = await generate_embed('yellow', embed_title, embed_description)
+			await message.channel.send(embed=embed)
+			await action_log('mod help guide sent to #duel-mods')
+			return
 
 	# contest category specific commands
 	if message.channel.category_id == config.MATCH_CATEGORY_ID:

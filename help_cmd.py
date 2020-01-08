@@ -8,7 +8,8 @@ stats_help = """`.donate` - shows MadnessMod donation info
 	\n`.help` - returns this help menu
 	\n`.stats` - displays your Meme Madness stats (can also be used like `.stats @<user>`)"""
 
-mod_help = """`.donate` - shows MadnessMod donation info
+mod_help = """`.cancelmatch` - cancels the match in a given match channel
+	\n`.donate` - shows MadnessMod donation info
 	\n`.forcewin` - ends a match by forcing one of the participants to win (use in split matches when one participant hasn't competed)
 	\n`.help` - returns this help menu
 	\n`.matchisfinal` - sets the next match as a final match which will ping `Verified` and `everyone`
@@ -20,6 +21,7 @@ mod_help = """`.donate` - shows MadnessMod donation info
 	\n`.startsolo @<user>` - starts a user's solo match after a `.splitmatch`"""
 
 admin_help = """`.activematches` - displays all currently active matches and polls
+	\n`.cancelmatch` - cancels the match in a given match channel
 	\n`.clearmatches` - clears all matches and votes from the database (**admin only**)
 	\n`.clearsignups` - clears all signups from the database (**admin only**)
 	\n`.createbracket <tournament reference>` - creates a Challonge bracket with the given tournament reference (for example, Meme Madness 10) and populates all participants (**admin only**)
