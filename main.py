@@ -2235,7 +2235,7 @@ async def on_message(message):
 		# '.cancelmatch' command (contest category)
 		if message_content == '.cancelmatch':
 			# update match in postgresql
-			query = f'UPDATE matches SET cancelled = True WHERE channel_id = {message.channel.id} ORDER BY db_id DESC'
+			query = f'UPDATE matches SET cancelled = True WHERE channel_id = {message.channel.id}'
 			await execute_sql(query)
 			connect.conn.commit()
 			await action_log('cancelled match in database')
