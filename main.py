@@ -2237,7 +2237,7 @@ async def on_message(message):
 			# update match in postgresql
 			query = f'UPDATE matches SET cancelled = True WHERE channel_id = {message.channel.id} ORDER BY db_id DESC'
 			await execute_sql(query)
-			conn.commit()
+			connect.conn.commit()
 			await action_log('cancelled match in database')
 
 			# send cancelled embed to match channel
