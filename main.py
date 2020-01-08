@@ -2533,11 +2533,30 @@ async def on_reaction_add(reaction, user):
 					embed_title = 'Mod Help Guide'
 					# check to see which emoji was used
 					if reaction.emoji == '⚔️':
-						embed_description = """(In Progress)"""
+						embed_description = """**⚔️ Match Commands**
+							\n`.cancelmatch` - cancels the match in a given match channel
+							\n`.forcewin` - ends a match by forcing one of the participants to win (use in matches when one participant hasn't submitted)
+							\n`.matchisfinal` - sets the next match as a final match which will ping `Verified` and `everyone`
+							\n`.showresults` - shows the results of the most recent match in the match channel it's called in
+							\n`.splitmatch @<user> @<user>` - splits a match between two users so they can compete separately
+							\n`.startmatch @<user> @<user>` - starts a match between two users
+							\n`.startsolo @<user>` - starts a user's solo match (use after `.splitmatch`)"""
 					elif reaction.emoji == '🏆':
-						embed_description = """(In Progress)"""
+						embed_description = """**🏆 Tournament Commands**
+							\n`.createbracket <tournament reference>` - creates a Challonge bracket with the given tournament reference (for example, use `10` to get Meme Madness 10) and populates all participants
+							\n`.creatematchchannels <tournament reference>` - creates a match channel for every "open" match from the specified Challonge bracket
+							\n`.prelim <user ID>` - sets a user's tournament role to `Preliminary` (deprecated)
+							\n`.removetournamentroles` - remove past participants' round roles (deprecated)
+							\n`.resignup <user ID> <reason>` - deletes a user's template and DMs them with `<reason>`, prompting them to re-signup
+							\n`.settournamentroles` - removes all past tournament roles and initializes the tournament's participants' round roles (sets them to Round 1)
+							\n`.signuplist` - displays a full list of signups for the current tournament"""
 					elif reaction.emoji == '📎':
-						embed_description = """(In Progress)"""
+						embed_description = """**📎 Admin Commands**
+							\n`.activematches` - displays all currently active matches
+							\n`.clearmatches` - clears all matches and votes from the database
+							\n`.clearsignups` - clears all signups from the database
+							\n`.reconnect` - forces the bot to reconnect to its database
+							\n`.toggletemplates` - enable or disable template requirements with `.signup`"""
 					elif reaction.emoji == '↩️':
 						embed_description = """Use the emojis to navigate this help guide:
 							\n⚔️ Match Commands
