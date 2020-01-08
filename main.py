@@ -430,6 +430,7 @@ async def on_message(message):
 					await message.add_reaction('⚔️')
 					await message.add_reaction('🏆')
 					await message.add_reaction('📎')
+					await message.add_reaction('↩️')
 			return
 		return
 
@@ -1736,10 +1737,11 @@ async def on_message(message):
 		if message_content == '.help':
 			# build base embed
 			embed_title = 'Mod Help Guide'
-			embed_description = """Use the emojis to navigate this help guide.\n
+			embed_description = """Use the emojis to navigate this help guide:
 				\n⚔️ Match Commands
 				\n🏆 Tournament Commands
-				\n📎 Admin Commands"""
+				\n📎 Admin Commands
+				\n↩️ Return Here"""
 			embed = await generate_embed('yellow', embed_title, embed_description)
 			await message.channel.send(embed=embed)
 			await action_log('mod help guide sent to #duel-mods')
@@ -2520,6 +2522,35 @@ async def on_reaction_add(reaction, user):
 						embed = await generate_embed('green', embed_title, embed_description)
 						await user_channel.send(embed=embed)
 						await action_log('vote confirmation sent to user')
+				return
+
+			if message.embeds[0].title == 'Mod Help Guide':
+				if not user.bot:
+					# remove the user's reaction from the bot
+					await reaction.remove(user)
+					await action_log(f'reaction added to mod help guide')
+
+					embed_title = 'Mod Help Guide'
+					# check to see which emoji was used
+					if reaction.emoji == '⚔️':
+						embed_description = """(In Progress)"""
+					elif reaction.emoji == '🏆':
+						embed_description = """(In Progress)"""
+					elif reaction.emoji == '📎':
+						embed_description = """(In Progress)"""
+					elif reaction.emoji == '↩️':
+						embed_description = """Use the emojis to navigate this help guide:
+							\n⚔️ Match Commands
+							\n🏆 Tournament Commands
+							\n📎 Admin Commands
+							\n↩️ Return Here"""
+					else:
+						return
+
+					# update the help guide
+					embed = await generate_embed('yellow', embed_title, embed_description)
+					await message.edit(embed=embed)
+					await action_log('mod help guide edited')
 				return
 
 	if message.nonce is not None:
