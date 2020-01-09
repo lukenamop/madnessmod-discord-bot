@@ -687,7 +687,7 @@ async def on_message(message):
 							rules_chan = client.get_channel(config.RULES_CHAN_ID)
 							embed_description = f'{base_member.mention}, welcome to Meme Madness! Signup info is always posted in {announcements_chan.mention}. Check out {info_chan.mention} and {rules_chan.mention} to see how this place is run and let a member of the mod team know if you need any help!'
 							embed = await generate_embed('green', embed_title, embed_description)
-							await client.get_channel(581695290986332162).send(embed=embed)
+							# await client.get_channel(581695290986332162).send(embed=embed)
 						# send welcome embed
 						await action_log(f'verification compeleted by {username_discriminator}')
 

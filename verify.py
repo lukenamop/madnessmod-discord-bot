@@ -44,7 +44,7 @@ def extra_checks(username):
 	checks = [0, 0, 0]
 
 	# check to see if a users' account age is less than 30 days
-	if redditor.created_utc < (time.now() - (30*24*60*60)):
+	if redditor.created_utc < (time.time() - (30*24*60*60)):
 		checks[0] = 1
 
 	# check to see if a user has less than 1000 total karma
