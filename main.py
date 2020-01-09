@@ -2614,7 +2614,7 @@ async def on_reaction_add(reaction, user):
 						if member is not None:
 							iteration += 1
 
-							if iteration < first_participant and member == message.author:
+							if iteration < first_participant and member == user:
 								user_found = True
 								embed_description = 'User\'s rank:\n'
 								embed_description += functions.format_lb_entry(lb_page, lb_rank, member.display_name, lb_points)
@@ -2626,10 +2626,10 @@ async def on_reaction_add(reaction, user):
 									embed_description = f'Page {lb_page}:\n'
 
 							if iteration >= first_participant and iteration <= last_participant:
-								if member == message.author:
+								if member == user:
 									user_found = True
 								embed_description += functions.format_lb_entry(lb_page, lb_rank, member.display_name, lb_points)
-							elif iteration > last_participant and member == message.author:
+							elif iteration > last_participant and member == user:
 								embed_description += '\nUser\'s rank:\n'
 								embed_description += functions.format_lb_entry(lb_page, lb_rank, member.display_name, lb_points)
 
