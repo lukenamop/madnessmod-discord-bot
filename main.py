@@ -426,7 +426,7 @@ async def on_message(message):
 					await message.add_reaction('<:check_mark:637394596472815636>')
 					await message.add_reaction('<:x_mark:637394622200676396>')
 					return
-			if message.embeds[0] is not None:
+			if message.embeds.length == 1:
 				if message.embeds[0].title == 'Mod Help Guide':
 					await message.add_reaction('⚔️')
 					await message.add_reaction('🏆')
@@ -2330,7 +2330,7 @@ async def on_reaction_add(reaction, user):
 	message = reaction.message
 
 	if message.author.id == 622139031756734492:
-		if message.embeds is not None:
+		if message.embeds.length == 1:
 			# match voting (polls)
 			if message.embeds[0].title == 'Match Voting' and message.embeds[0].description.startswith('**Vote for your favorite!'):
 				if not user.bot:
