@@ -690,6 +690,11 @@ async def on_message(message):
 							await client.get_channel(581695290986332162).send(embed=embed)
 						# send welcome embed
 						await action_log(f'verification compeleted by {username_discriminator}')
+
+						# check specific conditions related to the user's reddit account
+						if verify.extra_checks(reddit_username) is not None:
+							await action_log('redditor did not pass specific checks, report sent in #modlog')
+							embed_title = f'New User {reddit_username} Joined: Low Activity'
 					else:
 						# build verification failure embed (verification key error)
 						embed_title = 'Verification Key Incorrect'
