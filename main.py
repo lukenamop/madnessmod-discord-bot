@@ -426,7 +426,7 @@ async def on_message(message):
 					await message.add_reaction('<:check_mark:637394596472815636>')
 					await message.add_reaction('<:x_mark:637394622200676396>')
 					return
-			if message.embeds is not None:
+			if message.embeds[0] is not None:
 				if message.embeds[0].title == 'Mod Help Guide':
 					await message.add_reaction('⚔️')
 					await message.add_reaction('🏆')
