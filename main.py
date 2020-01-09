@@ -2575,6 +2575,10 @@ async def on_reaction_add(reaction, user):
 			# points leaderboard (overall)
 			if message.embeds[0].title == 'Overall Points Leaderboard':
 				if not user.bot:
+					# remove the user's reaction from the bot
+					await reaction.remove(user)
+					await action_log(f'reaction added to leaderboard')
+
 					# check which page the leaderboard is currently on
 					lb_page = int(message.embeds[0].description.split(':')[0].lstrip('Page '))
 
