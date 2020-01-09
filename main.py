@@ -698,7 +698,7 @@ async def on_message(message):
 							embed_title = f'New User {reddit_username} Joined: Low Activity'
 							embed_description = f'This newly verified user has been flagged because their reddit account (https://reddit.com/u/{reddit_username}) has not met the following condition(s):\n'
 							if checks[0] == 1:
-								embed_description += '\n- Their account is less then 30 days old'
+								embed_description += '\n- Their account is less than 30 days old'
 							if checks[1] == 1:
 								embed_description += '\n- Their account has less than 1000 combined karma'
 							if checks[2] == 1:
