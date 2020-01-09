@@ -2595,7 +2595,7 @@ async def on_reaction_add(reaction, user):
 						result = connect.crsr.fetchone()
 						if result is not None:
 							user_rank = result[0]
-							lb_page = (user_rank - (user_rank % 10)) / 10
+							lb_page = int((user_rank - (user_rank % 10)) / 10) + 1
 					elif reaction.emoji == '➡️':
 						lb_page += 1
 
