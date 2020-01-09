@@ -2613,7 +2613,7 @@ async def on_reaction_add(reaction, user):
 							if iteration < first_participant and member == message.author:
 								user_found = True
 								embed_description = 'User\'s rank:\n'
-								embed_description += functions.format_lb_entry(lb_page, lb_rank, member.display_name, lb_points)
+								embed_description += functions.format_lb_entry(lb_page, iteration, lb_rank, member.display_name, lb_points)
 
 							elif iteration == first_participant:
 								if user_found:
@@ -2624,10 +2624,10 @@ async def on_reaction_add(reaction, user):
 							if iteration >= first_participant and iteration <= last_participant:
 								if member == message.author:
 									user_found = True
-								embed_description += functions.format_lb_entry(lb_page, lb_rank, member.display_name, lb_points)
+								embed_description += functions.format_lb_entry(lb_page, iteration, lb_rank, member.display_name, lb_points)
 							elif iteration > last_participant and member == message.author:
 								embed_description += '\nUser\'s rank:\n'
-								embed_description += functions.format_lb_entry(lb_page, lb_rank, member.display_name, lb_points)
+								embed_description += functions.format_lb_entry(lb_page, iteration, lb_rank, member.display_name, lb_points)
 
 							if iteration > last_participant and user_found:
 								break

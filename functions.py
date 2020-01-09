@@ -5,7 +5,7 @@ def escape_underscores(input_string):
 	return input_string.translate(str.maketrans({'_': '\_'}))
 
 # format leaderboard entries
-def format_lb_entry(lb_page, lb_rank, member_name, lb_points):
+def format_lb_entry(lb_page, iteration, lb_rank, member_name, lb_points):
 	if lb_page == 1:
 		if iteration < 10:
 			# add an extra space to align the other ranks
