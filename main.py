@@ -537,14 +537,14 @@ async def on_message(message):
 						elif iteration <= 10:
 							if member == user:
 								user_found = True
-							embed_description += format_lb_entry(1, lb_rank, member.display_name, lb_points)
+							embed_description += functions.format_lb_entry(1, lb_rank, member.display_name, lb_points)
 						# 10 users printed but the base user hasn't been found yet
 						else:
 							if member == user:
 								embed_description += '\nUser\'s rank:\n'
 								user_found = True
 								# add the user's rank at the bottom
-								embed_description += format_lb_entry(1, lb_rank, member.display_name, lb_points)
+								embed_description += functions.format_lb_entry(1, lb_rank, member.display_name, lb_points)
 				# strip any extraneous newlines
 				embed_description = embed_description.rstrip('\n')
 			else:
