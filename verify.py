@@ -48,11 +48,11 @@ def extra_checks(username):
 		checks[0] = 1
 
 	# check to see if a user has less than 1000 total karma
-	if (redditor.link_karma + redditor.comment_karma) > 1000:
+	if (redditor.link_karma + redditor.comment_karma) < 1000:
 		checks[1] = 1
 
 	# check to see if the user has verified their email
-	if redditor.has_verified_email:
+	if not redditor.has_verified_email:
 		checks[2] = 1
 
 	return checks
