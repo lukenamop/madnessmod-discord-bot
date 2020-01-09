@@ -518,7 +518,7 @@ async def on_message(message):
 			# check to make sure there are signups
 			if results is not None:
 				# build signuplist embed
-				embed_description = '**Page 1:**\n'
+				embed_description = 'Page 1:\n'
 				iteration = 0
 				user_found = False
 				# iterate through the participants in the database
@@ -2576,41 +2576,67 @@ async def on_reaction_add(reaction, user):
 			if message.embeds[0].title == 'Overall Points Leaderboard':
 				if not user.bot:
 					# check which page the leaderboard is currently on
-					lb_page = int(message.embeds[0].description.split(':')[0].lstrip('**Page '))
+					lb_page = int(message.embeds[0].description.split(':')[0].lstrip('Page '))
 
 					# check to see which emoji was used
 					if reaction.emoji == '⬅️':
 						# previous page
 						if lb_page == 1:
 							return
-						lb_page += 1
+						lb_page -= 1
 					elif reaction.emoji == '🔅':
 						# jump to self
 						'self'
 					elif reaction.emoji == '➡️':
-						# next page
-						'next'
+						lb_page += 1
+
+					# update the embed description
+					first_participant = (lb_page * 10) - 9
+					last_participant = lb_page * 10
+					query = f'SELECT user_id, lb_points, RANK () OVER (ORDER BY lb_points DESC) lb_rank FROM participants ORDER BY lb_points DESC'
+					await execute_sql(query)
+					results = connect.crsr.fetchall()
+					embed_title = 'Overall Points Leaderboard'
+
+					iteration = 0
+					user_found = False
+					# iterate through the participants in the database
+					for entry in results:
+						# initialize variables for the member and their info
+						member = message.guild.get_member(entry[0])
+						lb_points = entry[1]
+						lb_rank = entry[2]
+
+						if member is not None:
+							iteration += 1
+
+							if iteration < first_participant and member == message.author:
+								user_found = True
+								embed_description = 'User\'s rank:\n'
+								embed_description += functions.format_lb_entry(lb_page, lb_rank, member.display_name, lb_points)
+
+							elif iteration == first_participant:
+								if user_found:
+									embed_description += f'\nPage {lb_page}:\n'
+								else:
+									embed_description = f'Page {lb_page}:\n'
+
+							if iteration >= first_participant and iteration <= last_participant:
+								if member == message.author:
+									user_found = True
+								embed_description += functions.format_lb_entry(lb_page, lb_rank, member.display_name, lb_points)
+							elif iteration > last_participant and member == message.author:
+								embed_description += '\nUser\'s rank:\n'
+								embed_description += functions.format_lb_entry(lb_page, lb_rank, member.display_name, lb_points)
+
+							if iteration > last_participant and user_found:
+								break
+
+					embed = await generate_embed('blue', embed_title, embed_description)
+					await message.edit(embed=embed)
 				return
-
+				
 				"""
-		if message_content.startswith('.top10') or message_content.startswith('.lb') or message_content.startswith('.leaderboard'):
-			await action_log(f'{message.author.display_name} called .lb')
-			# check for a mentioned user
-			if len(message.mentions) == 1:
-				user = message.mentions[0]
-				await action_log(f'.lb was used on {user.display_name}')
-			else:
-				user = message.author
-
-			# pull top 15 participants from database (extras in case some of the top 10 have left the server)
-			query = 'SELECT user_id, lb_points, RANK () OVER (ORDER BY lb_points DESC) lb_rank FROM participants ORDER BY lb_points DESC'
-			# query = 'SELECT user_id, lb_points FROM participants ORDER BY lb_points DESC LIMIT 15'
-			await execute_sql(query)
-			results = connect.crsr.fetchall()
-			embed_title = 'Overall Points Leaderboard'
-			# check to make sure there are signups
-			if results is not None:
-				# build signuplist embed
 				embed_description = '**Page 1:**\n'
 				iteration = 0
 				user_found = False
