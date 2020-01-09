@@ -2577,12 +2577,13 @@ async def on_reaction_add(reaction, user):
 				if not user.bot:
 					# check which page the leaderboard is currently on
 					lb_page = int(message.embeds[0].description.split(':')[0].lstrip('**Page '))
-					await message.channel.send(str(lb_page))
 
 					# check to see which emoji was used
 					if reaction.emoji == '⬅️':
 						# previous page
-						'back'
+						if lb_page == 1:
+							return
+						lb_page += 1
 					elif reaction.emoji == '🔅':
 						# jump to self
 						'self'
