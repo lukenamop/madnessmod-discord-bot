@@ -2580,7 +2580,7 @@ async def on_reaction_add(reaction, user):
 					await action_log(f'reaction added to leaderboard')
 
 					# check which page the leaderboard is currently on
-					lb_page = int(message.embeds[0].description.split(':')[0].lstrip('Page '))
+					lb_page = int(message.embeds[0].description.split('Page ')[1].rstrip(':')[0])
 
 					# check to see which emoji was used
 					if reaction.emoji == '⬅️':
