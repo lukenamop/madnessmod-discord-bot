@@ -510,15 +510,14 @@ async def on_message(message):
 			else:
 				user = message.author
 
-			# pull top 15 participants from database (extras in case some of the top 10 have left the server)
+			# pull top participants
 			query = 'SELECT user_id, lb_points, RANK () OVER (ORDER BY lb_points DESC) lb_rank FROM participants ORDER BY lb_points DESC'
-			# query = 'SELECT user_id, lb_points FROM participants ORDER BY lb_points DESC LIMIT 15'
 			await execute_sql(query)
 			results = connect.crsr.fetchall()
 			embed_title = 'Overall Points Leaderboard'
-			# check to make sure there are signups
+			# check to make sure there are participants
 			if results is not None:
-				# build signuplist embed
+				# build lb embed
 				embed_description = 'Page 1:\n'
 				iteration = 0
 				user_found = False
@@ -538,21 +537,14 @@ async def on_message(message):
 						elif iteration <= 10:
 							if member == user:
 								user_found = True
-							if lb_rank < 10:
-								# add an extra space to align all the ranks
-								embed_description += f'**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
-							elif lb_rank >= 10 and lb_rank < 100:
-								embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
+							embed_description += format_lb_entry(1, lb_rank, member.display_name, lb_points)
 						# 10 users printed but the base user hasn't been found yet
 						else:
 							if member == user:
 								embed_description += '\nUser\'s rank:\n'
 								user_found = True
 								# add the user's rank at the bottom
-								if lb_rank < 10:
-									embed_description += f'**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
-								elif lb_rank >= 10 and lb_rank < 100:
-									embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
+								embed_description += format_lb_entry(1, lb_rank, member.display_name, lb_points)
 				# strip any extraneous newlines
 				embed_description = embed_description.rstrip('\n')
 			else:
@@ -2645,53 +2637,6 @@ async def on_reaction_add(reaction, user):
 					embed = await generate_embed('blue', embed_title, embed_description)
 					await message.edit(embed=embed)
 				return
-				
-				"""
-				embed_description = '**Page 1:**\n'
-				iteration = 0
-				user_found = False
-				# iterate through the participants in the database
-				for entry in results:
-					# initialize variables for the member and their info
-					member = message.guild.get_member(entry[0])
-					lb_points = entry[1]
-					lb_rank = entry[2]
-					# check to be sure the member is still in the guild
-					if member is not None:
-						iteration += 1
-						# 10 users printed and the base user was one of them
-						if iteration > 10 and user_found:
-							break
-						# not 10 users printed yet
-						elif iteration <= 10:
-							if member == user:
-								user_found = True
-							if lb_rank < 10:
-								# add an extra space to align all the ranks
-								embed_description += f'**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
-							elif lb_rank >= 10 and lb_rank < 100:
-								embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points\n'
-						# 10 users printed but the base user hasn't been found yet
-						else:
-							if member == user:
-								embed_description += '\nUser\'s rank:\n'
-								user_found = True
-								# add the user's rank at the bottom
-								if lb_rank < 10:
-									embed_description += f'**` {lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
-								elif lb_rank >= 10 and lb_rank < 100:
-									embed_description += f'**`{lb_rank}:` {functions.escape_underscores(member.display_name)}** - {lb_points} points'
-				# strip any extraneous newlines
-				embed_description = embed_description.rstrip('\n')
-			else:
-				# send this message if no participants were found
-				embed_description = 'The leaderboard seems to be empty in the database.'
-			embed = await generate_embed('blue', embed_title, embed_description)
-			# send signuplist embed
-			lb_message = await message.channel.send(embed=embed)
-			await action_log('leaderboard sent to stats-flex')
-			return
-			"""
 
 	if message.nonce is not None:
 		# act on template confirmations for split matches
@@ -2955,10 +2900,6 @@ async def on_reaction_add(reaction, user):
 			return
 		return
 	return
-
-left_emoji = '⬅️'
-find_self_emoji = '🔅'
-right_emoji = '➡️'
 
 # client event triggers when discord bot client is fully loaded and ready
 @client.event
