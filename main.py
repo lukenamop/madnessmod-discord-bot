@@ -2590,7 +2590,7 @@ async def on_reaction_add(reaction, user):
 						lb_page -= 1
 					elif reaction.emoji == '🔅':
 						# jump to self
-						query = f'SELECT lb_points, RANK () OVER (ORDER BY lb_points DESC) lb_rank FROM participants WHERE user_id = {user.id}'
+						query = f'WITH cte_lb_rank AS (SELECT user_id, lb_points, RANK () OVER (ORDER BY lb_points DESC) lb_rank FROM participants) SELECT lb_points, lb_rank FROM cte_lb_rank WHERE user_id = {user.id}'
 						await execute_sql(query)
 						result = connect.crsr.fetchone()
 						await action_log(f'{result[1]}')
