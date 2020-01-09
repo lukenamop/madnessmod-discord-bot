@@ -3,6 +3,7 @@
 # import libraries
 import praw
 import re
+import time
 
 # import additional files
 import config
@@ -40,4 +41,18 @@ def extra_checks(username):
 	reddit = initialize_reddit()
 	# find the specified redditor
 	redditor = reddit.redditor(username)
-	return None
+	checks = [0, 0, 0]
+
+	# check to see if a users' account age is less than 30 days
+	if redditor.created_utc < (time.now() - (30*24*60*60)):
+		checks[0] = 1
+
+	# check to see if a user has less than 1000 total karma
+	if (redditor.link_karma + redditor.comment_karma) > 1000:
+		checks[1] = 1
+
+	# check to see if the user has verified their email
+	if redditor.has_verified_email:
+		checks[2] = 1
+
+	return checks

@@ -692,9 +692,11 @@ async def on_message(message):
 						await action_log(f'verification compeleted by {username_discriminator}')
 
 						# check specific conditions related to the user's reddit account
-						if verify.extra_checks(reddit_username) is not None:
+						checks = verify.extra_checks(reddit_username)
+						if checks[0] == 1 or checks[1] == 1 or checks[2] == 1:
 							await action_log('redditor did not pass specific checks, report sent in #modlog')
 							embed_title = f'New User {reddit_username} Joined: Low Activity'
+							await action_log(checks)
 					else:
 						# build verification failure embed (verification key error)
 						embed_title = 'Verification Key Incorrect'
