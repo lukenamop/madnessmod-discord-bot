@@ -2574,20 +2574,21 @@ async def on_reaction_add(reaction, user):
 
 			# points leaderboard (overall)
 			if message.embeds[0].title == 'Overall Points Leaderboard':
-				# check which page the leaderboard is currently on
-				lb_page = int(message.embeds[0].description.split(':')[0].lstrip('**Page '))
-				await message.channel.send(str(lb_page))
+				if not user.bot:
+					# check which page the leaderboard is currently on
+					lb_page = int(message.embeds[0].description.split(':')[0].lstrip('**Page '))
+					await message.channel.send(str(lb_page))
 
-				# check to see which emoji was used
-				if reaction.emoji == '⬅️':
-					# previous page
-					'back'
-				elif reaction.emoji == '🔅':
-					# jump to self
-					'self'
-				elif reaction.emoji == '➡️':
-					# next page
-					'next'
+					# check to see which emoji was used
+					if reaction.emoji == '⬅️':
+						# previous page
+						'back'
+					elif reaction.emoji == '🔅':
+						# jump to self
+						'self'
+					elif reaction.emoji == '➡️':
+						# next page
+						'next'
 				return
 
 				"""
