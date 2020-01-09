@@ -696,7 +696,16 @@ async def on_message(message):
 						if checks[0] == 1 or checks[1] == 1 or checks[2] == 1:
 							await action_log('redditor did not pass specific checks, report sending in #modlog')
 							embed_title = f'New User {reddit_username} Joined: Low Activity'
-							await action_log(checks)
+							embed_description = f'This newly verified user has been flagged because their reddit account (https://reddit.com/u/{reddit_username}) has not met the following condition(s):\n'
+							if checks[0] == 1:
+								embed_description += '\n- Their account is less then 30 days old'
+							if checks[1] == 1:
+								embed_description += '\n- Their account has less than 1000 combined karma'
+							if checks[2] == 1:
+								embed_description += '\n- Their account does not have a verified email'
+							embed = await generate_embed('red', embed_title, embed_description)
+							await client.get_channel(581717461309718530).send(embed=embed)
+							await action_log('report sent')
 					else:
 						# build verification failure embed (verification key error)
 						embed_title = 'Verification Key Incorrect'
