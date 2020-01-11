@@ -2588,8 +2588,11 @@ async def on_reaction_add(reaction, user):
 					await reaction.remove(user)
 					await action_log(f'reaction added to leaderboard by {user.display_name}')
 
-					# check which page the leaderboard is currently on
-					lb_page = int(message.embeds[0].description.split('Page ')[1].split(':')[0])
+					try:
+						# check which page the leaderboard is currently on
+						lb_page = int(message.embeds[0].description.split('Page ')[1].split(':')[0])
+					except IndexError:
+						lb_page = 1
 
 					# check to see which emoji was used
 					if reaction.emoji == '⬅️':
