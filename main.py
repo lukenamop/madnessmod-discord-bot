@@ -279,6 +279,8 @@ async def on_message(message):
 						# build tie embed for match channel
 						embed_title = 'Voting Results'
 						embed_description = f'This match has ended in a {a_votes} - {b_votes} tie! {a_member.mention} submitted image A and {b_member.mention} submitted image B. Participants, please contact each other and find a time to rematch.'
+						# for swiss-style tournaments:
+						# embed_description = f'This match has ended in a {a_votes} - {b_votes} tie! {a_member.mention} submitted image A and {b_member.mention} submitted image B.'
 						embed = await generate_embed('pink', embed_title, embed_description)
 						await base_channel.send(embed=embed)
 						await action_log('match ended in a tie, results sent in match channel')
@@ -297,7 +299,9 @@ async def on_message(message):
 						a_channel = await a_member.create_dm()
 						b_channel = await b_member.create_dm()
 						embed_title = 'Match Results - Tie'
-						embed_description = f'Your match has ended in {base_channel.mention}, you have earned {votes * 2} points for the {votes} votes for your meme. Please contact your opponent for a rematch!'
+						embed_description = f'Your match has ended in {base_channel.mention}, you have earned **{votes * 2} points** for the **{votes} votes** for your meme. Please contact your opponent for a rematch!'
+						# for swiss-style tournaments:
+						# embed_description = f'Your match has ended in {base_channel.mention}, you have earned **{votes * 2} points** for the **{votes} votes** for your meme.'
 						embed = await generate_embed('pink', embed_title, embed_description)
 						await a_channel.send(embed=embed)
 						await action_log('a_member dm sent')
@@ -382,7 +386,7 @@ async def on_message(message):
 				# build winner dm
 				winner_channel = await winner.create_dm()
 				embed_title = 'Match Results - Win'
-				embed_description = f'Your match has ended in {base_channel.mention}, you have earned 100 points for winning the match and {winning_votes * 2} points for the {winning_votes} votes for your meme. Good luck in the next round!'
+				embed_description = f'Your match has ended in {base_channel.mention}, you have earned **100 points** for winning the match and **{winning_votes * 2} points** for the **{winning_votes} votes** for your meme.'
 				embed = await generate_embed('pink', embed_title, embed_description)
 				await winner_channel.send(embed=embed)
 				await action_log('winner dm sent')
@@ -390,7 +394,7 @@ async def on_message(message):
 				# build loser dm
 				loser_channel = await loser.create_dm()
 				embed_title = 'Match Results - Loss'
-				embed_description = f'Your match has ended in {base_channel.mention}, you have earned {losing_votes * 2} points for the {losing_votes} votes for your meme.'
+				embed_description = f'Your match has ended in {base_channel.mention}, you have earned **{losing_votes * 2} points** for the {losing_votes} votes for your meme.'
 				embed = await generate_embed('pink', embed_title, embed_description)
 				await loser_channel.send(embed=embed)
 				await action_log('loser dm sent')

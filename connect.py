@@ -19,6 +19,9 @@ def db_connect():
 	print('postgres connection info:')
 	print(conn.get_dsn_parameters())
 
+	crsr.execute("""ALTER TABLE settings ADD signups_open BOOLEAN DEFAULT True""")
+	conn.commit()
+
 	crsr.execute("""SELECT * FROM settings""")
 	for row in crsr.fetchall():
 		print('settings: ' + str(row))
@@ -44,6 +47,7 @@ db_connect()
 # template_required BOOLEAN DEFAULT True
 # guild_id NUMERIC(18) NOT NULL
 # next_match_is_final BOOLEAN DEFAULT False
+# signups_open BOOLEAN DEFAULT True
 
 # TABLE participants
 # db_id SERIAL PRIMARY KEY
