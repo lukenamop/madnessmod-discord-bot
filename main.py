@@ -1553,7 +1553,7 @@ async def on_message(message):
 
 					# build toggletemplates confirmation embed
 					embed_title = 'Signups Closed'
-					embed_description = 'Signups are no longer accepted. To re-open, type `.togglesignups`.'
+					embed_description = 'Signups are now closed. To re-open, type `.togglesignups`.'
 					embed = await generate_embed('green', embed_title, embed_description)
 					await message.channel.send(embed=embed)
 					await action_log('signups toggle confirmation')
@@ -2614,6 +2614,7 @@ async def on_reaction_add(reaction, user):
 							\n`.clearmatches` - clears all matches and votes from the database
 							\n`.clearsignups` - clears all signups from the database
 							\n`.reconnect` - forces the bot to reconnect to its database
+							\n`.togglesignups` - open or close tournament signups
 							\n`.toggletemplates` - enable or disable template requirements with `.signup`"""
 					elif reaction.emoji == '↩️':
 						# back to main help menu
