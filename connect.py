@@ -19,9 +19,6 @@ def db_connect():
 	print('postgres connection info:')
 	print(conn.get_dsn_parameters())
 
-	crsr.execute("""ALTER TABLE settings ADD signups_open BOOLEAN DEFAULT True""")
-	conn.commit()
-
 	crsr.execute("""SELECT * FROM settings""")
 	for row in crsr.fetchall():
 		print('settings: ' + str(row))

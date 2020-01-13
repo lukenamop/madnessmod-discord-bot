@@ -775,11 +775,20 @@ async def on_message(message):
 				return
 
 			# check tournament settings via database (template requirement)
-			query = f'SELECT template_required FROM settings WHERE guild_id = {config.MM_GUILD_ID}'
+			query = f'SELECT template_required, signups_open FROM settings WHERE guild_id = {config.MM_GUILD_ID}'
 			await execute_sql(query)
 			results = connect.crsr.fetchone()
 			template_required = results[0]
+			signups_open = results[1]
 
+			# check to see if signups are open
+			if not signups_open:
+				embed_title = 'Signups Closed'
+				embed_description = f'Signups are closed for the current tournament! Please try again when signups have opened again. To receive a notification when signups open, head to {client.get_channel(600355436033736714).mention} and give yourself the `Sign-Up Pings` role.'
+				embed = await generate_embed('red', embed_title, embed_description)
+				await message.channel.send(embed=embed)
+				await action_log(f'signups closed, signup rejected from {message.author.name}#{message.author.discriminator}')
+				return
 			# check to see if templates are required for signups
 			if template_required:
 				# signup process when a template is required
@@ -1524,6 +1533,44 @@ async def on_message(message):
 					await message.channel.send(embed=embed)
 					await action_log('template toggle confirmation')
 					return
+
+		# '.togglesignups'
+		if message_content == '.togglesignups':
+			# check to be sure only admin user uses command
+			if message.author.id in config.ADMIN_IDS:
+				await action_log('signups toggled')
+				# check to see if templates are required
+				query = f'SELECT signups_open FROM settings WHERE guild_id = {config.MM_GUILD_ID}'
+				await execute_sql(query)
+				results = connect.crsr.fetchone()
+				signups_open = results[0]
+				if signups_open:
+					# set templates to no longer be required
+					query = f'UPDATE settings SET signups_open = False WHERE guild_id = {config.MM_GUILD_ID}'
+					await execute_sql(query)
+					connect.conn.commit()
+					await action_log('signups no longer open')
+
+					# build toggletemplates confirmation embed
+					embed_title = 'Signups Closed'
+					embed_description = 'Signups are no longer accepted. To re-open, type `.togglesignups`.'
+					embed = await generate_embed('green', embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log('signups toggle confirmation')
+					return
+				else:
+					# set templates to now be required
+					query = f'UPDATE settings SET signups_open = True WHERE guild_id = {config.MM_GUILD_ID}'
+					await execute_sql(query)
+					connect.conn.commit()
+					await action_log('signups now open')
+
+					# build toggletemplates confirmation embed
+					embed_title = 'Signups Open'
+					embed_description = 'Signups are now open. To close, type `.togglesignups`.'
+					embed = await generate_embed('green', embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log('signups toggle confirmation')
 
 		# '.createbracket' command (duel-mods)
 		if message_content.startswith('.createbracket '):
