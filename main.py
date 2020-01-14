@@ -451,7 +451,7 @@ async def on_message(message):
 	# this will trigger when a Cards Against Humanity game is started in #off-topic using YAGPDG.xyz
 	if message_content.startswith('-cah c') and message.channel.id == 639526660990828564:
 		creator = False
-		# iterate through all of a member's roles
+		# iterate through all of the author's roles
 		for role in message.author.roles:
 			# check to see if the user has the CAH Creator role
 			if role.id == 666305324244008960:
@@ -2635,6 +2635,7 @@ async def on_reaction_add(reaction, user):
 							\n`.clearmatches` - clears all matches and votes from the database
 							\n`.clearsignups` - clears all signups from the database
 							\n`.reconnect` - forces the bot to reconnect to its database
+							\n`.removeinvalidparticipants` - removes users who have left the server from the database
 							\n`.togglesignups` - open or close tournament signups
 							\n`.toggletemplates` - enable or disable template requirements with `.signup`"""
 					elif reaction.emoji == '↩️':
