@@ -1802,12 +1802,20 @@ async def on_message(message):
 						await execute_sql(query)
 						connect.conn.commit()
 						total += 1
-				embed_title = 'Participants Removed'
-				embed_description = f'{total} users in the database are no longer in this server. They have been removed from the database.'
+				if total == 0:
+					embed_title = 'No Invalid Participants'
+					embed_description = 'There were no invalid participants to remove.'
+				else:
+					embed_title = 'Participants Removed'
+					embed_description = f'{total} users in the database are no longer in this server. They have been removed from the database.'
 				embed = await generate_embed('green', embed_title, embed_description)
 				await message.channel.send(embed=embed)
 				await action_log(f'{total} invalid participants removed from the participants table')
 				return
+			return
+
+		# '.dbstats' command (duel-mods)
+		if message_content == '.dbstats':
 			return
 
 		# '.help' command (duel-mods)
