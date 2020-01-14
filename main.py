@@ -1711,41 +1711,41 @@ async def on_message(message):
 					await conf_message.delete()
 			return
 
-		# '.clearparticipantstats' command (duel-mods)
-		if message_content == '.clearparticipantstats':
-			# check to be sure only admin user uses command
-			if message.author.id in config.ADMIN_IDS:
-				# set participant stats to defaults in database
-				query = 'UPDATE participants SET total_matches = DEFAULT, match_wins = DEFAULT, match_losses = DEFAULT, total_votes_for = DEFAULT, avg_final_meme_time = DEFAULT'
-				await execute_sql(query)
-				connect.conn.commit()
+		# # '.clearparticipantstats' command (duel-mods)
+		# if message_content == '.clearparticipantstats':
+		# 	# check to be sure only admin user uses command
+		# 	if message.author.id in config.ADMIN_IDS:
+		# 		# set participant stats to defaults in database
+		# 		query = 'UPDATE participants SET total_matches = DEFAULT, match_wins = DEFAULT, match_losses = DEFAULT, total_votes_for = DEFAULT, avg_final_meme_time = DEFAULT'
+		# 		await execute_sql(query)
+		# 		connect.conn.commit()
 
-				# build clearparticipantstats confirmation embed
-				embed_title = 'Participant Stats Cleared'
-				embed_description = 'All participant stats were cleared from the database.'
-				embed = await generate_embed('green', embed_title, embed_description)
-				await message.channel.send(embed=embed)
-				await action_log('participant stats cleared by duel-mods')
-				return
-			return
+		# 		# build clearparticipantstats confirmation embed
+		# 		embed_title = 'Participant Stats Cleared'
+		# 		embed_description = 'All participant stats were cleared from the database.'
+		# 		embed = await generate_embed('green', embed_title, embed_description)
+		# 		await message.channel.send(embed=embed)
+		# 		await action_log('participant stats cleared by duel-mods')
+		# 		return
+		# 	return
 
-		# '.clearlbpoints' command (duel-mods)
-		if message_content == '.clearlbpoints':
-			# check to be sure only admin user uses command
-			if message.author.id in config.ADMIN_IDS:
-				# reset participant lb_points to default in database
-				query = 'UPDATE participants SET lb_points = DEFAULT'
-				await execute_sql(query)
-				connect.conn.commit()
+		# # '.clearlbpoints' command (duel-mods)
+		# if message_content == '.clearlbpoints':
+		# 	# check to be sure only admin user uses command
+		# 	if message.author.id in config.ADMIN_IDS:
+		# 		# reset participant lb_points to default in database
+		# 		query = 'UPDATE participants SET lb_points = DEFAULT'
+		# 		await execute_sql(query)
+		# 		connect.conn.commit()
 
-				# build clearlbpoints confirmation embed
-				embed_title = 'Leaderboard Points Reset'
-				embed_description = 'All participants\' leaderboard points were cleared from the database.'
-				embed = await generate_embed('green', embed_title, embed_description)
-				await message.channel.send(embed=embed)
-				await action_log('leaderboard points cleared by duel-mods')
-				return
-			return
+		# 		# build clearlbpoints confirmation embed
+		# 		embed_title = 'Leaderboard Points Reset'
+		# 		embed_description = 'All participants\' leaderboard points were cleared from the database.'
+		# 		embed = await generate_embed('green', embed_title, embed_description)
+		# 		await message.channel.send(embed=embed)
+		# 		await action_log('leaderboard points cleared by duel-mods')
+		# 		return
+		# 	return
 
 		# '.clearsignups' command (duel-mods)
 		if message_content == '.clearsignups':
