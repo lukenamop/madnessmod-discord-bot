@@ -449,7 +449,7 @@ async def on_message(message):
 	message_content = unidecode(message.content.casefold().strip())
 
 	# this will trigger when a Cards Against Humanity game is started in #off-topic using YAGPDG.xyz
-	if message_content.startswith('-cah c') and (message.channel.id == 639526660990828564 or message.channel.id == 631167917391872027):
+	if message_content.startswith('-cah c') and message.channel.id == 639526660990828564:
 		creator = False
 		for role in message.author.roles:
 			# check to see if the user has the CAH Creator role
@@ -461,6 +461,7 @@ async def on_message(message):
 			await cah_pings_role.edit(mentionable=True)
 			await message.channel.send(f'{cah_pings_role.mention} -  If this message didn\'t ping you and you want to get pinged for future CAH games, type `-role cah pings` in this channel!')
 			await cah_pings_role.edit(mentionable=False)
+			await action_log('CAH Pings role notified')
 		return
 
 	# '.donate' command (all channels)
