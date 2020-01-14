@@ -127,7 +127,7 @@ async def execute_sql(query):
 async def on_message(message):
 	# ignore bots
 	if message.author.bot:
-		# except for MadnessMod itself
+		# check messages from MadnessMod
 		if message.author.id == 622139031756734492:
 			if message.nonce == 'poll':
 				# get base match channel
@@ -442,6 +442,17 @@ async def on_message(message):
 					await message.add_reaction('🔅')
 					await message.add_reaction('➡️')
 					return
+			return
+		# check messages from YAGPDB.xyz
+		if message.author.id == 204255221017214977:
+			# check to be sure the message has an embed
+			if len(message.embeds) == 1:
+				if message.embeds[0] is not None:
+					# check to see if the message is from a CAH game
+					if message.embeds[0].title == 'Pick the winner':
+						# ping the card czar
+						user_mention = message.embeds[0].description.mentions[0]
+						await message.channel.send(f'{user_mention}, pick the winner!')
 			return
 		return
 
