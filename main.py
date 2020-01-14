@@ -451,7 +451,7 @@ async def on_message(message):
 					# check to see if the message is from a CAH game
 					if message.embeds[0].title == 'Pick the winner':
 						# ping the card czar
-						user_mention = message.embeds[0].description.mentions[0]
+						user_mention = message.embeds[0].description.split(', pick the best one(s) ')[1].split('! You have `')[0]
 						await message.channel.send(f'{user_mention}, pick the winner!')
 			return
 		return
