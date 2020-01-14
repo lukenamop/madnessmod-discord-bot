@@ -451,15 +451,20 @@ async def on_message(message):
 	# this will trigger when a Cards Against Humanity game is started in #off-topic using YAGPDG.xyz
 	if message_content.startswith('-cah c') and message.channel.id == 639526660990828564:
 		creator = False
+		# iterate through all of a member's roles
 		for role in message.author.roles:
 			# check to see if the user has the CAH Creator role
 			if role.id == 666305324244008960:
 				creator = True
 
 		if creator:
+			# find the CAH Pings role
 			cah_pings_role = message.guild.get_role(664238054260736040)
+			# make the CAH Pings role mentionable
 			await cah_pings_role.edit(mentionable=True)
+			# mention the CAH Pings role
 			await message.channel.send(f'{cah_pings_role.mention} -  If this message didn\'t ping you and you want to get pinged for future CAH games, type `-role cah pings` in this channel!')
+			# make the CAH Pings role unmentionable
 			await cah_pings_role.edit(mentionable=False)
 			await action_log('CAH Pings role notified')
 		return
