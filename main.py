@@ -1880,16 +1880,31 @@ async def on_message(message):
 					# check to make sure there is at least one template in the list
 					if len(template_list) >= 1:
 						template_message = random.choice(template_list)
-						if len(template_message.embeds) == 1:
-							template_url = template_message.embeds[0].image.url
-							template_author = message.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').lstrip('!').rstrip('>')))
-						else:
-							template_url = template_message.attachments[0].url
-							template_author = template_message.author
+						# initiate reaction-related variables
+						ups = 0
+						shrugs = 0
+						downs = 0
+						if len(template_message.reactions) >= 1:
+							for reaction in template_message.reactions:
+								# count relevant reactions (subtract 1 so that bot reactions aren't counted)
+								if reaction.emoji == '👍':
+									ups = reaction.count - 1
+								elif reaction.emoji == '🤷':
+									shrugs = reaction.count - 1
+								elif reaction.emoji == '👎':
+									downs = reaction.count - 1
+						# check to see if the template is quality
+						if ups >= 2 and downs <= 1:
+							if len(template_message.embeds) == 1:
+								template_url = template_message.embeds[0].image.url
+								template_author = message.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').lstrip('!').rstrip('>')))
+							else:
+								template_url = template_message.attachments[0].url
+								template_author = template_message.author
 
-						# if the template author is neither of the match members, break out of the loop
-						if not (member1.mention == template_author.mention or member2.mention == template_author.mention):
-							found_template = True
+							# if the template author is neither of the match members, break out of the loop
+							if not (member1.mention == template_author.mention or member2.mention == template_author.mention):
+								found_template = True
 
 					# trigger this if there are no templates
 					else:
