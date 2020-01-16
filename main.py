@@ -113,7 +113,7 @@ async def generate_embed(color, title, description, attachment=None, timestamp=N
 async def execute_sql(query):
 	try:
 		connect.crsr.execute(query)
-	except config.psycopg2.errors.InFailedSqlTransaction:
+	except connect.psycopg2.errors.InFailedSqlTransaction:
 		await action_log('ERROR - failed SQL transaction, reconnecting automatically')
 		success = connect.db_connect()
 		if success:
