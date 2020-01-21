@@ -1226,6 +1226,22 @@ async def on_message(message):
 					await action_log('user already existed, participant stats updated in postgresql')
 			return
 
+		# '.mymatches' command (DM)
+		if message_content == '.mymatches':
+			# build match embed
+			embed_title = 'Your Active Matches'
+			embed_description = ''
+			match_category = mm_guild.get_channel(config.MATCH_CATEGORY_ID)
+			for match_channel in match_category.text_channels:
+				if len(match_channel.last_message.embeds) == 0 and len(match_channel.last_message.mentions) == 2:
+					if message.author.id == match_channel.last_message.mentions[0].id or message.author.id == match_channel.last_message.mentions[1].id:
+						embed_description += f'{match_channel.mention}\n'
+			embed_description.rstrip('\n')
+			embed = await generate_embed('yellow', embed_title, embed_description)
+			await message.channel.send(embed=embed)
+			await action_log(f'sent user matches to {message.author.name}#{message.author.discriminator}')
+			return
+
 		# '.help' command (DM)
 		if message_content == '.help':
 			# build help embed
