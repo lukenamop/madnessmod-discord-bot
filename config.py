@@ -42,6 +42,7 @@ ANNOUNCEMENTS_CHAN_ID = 581696676344102957 # channel ID for #announcements
 INFO_CHAN_ID = 599299817608314880 # channel ID for #info
 RULES_CHAN_ID = 581706416486744067 # channel ID for #rules
 VERIFICATION_CHAN_ID = 581705191703838720 # channel ID for #verification
+TEMP_ARCHIVE_CHAN_ID = 669305024656048200 # channel ID for #temp-archive
 
 
 ##### verify.py stuff

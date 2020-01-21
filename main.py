@@ -2921,7 +2921,8 @@ async def on_reaction_add(reaction, user):
 					await action_log(f'match started between {member1.name}#{member1.discriminator} and {member2.name}#{member2.discriminator}')
 
 					if not config.TESTING:
-						# delete template from #templates channel
+						# delete template from #templates channel, move to #temp-archive
+						await client.get_channel(config.TEMP_ARCHIVE_CHAN_ID).send(embed=template_message.embeds[0])
 						await template_message.delete()
 						await action_log('template deleted from templates channel')
 
