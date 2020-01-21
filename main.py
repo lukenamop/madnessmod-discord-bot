@@ -1237,6 +1237,8 @@ async def on_message(message):
 					if message.author.id == match_channel.last_message.mentions[0].id or message.author.id == match_channel.last_message.mentions[1].id:
 						embed_description += f'{match_channel.mention}\n'
 			embed_description.rstrip('\n')
+			if embed_description == '':
+				embed_description = 'No active matches found.'
 			embed = await generate_embed('yellow', embed_title, embed_description)
 			await message.channel.send(embed=embed)
 			await action_log(f'sent user matches to {message.author.name}#{message.author.discriminator}')
