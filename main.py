@@ -1228,6 +1228,7 @@ async def on_message(message):
 
 		# '.mymatches' command (DM)
 		if message_content == '.mymatches':
+			await message.channel.trigger_typing()
 			# build match embed
 			embed_title = 'Your Active Matches'
 			embed_description = ''
