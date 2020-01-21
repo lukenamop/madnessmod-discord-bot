@@ -1231,7 +1231,7 @@ async def on_message(message):
 			# build match embed
 			embed_title = 'Your Active Matches'
 			embed_description = ''
-			match_category = mm_guild.get_channel(config.MATCH_CATEGORY_ID)
+			match_category = client.get_channel(config.MATCH_CATEGORY_ID)
 			for match_channel in match_category.text_channels:
 				if len(match_channel.last_message.embeds) == 0 and len(match_channel.last_message.mentions) == 2:
 					if message.author.id == match_channel.last_message.mentions[0].id or message.author.id == match_channel.last_message.mentions[1].id:
