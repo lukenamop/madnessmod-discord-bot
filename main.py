@@ -1872,7 +1872,7 @@ async def on_message(message):
 							member1 = last_message.mentions[0]
 							member2 = last_message.mentions[1]
 
-							await match_channel.send(f'Friendly reminder to complete this match! If you haven\'t been able to line up your availability, you should plan on doing a split match. To complete a split match, @ mention Duel Mods in {guild.get_channel(581695290986332162).mention} when you have 30 minutes free.\n{member1.mention} {member2.mention}')
+							await match_channel.send(f'Friendly reminder to complete this match! If you haven\'t been able to line up your availability, you should plan on doing a split match. To complete a split match, @ mention Duel Mods in {message.guild.get_channel(581695290986332162).mention} when you have 30 minutes free.\n{member1.mention} {member2.mention}')
 							alerted += 1
 			embed_description = f'Participants in `{alerted}` match(es) have been alerted.'
 			embed = await generate_embed('green', embed_title, embed_description)
