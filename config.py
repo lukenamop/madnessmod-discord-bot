@@ -36,13 +36,14 @@ ARCHIVE_CHAN_ID = 636263404444844062 # channel ID for archiving winning images
 TEMPLATE_CHAN_ID = 599333803407835147 # channel ID for saving templates
 SUBMISSION_CHAN_ID = 599758863700328459 # channel ID for submitting final memes
 SIGNUP_CHAN_ID = 638796625573183488 # channel ID for signup confirmations
-DUELMODS_CHAN_ID = 600397545050734612 # channel ID for #duel-mods
+DUELMODS_CHAN_ID = 600397545050734612 # channel ID for #mod-spam
 MATCH_CATEGORY_ID = 639599353526485034 # category ID for #matches
 ANNOUNCEMENTS_CHAN_ID = 581696676344102957 # channel ID for #announcements
 INFO_CHAN_ID = 599299817608314880 # channel ID for #info
 RULES_CHAN_ID = 581706416486744067 # channel ID for #rules
 VERIFICATION_CHAN_ID = 581705191703838720 # channel ID for #verification
 TEMP_ARCHIVE_CHAN_ID = 669305024656048200 # channel ID for #temp-archive
+GENERAL_CHAN_ID = 581695290986332162 # channel ID for #general
 
 
 ##### verify.py stuff
