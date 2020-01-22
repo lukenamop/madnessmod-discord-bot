@@ -1846,6 +1846,27 @@ async def on_message(message):
 				return
 			return
 
+		# '.alertparticipants' command (DM)
+		if message_content == '.alertparticipants':
+			await message.channel.trigger_typing()
+			# build alert embed
+			embed_title = 'Participants Alerted'
+			alerted = 0
+			match_category = client.get_channel(config.MATCH_CATEGORY_ID)
+			for match_channel in match_category.text_channels:
+				if match_channel.last_message_id is not None:
+					last_message = await match_channel.fetch_message(match_channel.last_message_id)
+					if len(last_message.embeds) == 0 and len(last_message.mentions) == 2:
+						member1 = last_message.mentions[0]
+						member2 = last_message.mentions[1]
+						await match_channel.send(f'Friendly reminder to complete this match! If you haven\'t been able to align, you should plan on doing a split match. To complete a split match, @ mention Duel Mods in #general when you have 30 minutes free.\n{member1.mention} {member2.mention}')
+						alerted += 1
+			embed_description = f'Participants in `{alerted}` matches have been alerted.'
+			embed = await generate_embed('green', embed_title, embed_description)
+			await message.channel.send(embed=embed)
+			await action_log(f'alerted unfinished match participants')
+			return
+
 		# '.dbstats' command (duel-mods)
 		if message_content == '.dbstats':
 			return
