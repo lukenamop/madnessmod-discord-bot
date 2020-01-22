@@ -1234,9 +1234,10 @@ async def on_message(message):
 			embed_description = ''
 			match_category = client.get_channel(config.MATCH_CATEGORY_ID)
 			for match_channel in match_category.text_channels:
-				if match_channel.last_message is not None:
-					if len(match_channel.last_message.embeds) == 0 and len(match_channel.last_message.mentions) == 2:
-						if message.author.id == match_channel.last_message.mentions[0].id or message.author.id == match_channel.last_message.mentions[1].id:
+				if match_channel.last_message_id is not None:
+					last_message = await match_channel.fetch_message(match_channel.last_message_id)
+					if len(last_message.embeds) == 0 and len(last_message.mentions) == 2:
+						if message.author.id == last_message.mentions[0].id or message.author.id == last_message.mentions[1].id:
 							embed_description += f'{match_channel.mention}\n'
 			embed_description.rstrip('\n')
 			if embed_description == '':
