@@ -2700,6 +2700,7 @@ async def on_reaction_add(reaction, user):
 					elif reaction.emoji == '🏆':
 						# tournament commands
 						embed_description = """**🏆 Tournament Commands**
+							\n`.alertparticipants` - alerts all participants of unfinished matches
 							\n`.createbracket <tournament reference>` - creates a Challonge bracket with the given tournament reference (for example, use `10` to get Meme Madness 10) and populates all participants
 							\n`.creatematchchannels <tournament reference>` - creates a match channel for every "open" match from the specified Challonge bracket
 							\n`.prelim <user ID>` - sets a user's tournament role to `Preliminary` (deprecated)
