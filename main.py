@@ -1923,12 +1923,13 @@ async def on_message(message):
 				query = f'SELECT start_time FROM matches WHERE (u1_id = {member1.id} OR u2_id = {member1.id} OR u1_id = {member2.id} OR u2_id = {member2.id}) ORDER BY start_time DESC'
 				await execute_sql(query)
 				result = connect.crsr.fetchone()
-				if result[0] is not None:
-					embed_title = 'Match already in progress'
-					embed_description = 'Competitors, please complete your other active matches before starting a new one.'
-					embed = await generate_embed('red', embed_title, embed_description)
-					await message.channel.send(embed=embed)
-					return
+				if result is not None:
+					if result[0] is not None:
+						embed_title = 'Match already in progress'
+						embed_description = 'Competitors, please complete your other active matches before starting a new one.'
+						embed = await generate_embed('red', embed_title, embed_description)
+						await message.channel.send(embed=embed)
+						return
 
 				embed_title = 'Starting Match'
 				embed_description = 'Randomly selecting template...'
