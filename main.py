@@ -2544,6 +2544,7 @@ async def on_message(message):
 				connect.conn.commit()
 
 			# send final memes to #submissions channel
+			submissions_channel = message.guild.get_channel(config.SUBMISSION_CHAN_ID)
 			# submission embed for user 1
 			embed_title = 'Final Meme Submission'
 			embed_description = f'{u1_mention} ({functions.escape_underscores(u1.display_name)}, {result[0]})'
