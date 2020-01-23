@@ -935,7 +935,7 @@ async def on_message(message):
 		# '.submit' command (DM)
 		if message_content.startswith('.submit'):
 			# check for an active match including the specified user
-			query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, template_url, creation_time, db_id, template_author_id, cancelled FROM matches WHERE (u1_id = {message.author.id} OR u2_id = {message.author.id}) ORDER BY start_time DESC'
+			query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, template_url, creation_time, db_id, template_author_id, cancelled FROM matches WHERE (u1_id = {message.author.id} OR u2_id = {message.author.id}) ORDER BY creation_time DESC'
 			await execute_sql(query)
 			result = connect.crsr.fetchone()
 
