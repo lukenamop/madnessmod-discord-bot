@@ -1731,6 +1731,8 @@ async def on_message(message):
 				for match in tournament_index:
 					if match['state'] == 'open':
 						# if a match is open, create a channel for it
+						await action_log(f'{match['player1-id']}')
+						await action_log(f'{tourney_manager.show_participant(tournament_shortcut, match['player1-id'])}')
 						participant1 = tourney_manager.show_participant(tournament_shortcut, match['player1-id'])['name']
 						participant2 = tourney_manager.show_participant(tournament_shortcut, match['player2-id'])['name']
 						channel_name = 'match-' + str(match['suggested-play-order']) + '-' + participant1[:6] + '-v-' + participant2[:6]
