@@ -2503,6 +2503,91 @@ async def on_message(message):
 			await action_log('voting results sent in match channel')
 			return
 
+		# '.forcepoll' command (contest category)
+		if message_content.startswith('.forcepoll '):
+			u_order = message_content.split()[1]
+			query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, u1_image_url, u2_image_url, channel_id, is_final, db_id FROM matches WHERE channel_id = {message.channel.id} ORDER BY db_id DESC'
+			await execute_sql(query)
+			result = connect.crsr.fetchone()
+			match_is_final = result[7]
+			if u_order == 1:
+				try:
+					# set user order
+					u1 = match_channel.guild.get_member(result[0])
+					u1_mention = u1.mention
+					u1_link = result[4]
+					u2 = match_channel.guild.get_member(result[1])
+					u2_mention = u2.mention
+					u2_link = result[5]
+				except AttributeError:
+					await action_log('final meme submission stopped due to an AttributeError')
+					return
+				# update match info in database
+				query = f'UPDATE matches SET a_meme = 1 WHERE db_id = {result[8]}'
+				await execute_sql(query)
+				connect.conn.commit()
+			if u_order == 2:
+				try:
+					# ser user order
+					u1 = match_channel.guild.get_member(result[1])
+					u1_mention = u1.mention
+					u1_link = result[5]
+					u2 = match_channel.guild.get_member(result[0])
+					u2_mention = u2.mention
+					u2_link = result[4]
+				except AttributeError:
+					await action_log('final meme submission stopped due to an AttributeError')
+					return
+				# update match info in database
+				query = f'UPDATE matches SET a_meme = 2 WHERE db_id = {result[8]}'
+				await execute_sql(query)
+				connect.conn.commit()
+
+			# send final memes to #submissions channel
+			# submission embed for user 1
+			embed_title = 'Final Meme Submission'
+			embed_description = f'{u1_mention} ({functions.escape_underscores(u1.display_name)}, {result[0]})'
+			embed_link = u1_link
+			embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
+			await submissions_channel.send(embed=embed)
+			# submission embed for user 2
+			embed_description = f'{u2_mention} ({functions.escape_underscores(u2.display_name)}, {result[1]})'
+			embed_link = u2_link
+			embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
+			await submissions_channel.send(embed=embed)
+			await action_log('final memes sent to #submissions')
+
+			# send final memes to match channel
+			# submission embed for image A
+			embed_description = 'Image A'
+			embed_link = u1_link
+			embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
+			await match_channel.send(embed=embed)
+			# submission embed for image B
+			embed_description = 'Image B'
+			embed_link = u2_link
+			embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
+			await match_channel.send(embed=embed)
+
+			vote_pings_role = match_channel.guild.get_role(600356303033860106)
+			if match_is_final:
+				verified_role = match_channel.guild.get_role(599354132771504128)
+				await verified_role.edit(mentionable=True)
+				await match_channel.send(f'Vote in the final!\n{verified_role.mention} @everyone')
+				await verified_role.edit(mentionable=False)
+			else:
+				if not config.TESTING:
+					await match_channel.send(f'{vote_pings_role.mention} @here')
+				else:
+					await match_channel.send('This is just a test match, not pinging `Vote Pings` or `here`.')
+
+			# build voting embed
+			embed_title = 'Match Voting'
+			embed_description = '**Vote for your favorite!** Results will be sent to this channel when voting ends in 2 hours.\n🇦 First image\n🇧 Second image'
+			embed = await generate_embed('pink', embed_title, embed_description)
+			await match_channel.send(embed=embed, nonce='poll')
+			return
+
 		# '.matchisfinal' command (contest category)
 		if message_content == '.matchisfinal':
 			await action_log('setting next match as final in database settings')
