@@ -2505,7 +2505,7 @@ async def on_message(message):
 
 		# '.forcepoll' command (contest category)
 		if message_content.startswith('.forcepoll '):
-			u_order = message_content.split()[1]
+			u_order = int(message_content.split()[1])
 			query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, u1_image_url, u2_image_url, channel_id, is_final, db_id FROM matches WHERE channel_id = {message.channel.id} ORDER BY db_id DESC'
 			await execute_sql(query)
 			result = connect.crsr.fetchone()
