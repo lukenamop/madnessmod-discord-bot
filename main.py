@@ -935,7 +935,7 @@ async def on_message(message):
 		# '.submit' command (DM)
 		if message_content.startswith('.submit'):
 			# check for an active match including the specified user
-			query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, template_url, creation_time, db_id, template_author_id, cancelled FROM matches WHERE (u1_id = {message.author.id} OR u2_id = {message.author.id}) ORDER BY db_id DESC'
+			query = f'SELECT u1_id, u2_id, u1_submitted, u2_submitted, channel_id, start_time, template_url, creation_time, db_id, template_author_id, cancelled FROM matches WHERE (u1_id = {message.author.id} OR u2_id = {message.author.id}) ORDER BY start_time DESC'
 			await execute_sql(query)
 			result = connect.crsr.fetchone()
 
@@ -1062,8 +1062,19 @@ async def on_message(message):
 				# find match_channel and submissions_channel from discord
 				match_channel = client.get_channel(result[6])
 				submissions_channel = client.get_channel(config.SUBMISSION_CHAN_ID)
+
+				# if it's a split match, reset start_time
+				if template_url is not None:
+					query = f'UPDATE matches SET start_time = NULL WHERE db_id = {match_db_id}'
+					await execute_sql(query)
+					connect.conn.commit()
+
 				# only execute if both users have submitted final memes
 				if result[2] and result[3]:
+					# reset start_time
+					query = f'UPDATE matches SET start_time = NULL WHERE db_id = {match_db_id}'
+					await execute_sql(query)
+					connect.comm.commit()
 					# if it's a split match, send the template to the channel
 					if template_url is not None:
 						try:
@@ -1907,6 +1918,17 @@ async def on_message(message):
 				member1 = message.mentions[0]
 				member2 = message.mentions[1]
 				channel_id = message.channel.id
+
+				# check for an active match including the specified user
+				query = f'SELECT start_time FROM matches WHERE (u1_id = {member1.id} OR u2_id = {member1.id} OR u1_id = {member2.id} OR u2_id = {member2.id}) ORDER BY start_time DESC'
+				await execute_sql(query)
+				result = connect.crsr.fetchone()
+				if result[0] is not None:
+					embed_title = 'Match already in progress'
+					embed_description = 'Competitors, please complete your other active matches before starting a new one.'
+					embed = await generate_embed('red', embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					return
 
 				embed_title = 'Starting Match'
 				embed_description = 'Randomly selecting template...'
