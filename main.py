@@ -1074,7 +1074,7 @@ async def on_message(message):
 					# reset start_time
 					query = f'UPDATE matches SET start_time = NULL WHERE db_id = {match_db_id}'
 					await execute_sql(query)
-					connect.comm.commit()
+					connect.conn.commit()
 					# if it's a split match, send the template to the channel
 					if template_url is not None:
 						try:
@@ -1937,7 +1937,7 @@ async def on_message(message):
 				await message.channel.send(embed=embed)
 
 				# gather list of all valid templates
-				template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).history(limit=200).flatten()
+				template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).history(limit=500).flatten()
 				await action_log(f'list of {len(template_list)} templates compiled from #templates')
 				duelmods_chan = client.get_channel(config.DUELMODS_CHAN_ID)
 
