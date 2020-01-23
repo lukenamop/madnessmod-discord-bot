@@ -2513,10 +2513,10 @@ async def on_message(message):
 			if u_order == 1:
 				try:
 					# set user order
-					u1 = match_channel.guild.get_member(result[0])
+					u1 = message.channel.guild.get_member(result[0])
 					u1_mention = u1.mention
 					u1_link = result[4]
-					u2 = match_channel.guild.get_member(result[1])
+					u2 = message.channel.guild.get_member(result[1])
 					u2_mention = u2.mention
 					u2_link = result[5]
 				except AttributeError:
@@ -2529,10 +2529,10 @@ async def on_message(message):
 			if u_order == 2:
 				try:
 					# ser user order
-					u1 = match_channel.guild.get_member(result[1])
+					u1 = message.channel.guild.get_member(result[1])
 					u1_mention = u1.mention
 					u1_link = result[5]
-					u2 = match_channel.guild.get_member(result[0])
+					u2 = message.channel.guild.get_member(result[0])
 					u2_mention = u2.mention
 					u2_link = result[4]
 				except AttributeError:
@@ -2562,30 +2562,30 @@ async def on_message(message):
 			embed_description = 'Image A'
 			embed_link = u1_link
 			embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
-			await match_channel.send(embed=embed)
+			await message.channel.send(embed=embed)
 			# submission embed for image B
 			embed_description = 'Image B'
 			embed_link = u2_link
 			embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
-			await match_channel.send(embed=embed)
+			await message.channel.send(embed=embed)
 
-			vote_pings_role = match_channel.guild.get_role(600356303033860106)
+			vote_pings_role = message.channel.guild.get_role(600356303033860106)
 			if match_is_final:
-				verified_role = match_channel.guild.get_role(599354132771504128)
+				verified_role = message.channel.guild.get_role(599354132771504128)
 				await verified_role.edit(mentionable=True)
-				await match_channel.send(f'Vote in the final!\n{verified_role.mention} @everyone')
+				await message.channel.send(f'Vote in the final!\n{verified_role.mention} @everyone')
 				await verified_role.edit(mentionable=False)
 			else:
 				if not config.TESTING:
-					await match_channel.send(f'{vote_pings_role.mention} @here')
+					await message.channel.send(f'{vote_pings_role.mention} @here')
 				else:
-					await match_channel.send('This is just a test match, not pinging `Vote Pings` or `here`.')
+					await message.channel.send('This is just a test match, not pinging `Vote Pings` or `here`.')
 
 			# build voting embed
 			embed_title = 'Match Voting'
 			embed_description = '**Vote for your favorite!** Results will be sent to this channel when voting ends in 2 hours.\n🇦 First image\n🇧 Second image'
 			embed = await generate_embed('pink', embed_title, embed_description)
-			await match_channel.send(embed=embed, nonce='poll')
+			await message.channel.send(embed=embed, nonce='poll')
 			return
 
 		# '.matchisfinal' command (contest category)
