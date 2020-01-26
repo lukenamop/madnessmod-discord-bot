@@ -3087,7 +3087,12 @@ async def on_reaction_add(reaction, user):
 
 					if not config.TESTING:
 						# delete template from #templates channel, move to #temp-archive
-						await client.get_channel(config.TEMP_ARCHIVE_CHAN_ID).send(embed=template_message.embeds[0])
+						winning_meme_message = await client.get_channel(config.TEMP_ARCHIVE_CHAN_ID).send(embed=template_message.embeds[0])
+						await winning_meme_message.add_reaction('<:GG:649057795643277342>')
+						await winning_meme_message.add_reaction('<:imfine:645785769461547018>')
+						await winning_meme_message.add_reaction('🏅')
+						await winning_meme_message.add_reaction('🧠')
+						await winning_meme_message.add_reaction('🔥')
 						await template_message.delete()
 						await action_log('template deleted from templates channel')
 
