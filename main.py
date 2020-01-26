@@ -1760,6 +1760,41 @@ async def on_message(message):
 					await conf_message.delete()
 			return
 
+		# '.deletematchchannels' command (duel-mods)
+		if message_content == '.deletematchchannels':
+			# check to be sure only admin user uses command
+			if message.author.id in config.ADMIN_IDS:
+				await action_log('attempting to delete match channels')
+				match_category = message.guild.get_channel(config.MATCH_CATEGORY_ID)
+
+				# send a confirmation embed
+				embed_title = 'Deleting Match Channels...'
+				embed_description = 'Deleting any match channels.'
+				embed = await generate_embed('yellow', embed_title, embed_description)
+				conf_message = await message.channel.send(embed=embed)
+
+				total_deleted = 0
+				for channel in match_category.text_channels:
+					if bool(re.match('^(match-\d+-.+)$', channel.name)):
+						await channel.delete()
+						total_deleted += 1
+
+				if total_deleted > 0:
+					embed_title = 'Channel Deletion Complete'
+					embed_description = f'A total of {total_deleted} channels were deleted!'
+					embed = await generate_embed('green', embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log(f'channel deletion complete - {total_deleted} channels')
+					await conf_message.delete()
+				else:
+					embed_title = 'No Channels Deleted'
+					embed_description = 'There were no channels to delete.'
+					embed = await generate_embed('red', embed_title, embed_description)
+					await message.channel.send(embed=embed)
+					await action_log('no channels to delete')
+					await conf_message.delete()
+			return
+
 		# # '.clearparticipantstats' command (duel-mods)
 		# if message_content == '.clearparticipantstats':
 		# 	# check to be sure only admin user uses command
