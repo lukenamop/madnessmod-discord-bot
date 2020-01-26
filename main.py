@@ -2860,6 +2860,7 @@ async def on_reaction_add(reaction, user):
 							\n`.alertparticipants` - alerts all participants of unfinished matches
 							\n`.createbracket <tournament reference>` - creates a Challonge bracket with the given tournament reference (for example, use `10` to get Meme Madness 10) and populates all participants
 							\n`.creatematchchannels <tournament reference>` - creates a match channel for every "open" match from the specified Challonge bracket
+							\n`.deletematchchannels` - deletes existing match channels from the matches category
 							\n`.prelim <user ID>` - sets a user's tournament role to `Preliminary` (deprecated)
 							\n`.removetournamentroles` - remove past participants' round roles (deprecated)
 							\n`.resignup <user ID> <reason>` - deletes a user's template and DMs them with `<reason>`, prompting them to re-signup
