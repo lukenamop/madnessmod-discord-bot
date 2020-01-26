@@ -357,7 +357,12 @@ async def on_message(message):
 					embed_description = datetime.date.today().strftime("%B %d")
 					embed_link = winning_image_url
 					embed = await generate_embed('pink', embed_title, embed_description, attachment=embed_link)
-					await client.get_channel(config.ARCHIVE_CHAN_ID).send(embed=embed)
+					winning_meme_message = await client.get_channel(config.ARCHIVE_CHAN_ID).send(embed=embed)
+					await winning_meme_message.add_reaction('<:GG:649057795643277342>')
+					await winning_meme_message.add_reaction('<:imfine:645785769461547018>')
+					await winning_meme_message.add_reaction('🏅')
+					await winning_meme_message.add_reaction('🧠')
+					await winning_meme_message.add_reaction('🔥')
 					await action_log('winning image sent to archive channel')
 
 				# check to see if challonge info is in the channel topic
@@ -3123,12 +3128,7 @@ async def on_reaction_add(reaction, user):
 
 					if not config.TESTING:
 						# delete template from #templates channel, move to #temp-archive
-						winning_meme_message = await client.get_channel(config.TEMP_ARCHIVE_CHAN_ID).send(embed=template_message.embeds[0])
-						await winning_meme_message.add_reaction('<:GG:649057795643277342>')
-						await winning_meme_message.add_reaction('<:imfine:645785769461547018>')
-						await winning_meme_message.add_reaction('🏅')
-						await winning_meme_message.add_reaction('🧠')
-						await winning_meme_message.add_reaction('🔥')
+						await client.get_channel(config.TEMP_ARCHIVE_CHAN_ID).send(embed=template_message.embeds[0])
 						await template_message.delete()
 						await action_log('template deleted from templates channel')
 
