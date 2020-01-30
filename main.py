@@ -1932,11 +1932,11 @@ async def on_message(message):
 				return
 			return
 
-		# '.alertparticipants' command (DM)
-		if message_content == '.alertparticipants':
+		# '.remindparticipants' command (DM)
+		if message_content == '.remindparticipants':
 			await message.channel.trigger_typing()
 			# build alert embed
-			embed_title = 'Participants Alerted'
+			embed_title = 'Participants Reminded'
 			alerted = 0
 			match_category = client.get_channel(config.MATCH_CATEGORY_ID)
 			for match_channel in match_category.text_channels:
@@ -1944,7 +1944,7 @@ async def on_message(message):
 					try:
 						last_message = await match_channel.fetch_message(match_channel.last_message_id)
 					except:
-						await action_log('ERROR - last_message_id was invalid')
+						await action_log('last_message_id was invalid')
 						last_message = None
 
 					if last_message is not None:
@@ -1952,8 +1952,13 @@ async def on_message(message):
 							member1 = last_message.mentions[0]
 							member2 = last_message.mentions[1]
 
-							await match_channel.send(f'Friendly reminder to complete this match! If you haven\'t been able to line up your availability, you should plan on doing a split match. To complete a split match, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention} when you have 30 minutes free.\n{member1.mention} {member2.mention}')
-							alerted += 1
+							# await match_channel.send(f'Friendly reminder to complete this match! If you haven\'t been able to line up your availability, you should plan on doing a split match. To complete a split match, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention} when you have 30 minutes free.\n{member1.mention} {member2.mention}')
+							# alerted += 1
+						elif len(last_message.embeds) == 1:
+							if last_message.embeds[0].title == 'Solo Match Complete':
+								match_channel_messages = await match_channel.history(limit=100).flatten()
+								await message.channel.send(match_channel_messages[-1].content)
+								await message.channel.send(match_channel_messages[0].content)
 			embed_description = f'Participants in `{alerted}` match(es) have been alerted.'
 			embed = await generate_embed('green', embed_title, embed_description)
 			await message.channel.send(embed=embed)
@@ -2891,7 +2896,7 @@ async def on_reaction_add(reaction, user):
 					elif reaction.emoji == '🏆':
 						# tournament commands
 						embed_description = """**🏆 Tournament Commands**
-							\n`.alertparticipants` - alerts all participants of unfinished matches
+							\n`.remindparticipants` - alerts all participants of unfinished matches
 							\n`.createbracket <tournament reference>` - creates a Challonge bracket with the given tournament reference (for example, use `10` to get Meme Madness 10) and populates all participants
 							\n`.creatematchchannels <tournament reference>` - creates a match channel for every "open" match from the specified Challonge bracket
 							\n`.deletematchchannels` - deletes existing match channels from the matches category
