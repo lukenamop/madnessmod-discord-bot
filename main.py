@@ -529,6 +529,15 @@ async def on_message(message):
 		# check for a mentioned user
 		if len(message.mentions) == 1:
 			user = message.mentions[0]
+		elif len(message_content.split()) == 2:
+			user = message.guild.get_member_named(message_content.split()[1])
+			if user is None:
+				embed_title = 'No User Found'
+				embed_description = f'\"{message_content.split()[1]}\" does not match the name of any member of this server. Please try again!'
+				embed = await generate_embed('red', embed_title, embed_description)
+				await message.channel.send(embed=embed)
+				await action_log('stats not able to be shared')
+				return
 		else:
 			user = message.author
 
