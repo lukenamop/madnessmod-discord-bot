@@ -476,6 +476,20 @@ async def on_message(message):
 	# process and clean message content
 	message_content = unidecode(message.content.casefold().strip())
 
+	# this custom trigger is designed to remove '-whois' responses after 30 seconds
+	if message_content.startswith('-whois') and message.guild.id == config.MM_GUILD_ID:
+		# define message requirements (author is YAGPDB.xyz)
+		def check(m):
+			return m.author.id == 204255221017214977
+		# wait for a message
+		response_message = await client.wait_for('message', check=check, timeout=30)
+		await action_log(f'\'-whois\' used by {message.author.display_name}')
+
+		# sleep for 1 minute
+		await asyncio.sleep(60)
+		await response_message.delete()
+		return
+
 	# this will trigger when a Cards Against Humanity game is started in #off-topic using YAGPDG.xyz
 	if message_content.startswith('-cah c') and message.channel.id == 639526660990828564:
 		creator = False
@@ -504,7 +518,7 @@ async def on_message(message):
 		embed_description = 'If you\'d like to donate to MadnessMod, please go to https://www.paypal.me/lukenamop\n\n100% of MadnessMod donations will go towards bot upkeep ($8 a month) and other Meme Madness fees.'
 		embed = await generate_embed('pink', embed_title, embed_description)
 		await message.channel.send(embed=embed)
-		await action_log('donation info sent to ' + message.author.name + '#' + message.author.discriminator)
+		await action_log(f'donation info sent to {message.author.display_name}')
 		return
 
 	# '.stats' command (all channels)
@@ -540,7 +554,7 @@ async def on_message(message):
 			embed = await generate_embed('blue', embed_title, embed_description)
 			nonce = f'stats{message.author.id}'
 			await message.channel.send(embed=embed, nonce=nonce)
-			await action_log(f'stats shared to {message.author.name}#{message.author.discriminator}')
+			await action_log(f'stats shared to {message.author.display_name}')
 			return
 
 		# if no record of specified user, build no-stats embed
@@ -623,7 +637,7 @@ async def on_message(message):
 		# '.verify' command (verification)
 		if message_content.startswith('.verify'):
 			verified = False
-			username_discriminator = f'{message.author.name}#{message.author.discriminator}'
+			display_name = message.author.display_name
 			# check manually which guild the user is verifying to; get "Verified" role from guild
 			if message.guild.id == 581695290986332160:
 				verification_role = message.guild.get_role(599354132771504128)
@@ -641,7 +655,7 @@ async def on_message(message):
 			embed_description = f'{base_member.mention}, please check your Discord messages for the next steps!'
 			embed = await generate_embed('yellow', embed_title, embed_description)
 			base_bot_response = await message.channel.send(embed=embed)
-			await action_log(f'verification started by {username_discriminator}')
+			await action_log(f'verification started by {display_name}')
 
 			# build verification step 1/2 embed
 			user_channel = await base_member.create_dm()
@@ -656,7 +670,7 @@ async def on_message(message):
 				embed_description = f'{base_member.mention}, I\'m unable to send you DMs! Please check your Discord settings, in `Privacy & Safety`, and enable the `Allow direct messages from server members` option before trying again.'
 				embed = await generate_embed('red', embed_title, embed_description)
 				await message.channel.send(embed=embed)
-				await action_log(f'{username_discriminator} has Discord DMs disabled')
+				await action_log(f'{display_name} has Discord DMs disabled')
 				return
 
 			# asyncio.TimeoutError triggers if client.wait_for(message) times out
@@ -667,7 +681,7 @@ async def on_message(message):
 				# wait for a message
 				message = await client.wait_for('message', check=check, timeout=120)
 				reddit_username = message.content.split('/')[-1].lstrip('@')
-				await action_log(f'verification username shared by {username_discriminator}')
+				await action_log(f'verification username shared by {display_name}')
 
 				# generate random 6 character string excluding unwanted_chars
 				unwanted_chars = ["0", "O", "l", "I"]
@@ -677,14 +691,14 @@ async def on_message(message):
 				# check to see which server is hosting the verification and set unique message
 				if base_message.guild.id == 607342998497525808:
 					# send message via reddit
-					reddit_username = verify.send_message(reddit_username, verification_string, username_discriminator, mex=True)
+					reddit_username = verify.send_message(reddit_username, verification_string, display_name, mex=True)
 				else:
 					# send message via reddit
-					reddit_username = verify.send_message(reddit_username, verification_string, username_discriminator)
+					reddit_username = verify.send_message(reddit_username, verification_string, display_name)
 
 				# verify that a username was shared
 				if reddit_username is not None:
-					await action_log(f'verification reddit message for {username_discriminator} sent to \'{reddit_username}\'')
+					await action_log(f'verification reddit message for {display_name} sent to \'{reddit_username}\'')
 
 					# build verification step 2/2 embed
 					embed_title = 'Verification Attempt (Step 2/2)'
@@ -742,7 +756,7 @@ async def on_message(message):
 							embed = await generate_embed('green', embed_title, embed_description)
 							await client.get_channel(581695290986332162).send(embed=embed)
 						# send welcome embed
-						await action_log(f'verification compeleted by {username_discriminator}')
+						await action_log(f'verification compeleted by {display_name}')
 
 						# check specific conditions related to the user's reddit account
 						checks = verify.extra_checks(reddit_username)
@@ -768,10 +782,10 @@ async def on_message(message):
 							embed_description = 'To try again, please send `.verify` in #verification.'
 						embed = await generate_embed('red', embed_title, embed_description)
 						await user_channel.send(embed=embed)
-						await action_log(f'verification key incorrect from {username_discriminator}')
+						await action_log(f'verification key incorrect from {display_name}')
 				else:
 					attempted_name = message.content.split('/')[-1]
-					await action_log(f'verification username error for {username_discriminator}, attempted name: {attempted_name}')
+					await action_log(f'verification username error for {display_name}, attempted name: {attempted_name}')
 					# build verification failure embed (username error)
 					embed_title = 'Username Error'
 					if base_message.guild.id == 581695290986332160:
@@ -789,7 +803,7 @@ async def on_message(message):
 					embed_description = 'To try again, please send `.verify` in #verification.'
 				embed = await generate_embed('red', embed_title, embed_description)
 				await user_channel.send(embed=embed)
-				await action_log(f'verification timed out for {username_discriminator}')
+				await action_log(f'verification timed out for {display_name}')
 
 			# discord.errors.NotFound triggers if messages set for deletion don't exist
 			try:
@@ -836,7 +850,7 @@ async def on_message(message):
 				embed_description = f'Signups are closed for the current tournament! Please try again when signups have opened again. To receive a notification when signups open, head to {client.get_channel(600355436033736714).mention} and give yourself the `Sign-Up Pings` role.'
 				embed = await generate_embed('red', embed_title, embed_description)
 				await message.channel.send(embed=embed)
-				await action_log(f'signups closed, signup rejected from {message.author.name}#{message.author.discriminator}')
+				await action_log(f'signups closed, signup rejected from {message.author.display_name}')
 				return
 			# check to see if templates are required for signups
 			if template_required:
@@ -848,7 +862,7 @@ async def on_message(message):
 					embed_description = 'Please send me a blank template to confirm your signup! This signup attempt will expire in 120 seconds.'
 					embed = await generate_embed('yellow', embed_title, embed_description)
 					await message.channel.send(embed=embed)
-					await action_log(f'signup attempted without attachment by {message.author.name}#{message.author.discriminator}')
+					await action_log(f'signup attempted without attachment by {message.author.display_name}')
 
 					# asyncio.TimeoutError triggers if client.wait_for(message) times out
 					try:
@@ -857,17 +871,17 @@ async def on_message(message):
 							return m.channel.type == message.channel.type and m.author.id == message.author.id and len(m.attachments) == 1
 						# wait for a message
 						message = await client.wait_for('message', check=check, timeout=120)
-						await action_log(f'signup attachment received from {message.author.name}#{message.author.discriminator}')
+						await action_log(f'signup attachment received from {message.author.display_name}')
 					except asyncio.TimeoutError:
 						# build signup error embed (timed out)
 						embed_title = 'Signup Timed Out'
 						embed_description = 'If you\'d like to signup for this week\'s competition, send me another message with `.signup`!'
 						embed = await generate_embed('red', embed_title, embed_description)
 						await message.channel.send(embed=embed)
-						await action_log(f'signup timed out by {message.author.name}#{message.author.discriminator}')
+						await action_log(f'signup timed out by {message.author.display_name}')
 						return
 				else:
-					await action_log(f'signup attachment received from {message.author.name}#{message.author.discriminator}')
+					await action_log(f'signup attachment received from {message.author.display_name}')
 
 					# check to see if user has signed up in the last 7 days (config.CYCLE seconds)
 					query = f'SELECT * FROM signups WHERE user_id = {message.author.id} AND submission_time >= {time.time() - config.CYCLE}'
@@ -888,7 +902,7 @@ async def on_message(message):
 						embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
 						template_chan = client.get_channel(config.TEMPLATE_CHAN_ID)
 						template_message = await template_chan.send(embed=embed, nonce='template')
-						await action_log(f'signup attachment sent to #templates by {message.author.name}#{message.author.discriminator}')
+						await action_log(f'signup attachment sent to #templates by {message.author.display_name}')
 
 						# add signup info to postgresql
 						query = f'INSERT INTO signups (user_id, message_id, submission_time) VALUES ({message.author.id}, 0, {time.time()})'
@@ -901,7 +915,7 @@ async def on_message(message):
 						embed_description = 'It looks like you\'ve already signed up for this cycle of Meme Madness! Contact a moderator if this is incorrect.'
 						embed = await generate_embed('red', embed_title, embed_description)
 						await message.channel.send(embed=embed)
-						await action_log(f'already signed up from {message.author.name}#{message.author.discriminator}')
+						await action_log(f'already signed up from {message.author.display_name}')
 						return
 			else:
 				# signup process when no template is required
@@ -922,7 +936,7 @@ async def on_message(message):
 					embed = await generate_embed('green', embed_title, embed_description)
 					template_chan = client.get_channel(config.SIGNUP_CHAN_ID)
 					template_message = await template_chan.send(embed=embed)
-					await action_log(f'signup sent to #templates by {message.author.name}#{message.author.discriminator}')
+					await action_log(f'signup sent to #templates by {message.author.display_name}')
 
 					# add signup info to postgresql
 					query = f'INSERT INTO signups (user_id, message_id, submission_time) VALUES ({message.author.id}, 0, {time.time()})'
@@ -935,7 +949,7 @@ async def on_message(message):
 					embed_description = 'It looks like you\'ve already signed up for this cycle of Meme Madness! Contact a moderator if this is incorrect.'
 					embed = await generate_embed('red', embed_title, embed_description)
 					await message.channel.send(embed=embed)
-					await action_log(f'already signed up from {message.author.name}#{message.author.discriminator}')
+					await action_log(f'already signed up from {message.author.display_name}')
 					return
 
 			# check for existing participant in database
@@ -984,20 +998,20 @@ async def on_message(message):
 					embed_description = 'Your match has been cancelled, please check the match channel for more info.'
 					embed = await generate_embed('red', embed_title, embed_description)
 					await message.channel.send(embed=embed)
-					await action_log(f'cancelled submission by {message.author.name}#{message.author.discriminator}')
+					await action_log(f'cancelled submission by {message.author.display_name}')
 					return
 
 				# check for duplicate submissions
 				if message.author.id == u1_id:
 					if u1_submitted:
 						await message.channel.send(embed=embed)
-						await action_log(f'duplicate submission by {message.author.name}#{message.author.discriminator}')
+						await action_log(f'duplicate submission by {message.author.display_name}')
 						return
 					u_order = 1
 				elif message.author.id == u2_id:
 					if u2_submitted:
 						await message.channel.send(embed=embed)
-						await action_log(f'duplicate submission by {message.author.name}#{message.author.discriminator}')
+						await action_log(f'duplicate submission by {message.author.display_name}')
 						return
 					u_order = 2
 				# check for an attachment
@@ -1007,7 +1021,7 @@ async def on_message(message):
 					embed_description = 'Please send me your final meme to confirm your submission! This submission attempt will expire in 120 seconds.'
 					embed = await generate_embed('yellow', embed_title, embed_description)
 					await message.channel.send(embed=embed)
-					await action_log(f'submission attempted without attachment by {message.author.name}#{message.author.discriminator}')
+					await action_log(f'submission attempted without attachment by {message.author.display_name}')
 
 					# asyncio.TimeoutError triggers if client.wait_for(message) times out
 					try:
@@ -1016,24 +1030,24 @@ async def on_message(message):
 							return m.channel.type == message.channel.type and m.author.id == message.author.id and len(m.attachments) == 1
 						# wait for a message
 						message = await client.wait_for('message', check=check, timeout=120)
-						await action_log(f'submission attachment received from {message.author.name}#{message.author.discriminator}')
+						await action_log(f'submission attachment received from {message.author.display_name}')
 					except asyncio.TimeoutError:
 						# build submission error embed (timed out)
 						embed_title = 'Submission Timed Out'
 						embed_description = 'If you\'d like to submit your final meme, send me another message with `.submit`!'
 						embed = await generate_embed('red', embed_title, embed_description)
 						await message.channel.send(embed=embed)
-						await action_log(f'submission timed out by {message.author.name}#{message.author.discriminator}')
+						await action_log(f'submission timed out by {message.author.display_name}')
 						return
 				else:
-					await action_log(f'submission attachment received from {message.author.name}#{message.author.discriminator}')
+					await action_log(f'submission attachment received from {message.author.display_name}')
 
 				# build submission confirmation embed
 				embed_title = 'Submission Confirmation'
 				embed_description = f'Thank you for submitting your final meme {message.author.mention}! If there are any issues with your submission you will be contacted.'
 				embed = await generate_embed('green', embed_title, embed_description)
 				await message.channel.send(embed=embed)
-				await action_log(f'final meme attachment sent in by {message.author.name}#{message.author.discriminator}')
+				await action_log(f'final meme attachment sent in by {message.author.display_name}')
 
 				if template_url is not None:
 					# build submission confirmation for match channel
@@ -1186,7 +1200,7 @@ async def on_message(message):
 				embed_description = 'You don\'t appear to have an active match to submit to right now.'
 				embed = await generate_embed('red', embed_title, embed_description)
 				await message.channel.send(embed=embed)
-				await action_log(f'submission attempt without match by {message.author.name}#{message.author.discriminator}')
+				await action_log(f'submission attempt without match by {message.author.display_name}')
 				return
 
 		# '.template' command (DM)
@@ -1201,7 +1215,7 @@ async def on_message(message):
 				embed_description = 'If you\'d like to help out by providing a template, please send me a blank image. This template submission attempt will expire in 120 seconds.'
 				embed = await generate_embed('yellow', embed_title, embed_description)
 				await message.channel.send(embed=embed)
-				await action_log(f'template attempted without attachment by {message.author.name}#{message.author.discriminator}')
+				await action_log(f'template attempted without attachment by {message.author.display_name}')
 
 				# asyncio.TimeoutError triggers if client.wait_for(message) times out
 				try:
@@ -1216,10 +1230,10 @@ async def on_message(message):
 					embed_description = 'If you\'d like to submit a template to be used in Meme Madness, send me another message with `.template`!'
 					embed = await generate_embed('red', embed_title, embed_description)
 					await message.channel.send(embed=embed)
-					await action_log(f'template submission timed out by {message.author.name}#{message.author.discriminator}')
+					await action_log(f'template submission timed out by {message.author.display_name}')
 					return
 
-			await action_log(f'template attachment received from {message.author.name}#{message.author.discriminator}')
+			await action_log(f'template attachment received from {message.author.display_name}')
 			# build confirmation embed
 			embed_title = 'Template Confirmation'
 			embed_description = f'Thank you for submitting your template {message.author.mention}! If there are any issues, you will be contacted.'
@@ -1233,7 +1247,7 @@ async def on_message(message):
 			embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
 			template_chan = client.get_channel(config.TEMPLATE_CHAN_ID)
 			template_message = await template_chan.send(embed=embed, nonce='voluntary_template')
-			await action_log(f'template attachment sent to #templates by {message.author.name}#{message.author.discriminator}')
+			await action_log(f'template attachment sent to #templates by {message.author.display_name}')
 
 			if not config.TESTING:
 				# check for existing participant in database
@@ -1278,7 +1292,7 @@ async def on_message(message):
 				embed_description = 'No active matches found.'
 			embed = await generate_embed('yellow', embed_title, embed_description)
 			await message.channel.send(embed=embed)
-			await action_log(f'sent user matches to {message.author.name}#{message.author.discriminator}')
+			await action_log(f'sent user matches to {message.author.display_name}')
 			return
 
 		# '.help' command (DM)
@@ -1288,7 +1302,7 @@ async def on_message(message):
 			embed_description = help_cmd.dm_help
 			embed = await generate_embed('yellow', embed_title, embed_description)
 			await message.channel.send(embed=embed)
-			await action_log(f'help query sent to {message.author.name}#{message.author.discriminator}')
+			await action_log(f'help query sent to {message.author.display_name}')
 			return
 		return
 
@@ -1301,7 +1315,7 @@ async def on_message(message):
 			embed_description = help_cmd.stats_help
 			embed = await generate_embed('yellow', embed_title, embed_description)
 			await message.channel.send(embed=embed)
-			await action_log(f'help query sent to {message.author.name}#{message.author.discriminator} in stats-flex')
+			await action_log(f'help query sent to {message.author.display_name} in stats-flex')
 			return
 		return
 
@@ -1555,7 +1569,7 @@ async def on_message(message):
 							embed_description = f'The tournament role for {member.mention} has been set to `Preliminary`.'
 							embed = await generate_embed('green', embed_title, embed_description)
 							await message.channel.send(embed=embed)
-							await action_log(f'prelim set for {member.name}#{member.discriminator}')
+							await action_log(f'prelim set for {member.display_name}')
 						else:
 							# build prelim error embed (user did not have tournament role)
 							embed_title = 'Error: Specified User Not Valid'
@@ -2270,7 +2284,7 @@ async def on_message(message):
 						embed_description = f'{match_user.mention} has 30 minutes to hand in their final meme. Good luck!'
 						embed = await generate_embed('green', embed_title, embed_description)
 						await match_channel.send(embed=embed)
-						await action_log(f'solo match started for {match_user.name}#{match_user.discriminator}')
+						await action_log(f'solo match started for {match_user.display_name}')
 
 						# sleep for 15 minutes (config.MATCH_WARN1_TIME seconds)
 						await asyncio.sleep(config.MATCH_WARN1_TIME)
@@ -2669,7 +2683,7 @@ async def on_reaction_add(reaction, user):
 				if not user.bot:
 					# remove the user's reaction from the bot (anonymous polling)
 					await reaction.remove(user)
-					await action_log(f'reaction added to poll by {user.name}#{user.discriminator}')
+					await action_log(f'reaction added to poll by {user.display_name}')
 
 					# create dm channel with the user
 					user_channel = await user.create_dm()
@@ -2714,7 +2728,7 @@ async def on_reaction_add(reaction, user):
 								embed_description = 'You cannot vote in your own match.'
 								embed = await generate_embed('red', embed_title, embed_description)
 								await user_channel.send(embed=embed)
-								await action_log(f'attempted self-vote in match by {user.name}#{user.discriminator}')
+								await action_log(f'attempted self-vote in match by {user.display_name}')
 								return
 
 						# check postgresql database for an existing vote by the user in the specified match
@@ -2735,7 +2749,7 @@ async def on_reaction_add(reaction, user):
 									embed = await generate_embed('red', embed_title, embed_description)
 									# send embed to the user via dm
 									await user_channel.send(embed=embed)
-									await action_log(f'invalid vote in match by {user.name}#{user.discriminator}')
+									await action_log(f'invalid vote in match by {user.display_name}')
 									return
 								else:
 									# send the user a warning if their vote broke any other rules
@@ -2744,7 +2758,7 @@ async def on_reaction_add(reaction, user):
 									embed = await generate_embed('red', embed_title, embed_description)
 									# send embed to the user via dm
 									await user_channel.send(embed=embed)
-									await action_log(f'invalid vote in match by {user.name}#{user.discriminator}')
+									await action_log(f'invalid vote in match by {user.display_name}')
 									return
 								# generate vote removal embed
 								embed_title = 'Vote Removal'
@@ -3136,7 +3150,7 @@ async def on_reaction_add(reaction, user):
 					embed_description = f'{member1.mention} and {member2.mention} have 30 minutes to hand in their final memes. Good luck! (Thanks to {template_author.mention} for the template!)'
 					embed = await generate_embed('green', embed_title, embed_description, attachment=template_url)
 					await match_channel.send(embed=embed)
-					await action_log(f'match started between {member1.name}#{member1.discriminator} and {member2.name}#{member2.discriminator}')
+					await action_log(f'match started between {member1.display_name} and {member2.display_name}')
 
 					if not config.TESTING:
 						# delete template from #templates channel, move to #temp-archive

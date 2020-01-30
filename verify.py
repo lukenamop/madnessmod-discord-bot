@@ -16,7 +16,7 @@ def initialize_reddit():
 		user_agent=config.R_USER_AGENT)
 	return reddit
 
-def send_message(username, key, username_discriminator, mex=False):
+def send_message(username, key, display_name, mex=False):
 	if not bool(re.match('^[a-zA-Z0-9\_\-]+$', username)) or len(username) > 20:
 		return None
 	# initialize a reddit connection
@@ -26,7 +26,7 @@ def send_message(username, key, username_discriminator, mex=False):
 		contact = 'u/lukenamop or u/l3dar'
 	else:
 		contact = 'u/lukenamop or lukenamop#0918'
-	message_body = 'Your 6 character verification key: `' + key + '`\n\nA Discord verification was requested for this account by ' + username_discriminator + '.\n\n^(If you didn\'t request this verification, contact ' + contact + ' immediately.)'
+	message_body = 'Your 6 character verification key: `' + key + '`\n\nA Discord verification was requested for this account by ' + display_name + '.\n\n^(If you didn\'t request this verification, contact ' + contact + ' immediately.)'
 	try:
 		# find the specified redditor
 		redditor = reddit.redditor(username)
