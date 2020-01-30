@@ -110,16 +110,28 @@ async def generate_embed(color, title, description, attachment=None, timestamp=N
 		embed.set_image(url=attachment)
 	return embed
 
-async def execute_sql(query):
+async def execute_sql(query, attempt=1):
+	reconnect_and_retry = False
 	try:
 		connect.crsr.execute(query)
 	except connect.psycopg2.errors.InFailedSqlTransaction:
-		await action_log('ERROR - failed SQL transaction, reconnecting automatically')
+		reconnect_and_retry = True
+		await action_log('failed SQL transaction (InFailedSqlTransaction), reconnecting automatically')
+	except connect.psycopg2.OperationalError:
+		reconnect_and_retry = True
+		await action_log('failed SQL transaction (OperationalError), reconnecting automatically')
+	except connect.psycopg2.InterfaceError:
+		reconnect_and_retry = True
+		await action_log('failed SQL transaction (InterfaceError), reconnecting automatically')
+
+	if reconnect_and_retry:
 		success = connect.db_connect()
 		if success:
 			await action_log('reconnection was a success')
+			if attempt <= 3:
+				await execute_sql(query, attempt=(attempt + 1))
 		else:
-			await action_log('ERROR - connection failed')
+			await action_log('connection failed')
 	return
 
 # client event triggers on any discord message
