@@ -209,11 +209,14 @@ async def on_message(message):
 					await asyncio.sleep(remaining_poll_time)
 					await action_log('waking back up in match channel and checking vote counts')
 					# check vote count
-					query = f'SELECT COUNT(*) FROM votes WHERE match_id = {db_id}'
+					query = f'SELECT COUNT(*) FROM votes WHERE match_id = {db_id} AND a_vote = True'
 					await execute_sql(query)
-					total_votes = connect.crsr.fetchone()[0]
+					a_votes = connect.crsr.fetchone()[0]
+					query = f'SELECT COUNT(*) FROM votes WHERE match_id = {db_id} AND b_vote = True'
+					b_votes = connect.crsr.fetchone()[0]
+					total_votes = a_votes + b_votes
 
-					while total_votes < 15 and poll_extensions < config.MAX_POLL_EXTENSIONS:
+					while (total_votes < 15 or a_votes == b_votes) and poll_extensions < config.MAX_POLL_EXTENSIONS:
 						poll_extensions += 1
 						await action_log(f'only {total_votes} votes, extending poll time, this is extension number {poll_extensions}')
 
