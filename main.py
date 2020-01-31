@@ -213,6 +213,7 @@ async def on_message(message):
 					await execute_sql(query)
 					a_votes = connect.crsr.fetchone()[0]
 					query = f'SELECT COUNT(*) FROM votes WHERE match_id = {db_id} AND b_vote = True'
+					await execute_sql(query)
 					b_votes = connect.crsr.fetchone()[0]
 					total_votes = a_votes + b_votes
 
