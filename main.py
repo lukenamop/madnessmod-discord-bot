@@ -757,7 +757,7 @@ async def on_message(message):
 						# check which server is hosting the verification
 						if base_message.guild.id == 607342998497525808:
 							# build welcome embed
-							embed_description = f'{base_member.mention}, welcome to MEX! Please let a member of the mod team know if you need any help.'
+							embed_description = f'{base_member.mention}, welcome to DEX! Please let a member of the mod team know if you need any help.'
 							embed = await generate_embed('green', embed_title, embed_description)
 							await client.get_channel(607342999751491585).send(embed=embed)
 						elif base_message.guild.id == 581695290986332160:
