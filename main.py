@@ -2533,7 +2533,7 @@ async def on_message(message):
 			await execute_sql(query)
 			results = connect.crsr.fetchall()
 			if len(results) > 1:
-				for match in results:
+				for result in results:
 					# check how many votes image A got
 					query = f'SELECT COUNT(*) FROM votes WHERE match_id = {result[0]} AND a_vote = True'
 					await execute_sql(query)
