@@ -2533,10 +2533,10 @@ async def on_message(message):
 			await execute_sql(query)
 			results = connect.crsr.fetchall()
 			if len(results) > 1:
-				result = [0, 0, 0, 0, 0]
+				result = [0, 0, 0, 0, 1000000000000000]
 				# find the most recent match by creation_time
 				for match in results:
-					if match[4] > result[4]:
+					if match[4] < result[4]:
 						result = match
 			elif len(results) == 1:
 				result = results[0]
