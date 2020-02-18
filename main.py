@@ -2529,12 +2529,12 @@ async def on_message(message):
 		if message_content == '.showresults':
 			await action_log('showresults command in match channel')
 			# check to see who submitted each meme
-			query = f'SELECT db_id, u1_id, u2_id, a_meme, start_time FROM matches WHERE channel_id = {message.channel.id}'
+			query = f'SELECT db_id, u1_id, u2_id, a_meme, creation_time FROM matches WHERE channel_id = {message.channel.id}'
 			await execute_sql(query)
 			results = connect.crsr.fetchall()
 			if len(results) > 1:
 				result = [0, 0, 0, 0, 0]
-				# find the most recent match by start_time
+				# find the most recent match by creation_time
 				for match in results:
 					if match[4] > result[4]:
 						result = match
