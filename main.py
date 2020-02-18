@@ -2533,60 +2533,13 @@ async def on_message(message):
 			await execute_sql(query)
 			results = connect.crsr.fetchall()
 			if len(results) > 1:
-				for result in results:
-					# check how many votes image A got
-					query = f'SELECT COUNT(*) FROM votes WHERE match_id = {result[0]} AND a_vote = True'
-					await execute_sql(query)
-					a_votes = connect.crsr.fetchone()[0]
-					# check how many votes image B got
-					query = f'SELECT COUNT(*) FROM votes WHERE match_id = {result[0]} AND b_vote = True'
-					await execute_sql(query)
-					b_votes = connect.crsr.fetchone()[0]
-					# find winning image
-					if a_votes > b_votes:
-						winning_image = 'A'
-					elif b_votes > a_votes:
-						winning_image = 'B'
-					elif a_votes == b_votes:
-						winning_image = 'tie'
-
-					# alert match channel of poll results
-					# AttributeError triggers if participant is no longer in the guild
-					try:
-						if (result[3] == 1 and winning_image == 'A') or (result[3] == 2 and winning_image == 'B'):
-							winner = message.channel.guild.get_member(result[1])
-							loser = message.channel.guild.get_member(result[2])
-						elif (result[3] == 2 and winning_image == 'A') or (result [3] == 1 and winning_image == 'B'):
-							winner = message.channel.guild.get_member(result[2])
-							loser = message.channel.guild.get_member(result[1])
-						elif winning_image == 'tie':
-							# build tie embed for match channel
-							embed_title = 'Voting Results'
-							embed_description = f'This match has ended in a {a_votes} - {b_votes} tie! Participants, please contact each other and find a time to rematch.'
-							embed = await generate_embed('pink', embed_title, embed_description)
-							await message.channel.send(embed=embed)
-							await action_log('match ended in a tie, results sent in match channel')
-							return
-						else:
-							await action_log('winner not found or a_meme not defined in postgresql')
-							return
-					except AttributeError:
-						await action_log('member from existing match was not found in the guild')
-						return
-
-					# build notification embed for match channel
-					embed_title = 'Voting Results'
-					embed_description = f'Congratulations to {winner.mention}, you have won this match with image {winning_image}! Thank you for participating {loser.mention}. The final score was {a_votes} - {b_votes}.'
-					embed = await generate_embed('pink', embed_title, embed_description)
-					await message.channel.send(embed=embed)
-					await action_log('voting results sent in match channel')
-			# 	result = [0, 0, 0, 0, 0]
-			# 	# find the most recent match by creation_time
-			# 	for match in results:
-			# 		if match[4] > result[4]:
-			# 			result = match
-			# elif len(results) == 1:
-			# 	result = results[0]
+				result = [0, 0, 0, 0, 0]
+				# find the most recent match by creation_time
+				for match in results:
+					if match[4] > result[4]:
+						result = match
+			elif len(results) == 1:
+				result = results[0]
 			else:
 				# build showresults error embed (no previous match)
 				embed_title = 'No Previous Match'
