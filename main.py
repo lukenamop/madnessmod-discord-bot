@@ -651,13 +651,6 @@ async def on_message(message):
 		if message_content.startswith('.verify'):
 			verified = False
 			display_name = message.author.display_name
-			# check manually which guild the user is verifying to; get "Verified" role from guild
-			if message.guild.id == 581695290986332160:
-				verification_role = message.guild.get_role(599354132771504128)
-			elif message.guild.id == 607342998497525808:
-				verification_role = message.guild.get_role(607349686554329094)
-			else:
-				return
 
 			# save base info for duration of the verification process
 			base_member = message.author
@@ -705,9 +698,12 @@ async def on_message(message):
 				if base_message.guild.id == 607342998497525808:
 					# send message via reddit
 					reddit_username = verify.send_message(reddit_username, verification_string, display_name, mex=True)
-				else:
+				elif message.guild.id == 581695290986332160:
 					# send message via reddit
+					verification_role = message.guild.get_role(599354132771504128)
 					reddit_username = verify.send_message(reddit_username, verification_string, display_name)
+				else:
+					return
 
 				# verify that a username was shared
 				if reddit_username is not None:
@@ -736,10 +732,13 @@ async def on_message(message):
 
 							# set user nickname and roles
 							await base_member.edit(nick=reddit_username)
-							await base_member.add_roles(verification_role)
 							if base_message.guild.id == 607342998497525808:
+								# remove For Review
 								del_role = base_message.guild.get_role(607365580567216130)
 								await base_member.remove_roles(del_role)
+							else:
+								# add Verified
+								await base_member.add_roles(verification_role)
 							verified = True
 
 						except discord.errors.Forbidden:
