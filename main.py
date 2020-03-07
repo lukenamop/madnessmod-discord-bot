@@ -698,9 +698,8 @@ async def on_message(message):
 				if base_message.guild.id == 607342998497525808:
 					# send message via reddit
 					reddit_username = verify.send_message(reddit_username, verification_string, display_name, mex=True)
-				elif message.guild.id == 581695290986332160:
+				elif base_message.guild.id == 581695290986332160:
 					# send message via reddit
-					verification_role = message.guild.get_role(599354132771504128)
 					reddit_username = verify.send_message(reddit_username, verification_string, display_name)
 				else:
 					return
@@ -733,11 +732,12 @@ async def on_message(message):
 							# set user nickname and roles
 							await base_member.edit(nick=reddit_username)
 							if base_message.guild.id == 607342998497525808:
-								# remove For Review
+								# remove For Review on DEX
 								del_role = base_message.guild.get_role(607365580567216130)
 								await base_member.remove_roles(del_role)
 							else:
-								# add Verified
+								# add Verified on Meme Madness
+								verification_role = message.guild.get_role(599354132771504128)
 								await base_member.add_roles(verification_role)
 							verified = True
 
