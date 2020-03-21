@@ -27,8 +27,9 @@ def db_connect():
 	result = crsr.fetchone()
 	print('participants: ' + str(result[0]))
 
-	crsr.execute("""UPDATE participants SET match_votes = 0, lb_points = 0, longest_vote_streak = 0, vote_streak = 0, last_vote_streak_time = 0, unvoted_match_start_time = NULL""")
-	conn.commit()
+	# reset leaderboard points and related stats for all users
+	# crsr.execute("""UPDATE participants SET match_votes = 0, lb_points = 0, longest_vote_streak = 0, vote_streak = 0, last_vote_streak_time = 0, unvoted_match_start_time = NULL""")
+	# conn.commit()
 
 	crsr.execute("""SELECT COUNT(*) FROM matches""")
 	result = crsr.fetchone()
