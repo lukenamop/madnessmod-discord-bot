@@ -2954,6 +2954,7 @@ async def on_reaction_add(reaction, user):
 							\n`.clearsignups` - clears all signups from the database
 							\n`.reconnect` - forces the bot to reconnect to its database
 							\n`.removeinvalidparticipants` - removes users who have left the server from the database
+							\n`.restartpolls` - fixes any match polls that are no longer counting votes
 							\n`.togglesignups` - open or close tournament signups
 							\n`.toggletemplates` - enable or disable template requirements with `.signup`"""
 					elif reaction.emoji == '↩️':
