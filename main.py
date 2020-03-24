@@ -1784,6 +1784,7 @@ async def on_message(message):
 						if member1 is None:
 							await match_channel.send(f'Please DM each other to find a 30 minute window to complete your match. When you\'re both available, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. Good luck!\n@{participant1} {member2.mention}')
 						elif member2 is None:
+							await match_channel.send(f'Please DM each other to find a 30 minute window to complete your match. When you\'re both available, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. Good luck!\n@{member1.mention} {member2.mention}')
 						else:
 							await match_channel.send(f'Please DM each other to find a 30 minute window to complete your match. When you\'re both available, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. Good luck!\n@{member1.mention} {participant2}')
 						total_created += 1
