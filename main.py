@@ -75,7 +75,7 @@ async def continue_polls(client):
 		await action_log('no active polls')
 	else:
 		await action_log(f'safely relaunched {connected_polls} active polls')
-	return
+	return connected_polls
 
 # generate a discord embed with an optional attached image
 async def generate_embed(color, title, description, attachment=None, timestamp=None):
@@ -1991,6 +1991,23 @@ async def on_message(message):
 
 		# '.dbstats' command (duel-mods)
 		if message_content == '.dbstats':
+			return
+
+		# '.restartpolls' command (duel-mods)
+		if message_content == '.restartpolls':
+			try:
+				connected_polls = await continue_polls(client)
+			except:
+				embed_title = 'Poll Restart Failed'
+				embed_description = 'Please contact lukenamop#0918.'
+				embed = await generate_embed('red', embed_title, embed_description)
+				await message.channel.send(embed=embed)
+				return
+
+			embed_title = 'Polls Successfully Restarted'
+			embed_description = f'`{connected_polls}` polls successfully restarted.'
+			embed = await generate_embed('green', embed_title, embed_description)
+			await message.channel.send(embed=embed)
 			return
 
 		# '.help' command (duel-mods)
