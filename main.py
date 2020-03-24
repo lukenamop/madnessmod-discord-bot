@@ -737,8 +737,8 @@ async def on_message(message):
 								await base_member.remove_roles(del_role)
 							else:
 								# add Verified on Meme Madness
-								verification_role = message.guild.get_role(599354132771504128)
-								await base_member.add_roles(verification_role)
+								verified_role = base_message.guild.get_role(599354132771504128)
+								await base_member.add_roles(verified_role)
 							verified = True
 
 						except discord.errors.Forbidden:
