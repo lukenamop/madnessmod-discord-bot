@@ -3339,7 +3339,7 @@ async def on_ready():
 	if config.TESTING:
 		print('Currently in TESTING MODE')
 	print('------')
-	await continue_polls(client)
+	# await continue_polls(client)
 
 # starts instance of discord bot client
 client.run(config.TOKEN)
