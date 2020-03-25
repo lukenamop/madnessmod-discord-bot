@@ -2730,7 +2730,7 @@ async def on_raw_reaction_add(payload):
 	if message.author.id == client.user.id:
 		if len(message.embeds) == 1:
 			# create variables for the reaction emoji, user, and guild
-			emoji = payload.emoji
+			emoji = payload.emoji.name
 			guild = client.get_guild(payload.guild_id)
 			if guild is not None:
 				user = guild.get_member(payload.user_id)
@@ -2933,7 +2933,7 @@ async def on_raw_reaction_add(payload):
 
 					embed_title = 'Mod Help Guide'
 					# check to see which emoji was used
-					if emoji.name == '⚔️':
+					if emoji == '⚔️':
 						# match commands
 						embed_description = """**⚔️ Match Commands**
 							\n`.cancelmatch` - cancels the match in a given match channel
@@ -2943,7 +2943,7 @@ async def on_raw_reaction_add(payload):
 							\n`.splitmatch @<user> @<user>` - splits a match between two users so they can compete separately
 							\n`.startmatch @<user> @<user>` - starts a match between two users
 							\n`.startsolo @<user>` - starts a user's solo match (use after `.splitmatch`)"""
-					elif emoji.name == '🏆':
+					elif emoji == '🏆':
 						# tournament commands
 						embed_description = """**🏆 Tournament Commands**
 							\n`.remindparticipants` - alerts all participants of unfinished matches
@@ -2955,7 +2955,7 @@ async def on_raw_reaction_add(payload):
 							\n`.resignup <user ID> <reason>` - deletes a user's template and DMs them with `<reason>`, prompting them to re-signup
 							\n`.settournamentroles` - removes all past tournament roles and initializes the tournament's participants' round roles (sets them to Round 1)
 							\n`.signuplist` - displays a full list of signups for the current tournament"""
-					elif emoji.name == '📎':
+					elif emoji == '📎':
 						# admin commands
 						embed_description = """**📎 Admin Commands**
 							\n`.activematches` - displays all currently active matches
@@ -2966,7 +2966,7 @@ async def on_raw_reaction_add(payload):
 							\n`.restartpolls` - fixes any match polls that are no longer counting votes
 							\n`.togglesignups` - open or close tournament signups
 							\n`.toggletemplates` - enable or disable template requirements with `.signup`"""
-					elif emoji.name == '↩️':
+					elif emoji == '↩️':
 						# back to main help menu
 						embed_description = """Use the emojis to navigate this help guide:
 							\n⚔️ Match Commands
@@ -2975,7 +2975,6 @@ async def on_raw_reaction_add(payload):
 							\n↩️ Return Here"""
 					else:
 						# invalid emoji, do nothing
-						await action_log(f'emoji: {emoji}; emoji.name: {emoji.name}')
 						return
 
 					# update the help guide
