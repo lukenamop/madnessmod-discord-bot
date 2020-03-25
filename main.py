@@ -2982,209 +2982,11 @@ async def on_raw_reaction_add(payload):
 					await message.edit(embed=embed)
 					await action_log('mod help guide edited')
 					return
-	return
 
-# client event triggers on any discord reaction add
-@client.event
-async def on_reaction_add(reaction, user):
-	# create variable for base message
-	message = reaction.message
-
-	if message.author.id == client.user.id:
-		if len(message.embeds) == 1:
-		# 	# match voting (polls)
-		# 	if message.embeds[0].title == 'Match Voting' and message.embeds[0].description.startswith('**Vote for your favorite!'):
-		# 		if not user.bot:
-		# 			# remove the user's reaction from the bot (anonymous polling)
-		# 			await reaction.remove(user)
-		# 			await action_log(f'reaction added to poll by {user.display_name}')
-
-		# 			# create dm channel with the user
-		# 			user_channel = await user.create_dm()
-
-		# 			# check for existing participant in database
-		# 			query = f'SELECT match_votes, lb_points, vote_streak, longest_vote_streak, unvoted_match_start_time, last_vote_streak_time FROM participants WHERE user_id = {user.id}'
-		# 			await execute_sql(query)
-		# 			result = connect.crsr.fetchone()
-		# 			if result is None:
-		# 				# create participant if none exists
-		# 				query = f'INSERT INTO participants (user_id) VALUES ({user.id})'
-		# 				await execute_sql(query)
-		# 				connect.conn.commit()
-		# 				await action_log('no existing user, new user added to participants table in postgresql')
-		# 				match_votes = 0
-		# 				lb_points = 0
-		# 				vote_streak = 0
-		# 				longest_vote_streak = 0
-		# 				unvoted_match_start_time = None
-		# 				last_vote_streak_time = 0
-		# 			else:
-		# 				match_votes = result[0]
-		# 				lb_points = result[1]
-		# 				vote_streak = result[2]
-		# 				longest_vote_streak = result[3]
-		# 				unvoted_match_start_time = result[4]
-		# 				last_vote_streak_time = result[5]
-
-		# 			# find the ID of the active match
-		# 			query = f'SELECT db_id, u1_id, u2_id FROM matches WHERE channel_id = {message.channel.id} ORDER BY db_id DESC'
-		# 			await execute_sql(query)
-		# 			result = connect.crsr.fetchone()
-		# 			if result is not None:
-		# 				match_id = result[0]
-		# 				u1_id = result[1]
-		# 				u2_id = result[2]
-
-		# 				if not config.TESTING:
-		# 					# check to see if the person voting is one of the match participants
-		# 					if user.id == u1_id or user.id == u2_id:
-		# 						embed_title = 'Invalid Vote'
-		# 						embed_description = 'You cannot vote in your own match.'
-		# 						embed = await generate_embed('red', embed_title, embed_description)
-		# 						await user_channel.send(embed=embed)
-		# 						await action_log(f'attempted self-vote in match by {user.display_name}')
-		# 						return
-
-		# 				# check postgresql database for an existing vote by the user in the specified match
-		# 				query = f'SELECT a_vote, b_vote FROM votes WHERE user_id = {user.id} AND match_id = {match_id}'
-		# 				await execute_sql(query)
-		# 				result = connect.crsr.fetchone()
-		# 				if result is not None:
-		# 					if result[0] or result[1]:
-		# 						# find which image the user originally voted for
-		# 						if result[0] and reaction.emoji == '🇦':
-		# 							vote_position = 'A'
-		# 						elif result[1] and reaction.emoji == '🇧':
-		# 							vote_position = 'B'
-		# 						elif (result[0] and reaction.emoji == '🇧') or (result[1] and reaction.emoji == '🇦'):
-		# 							# send the user a warning if their vote was for the wrong image
-		# 							embed_title = 'Invalid Vote'
-		# 							embed_description = 'You have previously voted for the other image, please remove your vote before attempting to vote again.'
-		# 							embed = await generate_embed('red', embed_title, embed_description)
-		# 							# send embed to the user via dm
-		# 							await user_channel.send(embed=embed)
-		# 							await action_log(f'invalid vote in match by {user.display_name}')
-		# 							return
-		# 						else:
-		# 							# send the user a warning if their vote broke any other rules
-		# 							embed_title = 'Invalid Vote'
-		# 							embed_description = 'You attempted to react to a match poll with an invalid emoji.'
-		# 							embed = await generate_embed('red', embed_title, embed_description)
-		# 							# send embed to the user via dm
-		# 							await user_channel.send(embed=embed)
-		# 							await action_log(f'invalid vote in match by {user.display_name}')
-		# 							return
-		# 						# generate vote removal embed
-		# 						embed_title = 'Vote Removal'
-		# 						embed_description = f'Your vote for **image {vote_position}** has been removed.'
-		# 						embed = await generate_embed('yellow', embed_title, embed_description)
-		# 						# remove vote from postgresql
-		# 						query = f'DELETE FROM votes WHERE user_id = {user.id} AND match_id = {match_id}'
-		# 						await execute_sql(query)
-		# 						connect.conn.commit()
-		# 						await action_log('vote removed from database')
-		# 						if not config.TESTING:
-		# 							# update participant stats
-		# 							query = f'UPDATE participants SET match_votes = {match_votes - 1}, lb_points = {lb_points - 10} WHERE user_id = {user.id}'
-		# 							await execute_sql(query)
-		# 							connect.conn.commit()
-		# 							await action_log('participant stats updated')
-		# 						# send embed to the user via dm
-		# 						await user_channel.send(embed=embed)
-		# 						return
-		# 					return
-		# 				# find which image the user voted for
-		# 				if reaction.emoji == '🇦':
-		# 					vote_position = 'A'
-		# 					query = f'INSERT INTO votes (user_id, match_id, a_vote) VALUES ({user.id}, {match_id}, True)'
-		# 				elif reaction.emoji == '🇧':
-		# 					vote_position = 'B'
-		# 					query = f'INSERT INTO votes (user_id, match_id, b_vote) VALUES ({user.id}, {match_id}, True)'
-		# 				else:
-		# 					await action_log('no vote position specified')
-		# 					return
-		# 				# add vote info to postgresql via the above queries
-		# 				await execute_sql(query)
-		# 				connect.conn.commit()
-		# 				await action_log('vote inserted into database')
-
-		# 				vote_streak_bonus = 0
-		# 				# check to see if the user's last vote was within 48 hours
-		# 				streak_kept = False
-		# 				try:
-		# 					if unvoted_match_start_time is None:
-		# 						streak_kept = True
-		# 					elif time.time() <= unvoted_match_start_time + 172800:
-		# 						streak_kept = True
-		# 				except TypeError:
-		# 					await action_log('ERROR - unvoted_match_start_time caused a TypeError')
-
-		# 				if streak_kept:
-		# 					# check to see if the user's streak was incremented at least 23 hours ago
-		# 					if time.time() >= last_vote_streak_time + 82800:
-		# 						# increment the user's vote streak
-		# 						vote_streak += 1
-		# 						last_vote_streak_time = time.time()
-		# 						# check to see if the user has voted at least 2 days in a row
-		# 						if vote_streak >= 2:
-		# 							if vote_streak < len(config.VOTE_STREAK_BONUSES):
-		# 								vote_streak_bonus = config.VOTE_STREAK_BONUSES[int(vote_streak - 1)]
-		# 								last_vote_streak_time = time.time()
-		# 							else:
-		# 								vote_streak_bonus = config.VOTE_STREAK_BONUSES[-1]
-		# 								last_vote_streak_time = time.time()
-		# 						# check to see if this is the user's longest vote streak
-		# 						if vote_streak > longest_vote_streak:
-		# 							longest_vote_streak = vote_streak
-		# 				else:
-		# 					vote_streak = 1
-		# 					last_vote_streak_time = time.time()
-
-		# 				if not config.TESTING:
-		# 					# update participant vote count, lb_points, and vote streak
-		# 					query = f'UPDATE participants SET match_votes = {match_votes + 1}, lb_points = {lb_points + 10 + vote_streak_bonus}, vote_streak = {vote_streak}, longest_vote_streak = {longest_vote_streak}, unvoted_match_start_time = NULL, last_vote_streak_time = {last_vote_streak_time} WHERE user_id = {user.id}'
-		# 					await execute_sql(query)
-		# 					connect.conn.commit()
-		# 					await action_log('participant stats updated')
-
-		# 				# send vote confirmation to the user via dm
-		# 				embed_title = 'Vote Confirmation'
-		# 				if vote_streak == 1:
-		# 					vote_streak_string = '1 day'
-		# 				else:
-		# 					vote_streak_string = f'{vote_streak} days'
-		# 				embed_description = f'Your vote for **image {vote_position}** has been confirmed. If you\'d like to change your vote, remove this vote by using the same emoji.\n\nYou have earned **10 points** for voting!'
-		# 				if vote_streak_bonus > 0:
-		# 					embed_description += f'\nYour new voting streak is `{vote_streak_string}`, next streak available in `23 hours`.\nYou have earned **{vote_streak_bonus} bonus points** for increasing your voting streak!'
-		# 				else:
-		# 					# calculate seconds until the user's next voting streak
-		# 					try:
-		# 						next_streak_seconds = int(last_vote_streak_time) + 82800 - round(time.time())
-		# 						if round(next_streak_seconds / (60 * 60)) > 1:
-		# 							# round to the nearest hour
-		# 							next_streak_string = f'{round(next_streak_seconds / (60 * 60))} hours'
-		# 						elif round(next_streak_seconds / 60) > 0:
-		# 							# round to the nearest minute
-		# 							next_streak_string = f'{round(next_streak_seconds / 60)} minutes'
-		# 						else:
-		# 							# there was some kind of error
-		# 							await action_log('CRITICAL ERROR - next_streak_seconds was negative')
-		# 							return
-		# 					except TypeError:
-		# 						await action_log('ERROR - next_streak_seconds caused a TypeError')
-		# 						next_streak_string = '`N/A`'
-
-		# 					embed_description += f'\nYour current voting streak is `{vote_streak_string}`, next streak available in `{next_streak_string}`.'
-		# 				embed = await generate_embed('green', embed_title, embed_description)
-		# 				await user_channel.send(embed=embed)
-		# 				await action_log('vote confirmation sent to user')
-		# 		return
-
-			# points leaderboard (overall)
-			if message.embeds[0].title == 'Overall Points Leaderboard':
-				if not user.bot:
+				# points leaderboard (overall)
+				if message.embeds[0].title == 'Overall Points Leaderboard':
 					# remove the user's reaction from the bot
-					await reaction.remove(user)
+					await message.remove_reaction(emoji, user)
 					await action_log(f'reaction added to leaderboard by {user.display_name}')
 
 					try:
@@ -3194,12 +2996,12 @@ async def on_reaction_add(reaction, user):
 						lb_page = 1
 
 					# check to see which emoji was used
-					if reaction.emoji == '⬅️':
+					if emoji == '⬅️':
 						# previous page
 						if lb_page == 1:
 							return
 						lb_page -= 1
-					elif reaction.emoji == '🔅':
+					elif emoji == '🔅':
 						# jump to self
 						query = f'WITH cte_lb_rank AS (SELECT user_id, RANK () OVER (ORDER BY lb_points DESC) lb_rank FROM participants) SELECT lb_rank FROM cte_lb_rank WHERE user_id = {user.id}'
 						await execute_sql(query)
@@ -3207,7 +3009,7 @@ async def on_reaction_add(reaction, user):
 						if result is not None:
 							user_rank = result[0]
 							lb_page = ceil(user_rank / 10)
-					elif reaction.emoji == '➡️':
+					elif emoji == '➡️':
 						lb_page += 1
 
 					# update the embed description
@@ -3223,7 +3025,7 @@ async def on_reaction_add(reaction, user):
 					# iterate through the participants in the database
 					for entry in results:
 						# initialize variables for the member and their info
-						member = message.guild.get_member(entry[0])
+						member = guild.get_member(entry[0])
 						lb_points = entry[1]
 						lb_rank = entry[2]
 
@@ -3254,7 +3056,14 @@ async def on_reaction_add(reaction, user):
 
 					embed = await generate_embed('blue', embed_title, embed_description)
 					await message.edit(embed=embed)
-				return
+					return
+	return
+
+# client event triggers on any discord reaction add
+@client.event
+async def on_reaction_add(reaction, user):
+	# create variable for base message
+	message = reaction.message
 
 	if message.nonce is not None:
 		# act on template confirmations for split matches
