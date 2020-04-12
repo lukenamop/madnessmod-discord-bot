@@ -2,7 +2,7 @@ praw
 prawcore
 psycopg2
 requests
-iso8601==0.1.11
+iso8601
 git+https://github.com/Rapptz/discord.py
 git+https://github.com/takluyver/Unidecode.git
 -e git+http://github.com/russ-/pychallonge#egg=pychallonge
