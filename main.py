@@ -506,12 +506,8 @@ async def on_message(message):
 		if creator:
 			# find the CAH Pings role
 			cah_pings_role = message.guild.get_role(664238054260736040)
-			# make the CAH Pings role mentionable
-			await cah_pings_role.edit(mentionable=True)
 			# mention the CAH Pings role
 			await message.channel.send(f'{cah_pings_role.mention} -  If this message didn\'t ping you and you want to get pinged for future CAH games, type `-role cah pings` in this channel!')
-			# make the CAH Pings role unmentionable
-			await cah_pings_role.edit(mentionable=False)
 			await action_log('CAH Pings role notified')
 		return
 
@@ -1191,12 +1187,10 @@ async def on_message(message):
 					vote_pings_role = match_channel.guild.get_role(600356303033860106)
 					if match_is_final:
 						verified_role = match_channel.guild.get_role(599354132771504128)
-						await verified_role.edit(mentionable=True)
 						await match_channel.send(f'Vote in the final!\n{verified_role.mention} @everyone')
-						await verified_role.edit(mentionable=False)
 					else:
 						if not config.TESTING:
-							await match_channel.send(f'{vote_pings_role.mention} @here')
+							await match_channel.send(f'Vote in this match!\n{vote_pings_role.mention}')
 						else:
 							await match_channel.send('This is just a test match, not pinging `Vote Pings` or `here`.')
 
@@ -1786,7 +1780,7 @@ async def on_message(message):
 						elif member2 is None:
 							await match_channel.send(f'Please DM each other to find a 30 minute window to complete your match. When you\'re both available, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. Good luck!\n{member1.mention} @{participant2}')
 						else:
-							await match_channel.send(f'Please DM each other to find a 30 minute window to complete your match. When you\'re both available, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. Good luck!\n@{member1.mention} {member2.mention}')
+							await match_channel.send(f'Please DM each other to find a 30 minute window to complete your match. When you\'re both available, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. Good luck!\n{member1.mention} {member2.mention}')
 						total_created += 1
 						if config.TESTING:
 							break
@@ -2688,9 +2682,7 @@ async def on_message(message):
 			vote_pings_role = message.channel.guild.get_role(600356303033860106)
 			if match_is_final:
 				verified_role = message.channel.guild.get_role(599354132771504128)
-				await verified_role.edit(mentionable=True)
 				await message.channel.send(f'Vote in the final!\n{verified_role.mention} @everyone')
-				await verified_role.edit(mentionable=False)
 			else:
 				if not config.TESTING:
 					await message.channel.send(f'{vote_pings_role.mention} @here')
