@@ -1190,7 +1190,7 @@ async def on_message(message):
 						await match_channel.send(f'Vote in the final!\n{verified_role.mention} @everyone')
 					else:
 						if not config.TESTING:
-							await match_channel.send(f'Vote in this match!\n{vote_pings_role.mention}')
+							await match_channel.send(f'Vote in this match!\n@here')
 						else:
 							await match_channel.send('This is just a test match, not pinging `Vote Pings` or `here`.')
 
