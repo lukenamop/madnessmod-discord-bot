@@ -1184,14 +1184,15 @@ async def on_message(message):
 					embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
 					await match_channel.send(embed=embed)
 
-					vote_pings_role = match_channel.guild.get_role(600356303033860106)
 					if match_is_final:
 						verified_role = match_channel.guild.get_role(599354132771504128)
-						await match_channel.send(f'Vote in the final!\n{verified_role.mention} @everyone')
+						await match_channel.send(f'Vote in the final! @everyone {verified_role.mention}')
 					else:
 						if not config.TESTING:
-							duel_mod_role = match_channel.guild.get_role(599996020171997206)
-							await match_channel.send(f'Voting has started, please mention `Vote Pings` to let them know!\n{duel_mod_role.mention}')
+							vote_pings_role = match_channel.guild.get_role(705420253957718098)
+							await match_channel.send(f'Voting has started in a new match, come vote! {vote_pings_role.mention}')
+							# duel_mod_role = match_channel.guild.get_role(599996020171997206)
+							# await match_channel.send(f'Voting has started, please mention `Vote Pings` to let them know! {duel_mod_role.mention}')
 						else:
 							await match_channel.send('This is just a test match, not pinging `Vote Pings` or `here`.')
 
@@ -2680,13 +2681,15 @@ async def on_message(message):
 			embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
 			await message.channel.send(embed=embed)
 
-			vote_pings_role = message.channel.guild.get_role(600356303033860106)
 			if match_is_final:
 				verified_role = message.channel.guild.get_role(599354132771504128)
-				await message.channel.send(f'Vote in the final!\n{verified_role.mention} @everyone')
+				await message.channel.send(f'Vote in the final! @everyone {verified_role.mention}')
 			else:
 				if not config.TESTING:
-					await message.channel.send(f'{vote_pings_role.mention} @here')
+					vote_pings_role = message.channel.guild.get_role(705420253957718098)
+					await message.channel.send(f'Voting has started in a new match, come vote! {vote_pings_role.mention}')
+					# duel_mod_role = message.channel.guild.get_role(599996020171997206)
+					# await message.channel.send(f'Voting has started, please mention `Vote Pings` to let them know! {duel_mod_role.mention}')
 				else:
 					await message.channel.send('This is just a test match, not pinging `Vote Pings` or `here`.')
 
