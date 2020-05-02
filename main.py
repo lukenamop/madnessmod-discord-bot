@@ -1189,8 +1189,7 @@ async def on_message(message):
 						await match_channel.send(f'Vote in the final! @everyone {verified_role.mention}')
 					else:
 						if not config.TESTING:
-							vote_pings_role = match_channel.guild.get_role(705420253957718098)
-							await match_channel.send(f'Voting has started in a new match, come vote! {vote_pings_role.mention}')
+							await match_channel.send('-mrole 705420253957718098 voting has started in a new match, come vote!')
 							# duel_mod_role = match_channel.guild.get_role(599996020171997206)
 							# await match_channel.send(f'Voting has started, please mention `Vote Pings` to let them know! {duel_mod_role.mention}')
 						else:
@@ -2686,8 +2685,7 @@ async def on_message(message):
 				await message.channel.send(f'Vote in the final! @everyone {verified_role.mention}')
 			else:
 				if not config.TESTING:
-					vote_pings_role = message.channel.guild.get_role(705420253957718098)
-					await message.channel.send(f'Voting has started in a new match, come vote! {vote_pings_role.mention}')
+					await message.channel.send('-mrole 705420253957718098 voting has started in a new match, come vote!')
 					# duel_mod_role = message.channel.guild.get_role(599996020171997206)
 					# await message.channel.send(f'Voting has started, please mention `Vote Pings` to let them know! {duel_mod_role.mention}')
 				else:
