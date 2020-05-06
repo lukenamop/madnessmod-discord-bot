@@ -99,9 +99,11 @@ async def continue_polls():
 	if len(results) > 0:
 		for result in results:
 			# initialize important variables
-			db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url, poll_start_time, poll_extensions = result
-			poll_start_time = int(result[6])
-			poll_extensions = int(result[7])
+			db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url, poll_start_time, poll_extensions, poll_message_id, channel_id = result
+			poll_start_time = int(poll_start_time)
+			poll_extensions = int(poll_extensions)
+			poll_message_id = int(poll_message_id)
+			channel_id = int(channel_id)
 			# these two will be used later
 			time_now = int(time.time())
 			extension_embed_message = None
@@ -155,6 +157,11 @@ async def continue_polls():
 			# 	await execute_sql(query)
 			# 	total_votes = connect.crsr.fetchone()[0]
 
+			# get the match channel
+			match_channel = client.get_channel(channel_id)
+			# fetch the poll message
+			message = await match_channel.fetch_message(poll_message_id)
+
 			# clear poll messages from the channel
 			await message.delete()
 			if extension_embed_message is not None:
@@ -185,21 +192,21 @@ async def continue_polls():
 			# alert match channel of poll results
 			try:
 				if (a_meme == 1 and winning_image == 'A') or (a_meme == 2 and winning_image == 'B'):
-					winner = base_channel.guild.get_member(u1_id)
+					winner = match_channel.guild.get_member(u1_id)
 					winning_image_url = u1_image_url
-					loser = base_channel.guild.get_member(u2_id)
+					loser = match_channel.guild.get_member(u2_id)
 				elif (a_meme == 2 and winning_image == 'A') or (a_meme == 1 and winning_image == 'B'):
-					winner = base_channel.guild.get_member(u2_id)
+					winner = match_channel.guild.get_member(u2_id)
 					winning_image_url = u2_image_url
-					loser = base_channel.guild.get_member(u1_id)
+					loser = match_channel.guild.get_member(u1_id)
 				elif winning_image == 'tie':
 					# find participants' images
 					if a_meme == 1:
-						a_member = base_channel.guild.get_member(u1_id)
-						b_member = base_channel.guild.get_member(u2_id)
+						a_member = match_channel.guild.get_member(u1_id)
+						b_member = match_channel.guild.get_member(u2_id)
 					elif a_meme == 2:
-						a_member = base_channel.guild.get_member(u2_id)
-						b_member = base_channel.guild.get_member(u1_id)
+						a_member = match_channel.guild.get_member(u2_id)
+						b_member = match_channel.guild.get_member(u1_id)
 					else:
 						await action_log('winner not found or a_meme not defined in postgresql')
 						return
@@ -209,7 +216,7 @@ async def continue_polls():
 					# for swiss-style tournaments:
 					# embed_description = f'This match has ended in a {a_votes} - {b_votes} tie! {a_member.mention} submitted image A and {b_member.mention} submitted image B.'
 					embed = await generate_embed('pink', embed_title, embed_description)
-					await base_channel.send(embed=embed)
+					await match_channel.send(embed=embed)
 					await action_log('match ended in a tie, results sent in match channel')
 
 					if not config.TESTING:
@@ -226,9 +233,9 @@ async def continue_polls():
 					a_channel = await a_member.create_dm()
 					b_channel = await b_member.create_dm()
 					embed_title = 'Match Results - Tie'
-					embed_description = f'Your match has ended in {base_channel.mention}, you have earned **{votes * 2} points** for the **{votes} votes** for your meme. Please contact your opponent for a rematch!'
+					embed_description = f'Your match has ended in {match_channel.mention}, you have earned **{votes * 2} points** for the **{votes} votes** for your meme. Please contact your opponent for a rematch!'
 					# for swiss-style tournaments:
-					# embed_description = f'Your match has ended in {base_channel.mention}, you have earned **{votes * 2} points** for the **{votes} votes** for your meme.'
+					# embed_description = f'Your match has ended in {match_channel.mention}, you have earned **{votes * 2} points** for the **{votes} votes** for your meme.'
 					embed = await generate_embed('pink', embed_title, embed_description)
 					await a_channel.send(embed=embed)
 					await action_log('a_member dm sent')
@@ -246,17 +253,17 @@ async def continue_polls():
 				# # update winner's round role
 				# i = 0
 				# while i <= (len(config.ROUND_ROLE_IDS) - 1):
-				# 	round_role = base_channel.guild.get_role(config.ROUND_ROLE_IDS[i])
+				# 	round_role = match_channel.guild.get_role(config.ROUND_ROLE_IDS[i])
 				# 	if round_role in winner.roles:
 				# 		# remove previous round role
 				# 		await winner.remove_roles(round_role)
 				# 		# check to see if winner is a finalist
 				# 		if round_role.id == 634853736144961580:
 				# 			# add winning role
-				# 			await winner.add_roles(base_channel.guild.get_role(config.WINNER_ROLE_ID))
+				# 			await winner.add_roles(match_channel.guild.get_role(config.WINNER_ROLE_ID))
 				# 		else:
 				# 			# add next round role
-				# 			await winner.add_roles(base_channel.guild.get_role(config.ROUND_ROLE_IDS[i + 1]))
+				# 			await winner.add_roles(match_channel.guild.get_role(config.ROUND_ROLE_IDS[i + 1]))
 				# 		i = len(config.ROUND_ROLE_IDS)
 				# 	i += 1
 				# await action_log('winner round role updated')
@@ -275,7 +282,7 @@ async def continue_polls():
 			embed_title = 'Voting Results'
 			embed_description = f'Congratulations to {winner.mention}, you have won this match with image {winning_image}! Thank you for participating {loser.mention}. The final score was {a_votes} - {b_votes}.'
 			embed = await generate_embed('pink', embed_title, embed_description)
-			await base_channel.send(embed=embed)
+			await match_channel.send(embed=embed)
 			await action_log('voting results sent in match channel')
 
 			if not config.TESTING:
@@ -296,11 +303,11 @@ async def continue_polls():
 				await action_log('winning image sent to archive channel')
 
 			# check to see if challonge info is in the channel topic
-			if base_channel.topic is not None:
-				tournament_shortcut = base_channel.topic.split('/')[0]
-				match_id = base_channel.topic.split('/')[1]
-				player1_id = base_channel.topic.split('/')[2]
-				player2_id = base_channel.topic.split('/')[3]
+			if match_channel.topic is not None:
+				tournament_shortcut = match_channel.topic.split('/')[0]
+				match_id = match_channel.topic.split('/')[1]
+				player1_id = match_channel.topic.split('/')[2]
+				player2_id = match_channel.topic.split('/')[3]
 
 				# find player names from challonge
 				player1_name = tourney_manager.show_participant(tournament_shortcut, player1_id)['name']
@@ -321,7 +328,7 @@ async def continue_polls():
 			# build winner dm
 			winner_channel = await winner.create_dm()
 			embed_title = 'Match Results - Win'
-			embed_description = f'Your match has ended in {base_channel.mention}, you have earned **100 points** for winning the match and **{winning_votes * 2} points** for the **{winning_votes} votes** for your meme.'
+			embed_description = f'Your match has ended in {match_channel.mention}, you have earned **100 points** for winning the match and **{winning_votes * 2} points** for the **{winning_votes} votes** for your meme.'
 			embed = await generate_embed('pink', embed_title, embed_description)
 			await winner_channel.send(embed=embed)
 			await action_log('winner dm sent')
@@ -329,7 +336,7 @@ async def continue_polls():
 			# build loser dm
 			loser_channel = await loser.create_dm()
 			embed_title = 'Match Results - Loss'
-			embed_description = f'Your match has ended in {base_channel.mention}, you have earned **{losing_votes * 2} points** for the {losing_votes} votes for your meme.'
+			embed_description = f'Your match has ended in {match_channel.mention}, you have earned **{losing_votes * 2} points** for the {losing_votes} votes for your meme.'
 			embed = await generate_embed('pink', embed_title, embed_description)
 			await loser_channel.send(embed=embed)
 			await action_log('loser dm sent')
@@ -353,52 +360,6 @@ async def continue_polls():
 @continue_polls.before_loop
 async def before_continue_polls():
 	await client.wait_until_ready()
-
-# async def continue_polls(client):
-# 	await action_log('checking for active polls')
-# 	match_category = client.get_channel(config.MATCH_CATEGORY_ID)
-# 	connected_polls = 0
-# 	# iterate through all channels in the matches category
-# 	for match_channel in match_category.channels:
-# 		if match_channel.last_message_id is not None:
-# 			# fetch the most recent message in the channel
-# 			try:
-# 				message = await match_channel.fetch_message(match_channel.last_message_id)
-# 			except:
-# 				await action_log('ERROR - last_message_id was invalid')
-# 				message = None
-				
-# 			if message is not None:
-# 				if len(message.embeds) == 1:
-# 					# check to see if there is an active poll in the channel
-# 					if message.embeds[0].title == 'Match Voting' or message.embeds[0].title == 'Extending Voting Time':
-# 						if message.embeds[0].title == 'Match Voting':
-# 							# delete the poll message
-# 							await match_channel.purge(limit=1)
-# 							await action_log(f'old poll deleted in #{match_channel.name}')
-# 						elif message.embeds[0].title == 'Extending Voting Time':
-# 							# delete the poll extension and base poll messages
-# 							await match_channel.purge(limit=2)
-# 							await action_log(f'old poll deleted in #{match_channel.name}')
-
-# 						query = f'SELECT poll_start_time FROM matches WHERE channel_id = {match_channel.id} ORDER BY db_id DESC'
-# 						await execute_sql(query)
-# 						result = connect.crsr.fetchone()
-# 						poll_start_time = int(result[0])
-
-# 						# build voting embed
-# 						embed_title = 'Match Voting'
-# 						embed_description = '**Vote for your favorite!** Results will be sent to this channel when voting ends.\n🇦 First image\n🇧 Second image'
-# 						embed = await generate_embed('pink', embed_title, embed_description, timestamp=poll_start_time)
-# 						await match_channel.send(embed=embed, nonce='poll')
-# 						await action_log(f'new poll sent in #{match_channel.name}')
-# 						connected_polls += 1
-
-# 	if connected_polls == 0:
-# 		await action_log('no active polls')
-# 	else:
-# 		await action_log(f'safely relaunched {connected_polls} active polls')
-# 	return connected_polls
 
 # client event triggers on any discord message
 @client.event
@@ -456,6 +417,8 @@ async def on_message(message):
 					query = f'UPDATE matches SET poll_message_id = {poll_message_id} WHERE db_id = {db_id}'
 					await execute_sql(query)
 					connet.conn.commit()
+
+				return
 				
 				# # calculate the time since starting the poll
 				# time_since_start = time_now - poll_start_time
