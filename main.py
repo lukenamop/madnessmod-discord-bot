@@ -369,292 +369,32 @@ async def on_message(message):
 		# check messages from MadnessMod
 		if message.author.id == client.user.id:
 			if message.nonce == 'poll':
-				# get base match channel
-				base_channel = message.channel
-
 				# add reactions to match poll in match channel
 				await message.add_reaction('🇦')
 				await message.add_reaction('🇧')
 				await action_log('added reactions to poll message')
 
 				# pull the match data
-				query = f'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url, poll_start_time, poll_extensions, poll_message_id FROM matches WHERE channel_id = {message.channel.id} ORDER BY db_id DESC'
+				query = f'SELECT db_id FROM matches WHERE channel_id = {message.channel.id} ORDER BY db_id DESC'
 				await execute_sql(query)
 				result = connect.crsr.fetchone()
 				# initialize important variables
-				db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url, poll_start_time, poll_extensions, poll_message_id = result
-				try:
-					poll_message_id = int(poll_message_id)
-				except:
-					poll_message_id = None
-				try:
-					poll_start_time = int(poll_start_time)
-				except:
-					poll_start_time = None
-				poll_extensions = int(poll_extensions)
-				# these two will be used later
-				time_now = round(time.time())
-				extension_embed_message = None
+				db_id = result[0]
 
-				if poll_start_time is None:
-					# set poll start time in the match database
-					poll_start_time = time_now
-					query = f'UPDATE matches SET poll_start_time = {poll_start_time} WHERE db_id = {db_id}'
+				# set poll start time in the match database
+				query = f'UPDATE matches SET poll_start_time = {time_now}, poll_message_id = {message.id} WHERE db_id = {db_id}'
+				await execute_sql(query)
+				connect.conn.commit()
+				await action_log(f'poll_start_time set in database ({poll_start_time})')
+
+				if not config.TESTING:
+					# set participants' unvoted_match_start_time to the current time (if not already set)
+					query = f'UPDATE participants SET unvoted_match_start_time = {time_now} WHERE unvoted_match_start_time IS NULL AND user_id != {u1_id} AND user_id != {u2_id}'
 					await execute_sql(query)
 					connect.conn.commit()
-					await action_log(f'poll_start_time set in database ({poll_start_time})')
-
-					if not config.TESTING:
-						# set participants' unvoted_match_start_time to the current time (if not already set)
-						query = f'UPDATE participants SET unvoted_match_start_time = {time_now} WHERE unvoted_match_start_time IS NULL AND user_id != {u1_id} AND user_id != {u2_id}'
-						await execute_sql(query)
-						connect.conn.commit()
-						await action_log('unvoted_match_start_time set for valid participants')
-
-				if poll_message_id is None:
-					# set poll message id in the match database
-					poll_message_id = message.id
-					query = f'UPDATE matches SET poll_message_id = {poll_message_id} WHERE db_id = {db_id}'
-					await execute_sql(query)
-					connet.conn.commit()
-
+					await action_log('unvoted_match_start_time set for valid participants')
+					
 				return
-				
-				# # calculate the time since starting the poll
-				# time_since_start = time_now - poll_start_time
-				# # calculate the time left in the poll
-				# remaining_poll_time = config.BASE_POLL_TIME + (config.POLL_EXTENSION_TIME * poll_extensions) - time_since_start
-				# while remaining_poll_time <= 0 and poll_extensions < config.MAX_POLL_EXTENSIONS:
-				# 	poll_extensions += 1
-				# 	# calculate the time left in the poll if an extension was added
-				# 	remaining_poll_time = config.BASE_POLL_TIME + (config.POLL_EXTENSION_TIME * poll_extensions) - time_since_start
-
-				# if remaining_poll_time > 0:
-				# 	# create a poll extension message if there should be one
-				# 	if poll_extensions > 0:
-				# 		embed_title = 'Extending Voting Time'
-				# 		if poll_extensions == 1:
-				# 			embed_description = f'The deadline for this poll has been extended by 1 hour.\n*Voting for this match will be extended until there are 15 or more votes, max {config.MAX_POLL_EXTENSIONS} extensions.*'
-				# 		else:
-				# 			embed_description = f'The deadline for this poll has been extended by {poll_extensions} hours.\n*Voting for this match will be extended until there are 15 or more votes, max {config.MAX_POLL_EXTENSIONS} extensions.*'
-				# 		embed = await generate_embed('pink', embed_title, embed_description)
-				# 		extension_embed_message = await message.channel.send(embed=embed)
-
-				# 	# sleep for time remaining in poll
-				# 	await asyncio.sleep(remaining_poll_time)
-				# 	await action_log('waking back up in match channel and checking vote counts')
-				# 	# check vote count
-				# 	query = f'SELECT COUNT(*) FROM votes WHERE match_id = {db_id} AND a_vote = True'
-				# 	await execute_sql(query)
-				# 	a_votes = connect.crsr.fetchone()[0]
-				# 	query = f'SELECT COUNT(*) FROM votes WHERE match_id = {db_id} AND b_vote = True'
-				# 	await execute_sql(query)
-				# 	b_votes = connect.crsr.fetchone()[0]
-				# 	total_votes = a_votes + b_votes
-
-				# 	while (total_votes < 15 or a_votes == b_votes) and poll_extensions < config.MAX_POLL_EXTENSIONS:
-				# 		poll_extensions += 1
-				# 		await action_log(f'only {total_votes} votes, extending poll time, this is extension number {poll_extensions}')
-
-				# 		query = f'UPDATE matches SET poll_extensions = {poll_extensions} WHERE db_id = {db_id}'
-				# 		await execute_sql(query)
-				# 		connect.conn.commit()
-				# 		await action_log('poll extensions updated in database')
-
-				# 		embed_title = 'Extending Voting Time'
-				# 		if poll_extensions == 1:
-				# 			embed_description = f'The deadline for this poll has been extended by 1 hour.\n*Voting for this match will be extended until there are 15 or more votes, max {config.MAX_POLL_EXTENSIONS} extensions.*'
-				# 			embed = await generate_embed('pink', embed_title, embed_description)
-				# 			extension_embed_message = await message.channel.send(embed=embed)
-				# 		else:
-				# 			embed_description = f'The deadline for this poll has been extended by {poll_extensions} hours.\n*Voting for this match will be extended until there are 15 or more votes, max {config.MAX_POLL_EXTENSIONS} extensions.*'
-				# 			embed = await generate_embed('pink', embed_title, embed_description)
-				# 			await extension_embed_message.edit(embed=embed)
-
-				# 		# sleep for 1 hour (config.POLL_EXTENSION_TIME)
-				# 		await asyncio.sleep(config.POLL_EXTENSION_TIME)
-				# 		await action_log('waking back up in match channel and checking vote counts')
-				# 		# check vote count
-				# 		query = f'SELECT COUNT(*) FROM votes WHERE match_id = {db_id}'
-				# 		await execute_sql(query)
-				# 		total_votes = connect.crsr.fetchone()[0]
-
-				# # clear poll messages from the channel
-				# await message.delete()
-				# if extension_embed_message is not None:
-				# 	await extension_embed_message.delete()
-
-				# # check how many votes image A got
-				# query = f'SELECT COUNT(*) FROM votes WHERE match_id = {db_id} AND a_vote = True'
-				# await execute_sql(query)
-				# a_votes = connect.crsr.fetchone()[0]
-				# # check how many votes image B got
-				# query = f'SELECT COUNT(*) FROM votes WHERE match_id = {db_id} AND b_vote = True'
-				# await execute_sql(query)
-				# b_votes = connect.crsr.fetchone()[0]
-
-				# # find winning image
-				# if a_votes > b_votes:
-				# 	winning_image = 'A'
-				# 	winning_votes = a_votes
-				# 	losing_votes = b_votes
-				# elif b_votes > a_votes:
-				# 	winning_image = 'B'
-				# 	winning_votes = b_votes
-				# 	losing_votes = a_votes
-				# elif a_votes == b_votes:
-				# 	winning_image = 'tie'
-				# 	votes = a_votes
-
-				# # alert match channel of poll results
-				# try:
-				# 	if (a_meme == 1 and winning_image == 'A') or (a_meme == 2 and winning_image == 'B'):
-				# 		winner = base_channel.guild.get_member(u1_id)
-				# 		winning_image_url = u1_image_url
-				# 		loser = base_channel.guild.get_member(u2_id)
-				# 	elif (a_meme == 2 and winning_image == 'A') or (a_meme == 1 and winning_image == 'B'):
-				# 		winner = base_channel.guild.get_member(u2_id)
-				# 		winning_image_url = u2_image_url
-				# 		loser = base_channel.guild.get_member(u1_id)
-				# 	elif winning_image == 'tie':
-				# 		# find participants' images
-				# 		if a_meme == 1:
-				# 			a_member = base_channel.guild.get_member(u1_id)
-				# 			b_member = base_channel.guild.get_member(u2_id)
-				# 		elif a_meme == 2:
-				# 			a_member = base_channel.guild.get_member(u2_id)
-				# 			b_member = base_channel.guild.get_member(u1_id)
-				# 		else:
-				# 			await action_log('winner not found or a_meme not defined in postgresql')
-				# 			return
-				# 		# build tie embed for match channel
-				# 		embed_title = 'Voting Results'
-				# 		embed_description = f'This match has ended in a {a_votes} - {b_votes} tie! {a_member.mention} submitted image A and {b_member.mention} submitted image B. Participants, please contact each other and find a time to rematch.'
-				# 		# for swiss-style tournaments:
-				# 		# embed_description = f'This match has ended in a {a_votes} - {b_votes} tie! {a_member.mention} submitted image A and {b_member.mention} submitted image B.'
-				# 		embed = await generate_embed('pink', embed_title, embed_description)
-				# 		await base_channel.send(embed=embed)
-				# 		await action_log('match ended in a tie, results sent in match channel')
-
-				# 		if not config.TESTING:
-				# 			# update participant stats in the databsee (tie)
-				# 			query = f'UPDATE participants SET total_votes_for = total_votes_for + {votes}, lb_points = lb_points + {votes * 2} WHERE user_id = {u1_id}'
-				# 			await execute_sql(query)
-				# 			connect.conn.commit()
-				# 			query = f'UPDATE participants SET total_votes_for = total_votes_for + {votes}, lb_points = lb_points + {votes * 2} WHERE user_id = {u2_id}'
-				# 			await execute_sql(query)
-				# 			connect.conn.commit()
-				# 			await action_log('participant stats updated')
-
-				# 		# build winner dm
-				# 		a_channel = await a_member.create_dm()
-				# 		b_channel = await b_member.create_dm()
-				# 		embed_title = 'Match Results - Tie'
-				# 		embed_description = f'Your match has ended in {base_channel.mention}, you have earned **{votes * 2} points** for the **{votes} votes** for your meme. Please contact your opponent for a rematch!'
-				# 		# for swiss-style tournaments:
-				# 		# embed_description = f'Your match has ended in {base_channel.mention}, you have earned **{votes * 2} points** for the **{votes} votes** for your meme.'
-				# 		embed = await generate_embed('pink', embed_title, embed_description)
-				# 		await a_channel.send(embed=embed)
-				# 		await action_log('a_member dm sent')
-				# 		await b_channel.send(embed=embed)
-				# 		await action_log('b_member dm sent')
-				# 		return
-				# 	else:
-				# 		await action_log('winner not found or a_meme not defined in postgresql')
-				# 		return
-				# except AttributeError:
-				# 	await action_log('member from existing match was not found in the guild')
-				# 	return
-
-				# if not config.TESTING:
-				# 	# # update winner's round role
-				# 	# i = 0
-				# 	# while i <= (len(config.ROUND_ROLE_IDS) - 1):
-				# 	# 	round_role = base_channel.guild.get_role(config.ROUND_ROLE_IDS[i])
-				# 	# 	if round_role in winner.roles:
-				# 	# 		# remove previous round role
-				# 	# 		await winner.remove_roles(round_role)
-				# 	# 		# check to see if winner is a finalist
-				# 	# 		if round_role.id == 634853736144961580:
-				# 	# 			# add winning role
-				# 	# 			await winner.add_roles(base_channel.guild.get_role(config.WINNER_ROLE_ID))
-				# 	# 		else:
-				# 	# 			# add next round role
-				# 	# 			await winner.add_roles(base_channel.guild.get_role(config.ROUND_ROLE_IDS[i + 1]))
-				# 	# 		i = len(config.ROUND_ROLE_IDS)
-				# 	# 	i += 1
-				# 	# await action_log('winner round role updated')
-
-				# 	# update participant stats in the database
-				# 	query = f'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1, total_votes_for = total_votes_for + {winning_votes}, lb_points = lb_points + {(winning_votes * 2) + 100} WHERE user_id = {winner.id}'
-				# 	await execute_sql(query)
-				# 	connect.conn.commit()
-				# 	await action_log('winner participant stats updated')
-				# 	query = f'UPDATE participants SET total_matches = total_matches + 1, match_losses = match_losses + 1, total_votes_for = total_votes_for + {losing_votes}, lb_points = lb_points + {losing_votes * 2} WHERE user_id = {loser.id}'
-				# 	await execute_sql(query)
-				# 	connect.conn.commit()
-				# 	await action_log('loser participant stats updated')
-
-				# # build notification embed for match channel (win/loss)
-				# embed_title = 'Voting Results'
-				# embed_description = f'Congratulations to {winner.mention}, you have won this match with image {winning_image}! Thank you for participating {loser.mention}. The final score was {a_votes} - {b_votes}.'
-				# embed = await generate_embed('pink', embed_title, embed_description)
-				# await base_channel.send(embed=embed)
-				# await action_log('voting results sent in match channel')
-
-				# if not config.TESTING:
-				# 	# build winning image embed for match archive
-				# 	embed_title = functions.escape_underscores(winner.display_name)
-				# 	embed_description = datetime.date.today().strftime("%B %d")
-				# 	embed_link = winning_image_url
-				# 	embed = await generate_embed('pink', embed_title, embed_description, attachment=embed_link)
-				# 	winning_meme_message = await client.get_channel(config.ARCHIVE_CHAN_ID).send(embed=embed)
-				# 	await winning_meme_message.add_reaction('<:GG:649057795643277342>')
-				# 	await winning_meme_message.add_reaction('<:imfine:645785769461547018>')
-				# 	await winning_meme_message.add_reaction('🏅')
-				# 	await winning_meme_message.add_reaction('🧠')
-				# 	await winning_meme_message.add_reaction('🔥')
-				# 	await action_log('winning image sent to archive channel')
-
-				# # check to see if challonge info is in the channel topic
-				# if base_channel.topic is not None:
-				# 	tournament_shortcut = base_channel.topic.split('/')[0]
-				# 	match_id = base_channel.topic.split('/')[1]
-				# 	player1_id = base_channel.topic.split('/')[2]
-				# 	player2_id = base_channel.topic.split('/')[3]
-
-				# 	# find player names from challonge
-				# 	player1_name = tourney_manager.show_participant(tournament_shortcut, player1_id)['name']
-				# 	player2_name = tourney_manager.show_participant(tournament_shortcut, player2_id)['name']
-
-				# 	# figure out which challonge player won
-				# 	if player1_name == winner.display_name:
-				# 		# player1 wins, 1-0
-				# 		scores_csv = '1-0'
-				# 		tourney_manager.set_match_winner(tournament_shortcut, int(match_id), scores_csv, int(player1_id))
-				# 		await action_log(f'{player1_name} set as match winner in challonge')
-				# 	elif player2_name == winner.display_name:
-				# 		# player2 wins, 0-1
-				# 		scores_csv = '0-1'
-				# 		tourney_manager.set_match_winner(tournament_shortcut, int(match_id), scores_csv, int(player2_id))
-				# 		await action_log(f'{player2_name} set as match winner in challonge')
-
-				# # build winner dm
-				# winner_channel = await winner.create_dm()
-				# embed_title = 'Match Results - Win'
-				# embed_description = f'Your match has ended in {base_channel.mention}, you have earned **100 points** for winning the match and **{winning_votes * 2} points** for the **{winning_votes} votes** for your meme.'
-				# embed = await generate_embed('pink', embed_title, embed_description)
-				# await winner_channel.send(embed=embed)
-				# await action_log('winner dm sent')
-
-				# # build loser dm
-				# loser_channel = await loser.create_dm()
-				# embed_title = 'Match Results - Loss'
-				# embed_description = f'Your match has ended in {base_channel.mention}, you have earned **{losing_votes * 2} points** for the {losing_votes} votes for your meme.'
-				# embed = await generate_embed('pink', embed_title, embed_description)
-				# await loser_channel.send(embed=embed)
-				# await action_log('loser dm sent')
-				# return
 
 			if message.channel.id == config.TEMPLATE_CHAN_ID and message.nonce == 'template':
 				# add reactions to messages in the #templates channel
