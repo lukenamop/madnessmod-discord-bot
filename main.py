@@ -340,7 +340,11 @@ async def end_polls():
 			embed = await generate_embed('pink', embed_title, embed_description)
 			await loser_channel.send(embed=embed)
 			await action_log('loser dm sent')
-			return
+			
+			# update the match in the database
+			query = f'UPDATE matches SET completed = True WHERE db_id = {db_id}'
+			await execute_sql(query)
+			connect.conn.commit()
 
 	# check to see when the next poll is supposed to end
 	query = 'SELECT poll_start_time FROM matches WHERE completed = False AND poll_start_time IS NOT NULL ORDER BY poll_start_time ASC LIMIT 1'
@@ -393,7 +397,6 @@ async def on_message(message):
 					await execute_sql(query)
 					connect.conn.commit()
 					await action_log('unvoted_match_start_time set for valid participants')
-
 				return
 
 			if message.channel.id == config.TEMPLATE_CHAN_ID and message.nonce == 'template':
@@ -1326,6 +1329,28 @@ async def on_message(message):
 			# send activematches embed
 			await message.channel.send(embed=embed)
 			await action_log('activematches sent to duel-mods')
+			return
+
+		# '.activepolls' command (duel-mods)
+		if message_content == '.activepolls':
+			query = f'SELECT channel_id, poll_start_time FROM matches WHERE poll_start_time IS NOT NULL AND completed = False'
+			# check to make sure there are active polls
+			if results is not None:
+				# build activepolls embed
+				embed_description = ''
+				total = 0
+				for poll in results:
+					channel = client.get_channel(poll[0])
+					if channel is not None:
+						embed_description += channel.mention + '\n'
+						total += 1
+				embed_description += f'**Total active polls: `{total}`**'
+			else:
+				embed_description = '**Total active polls: `0`**'
+			embed = await generate_embed('green', embed_title, embed_description)
+			# send activepolls embed
+			await message.channel.send(embed=embed)
+			await action_log('activepolls sent to duel-mods')
 			return
 
 		# '.reconnect' command (duel-mods)
