@@ -2939,6 +2939,7 @@ async def on_raw_reaction_add(payload):
 						# admin commands
 						embed_description = """**📎 Admin Commands**
 							\n`.activematches` - displays all currently active matches
+							\n`.activepolls` - displays all currently active polls
 							\n`.clearmatches` - clears all matches and votes from the database
 							\n`.clearsignups` - clears all signups from the database
 							\n`.reconnect` - forces the bot to reconnect to its database
