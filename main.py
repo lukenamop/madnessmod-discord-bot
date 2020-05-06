@@ -92,7 +92,7 @@ async def execute_sql(query, attempt=1):
 @tasks.loop()
 async def continue_polls():
 	# find all ended polls
-	query = f'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url, poll_start_time, poll_extensions FROM matches WHERE poll_start_time <= {int(time.time()) - config.BASE_POLL_TIME}'
+	query = f'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url, poll_start_time, poll_extensions, poll_message_id FROM matches WHERE completed = False AND poll_start_time IS NOT NULL AND poll_start_time <= {int(time.time()) - config.BASE_POLL_TIME}'
 	await execute_sql(query)
 	results = connect.crsr.fetchall()
 	if len(results) > 0:
@@ -335,7 +335,7 @@ async def continue_polls():
 			return
 
 	# check to see when the next poll is supposed to end
-	query = 'SELECT poll_start_time FROM matches ORDER BY poll_start_time ASC LIMIT 1'
+	query = 'SELECT poll_start_time FROM matches WHERE completed = False AND poll_start_time IS NOT NULL ORDER BY poll_start_time ASC LIMIT 1'
 	await execute_sql(query)
 	result = connect.crsr.fetchone()
 	if result is None:
@@ -416,16 +416,20 @@ async def on_message(message):
 				await action_log('added reactions to poll message')
 
 				# pull the match data
-				query = f'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url, poll_start_time, poll_extensions FROM matches WHERE channel_id = {message.channel.id} ORDER BY db_id DESC'
+				query = f'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url, poll_start_time, poll_extensions, poll_message_id FROM matches WHERE channel_id = {message.channel.id} ORDER BY db_id DESC'
 				await execute_sql(query)
 				result = connect.crsr.fetchone()
 				# initialize important variables
-				db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url, poll_start_time, poll_extensions = result
+				db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url, poll_start_time, poll_extensions, poll_message_id = result
 				try:
-					poll_start_time = int(result[6])
+					poll_message_id = int(poll_message_id)
+				except:
+					poll_message_id = None
+				try:
+					poll_start_time = int(poll_start_time)
 				except:
 					poll_start_time = None
-				poll_extensions = int(result[7])
+				poll_extensions = int(poll_extensions)
 				# these two will be used later
 				time_now = round(time.time())
 				extension_embed_message = None
@@ -444,6 +448,13 @@ async def on_message(message):
 						await execute_sql(query)
 						connect.conn.commit()
 						await action_log('unvoted_match_start_time set for valid participants')
+
+				if poll_message_id is None:
+					# set poll message id in the match database
+					poll_message_id = message.id
+					query = f'UPDATE matches SET poll_message_id = {poll_message_id} WHERE db_id = {db_id}'
+					await execute_sql(query)
+					connet.conn.commit()
 				
 				# calculate the time since starting the poll
 				time_since_start = time_now - poll_start_time
