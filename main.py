@@ -346,7 +346,7 @@ async def continue_polls():
 		if sleep_time < 5:
 			sleep_time = 5
 	# sleep before looping again
-	await action_log(f'{len(ended_polls)} polls ended, continue_polls sleeping for {functions.time_string(sleep_time)}')
+	await action_log(f'{len(results)} polls ended, continue_polls sleeping for {functions.time_string(sleep_time)}')
 	await asyncio.sleep(sleep_time)
 
 # make sure the client is ready before starting the continue_polls task
