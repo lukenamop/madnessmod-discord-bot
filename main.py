@@ -196,7 +196,7 @@ async def end_polls():
 			# check how many votes image B got
 			query = 'SELECT COUNT(*) FROM votes WHERE match_id = %s AND b_vote = True'
 			q_args = [db_id]
-			await execute_sql(query)
+			await execute_sql(query, q_args)
 			b_votes = connect.crsr.fetchone()[0]
 
 			# find winning image
