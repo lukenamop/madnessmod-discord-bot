@@ -413,6 +413,7 @@ async def on_message(message):
 				result = connect.crsr.fetchone()
 				# initialize important variables
 				db_id = result[0]
+				time_now = int(time.time())
 
 				# set poll start time in the match database
 				query = 'UPDATE matches SET poll_start_time = %s, poll_message_id = %s WHERE db_id = %s'
