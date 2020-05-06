@@ -35,14 +35,18 @@ def db_connect():
 	# conn.commit()
 	# crsr.execute("""UPDATE matches SET completed = False WHERE channel_id = 707341586454937781""")
 	# conn.commit()
-	crsr.execute("""ALTER TABLE matches ALTER COLUMN completed DROP DEFAULT""")
-	conn.commit()
-	crsr.execute("""ALTER TABLE matches ALTER COLUMN completed SET DEFAULT False""")
-	conn.commit()
+	# crsr.execute("""ALTER TABLE matches ALTER COLUMN completed DROP DEFAULT""")
+	# conn.commit()
+	# crsr.execute("""ALTER TABLE matches ALTER COLUMN completed SET DEFAULT False""")
+	# conn.commit()
 
 	crsr.execute("""SELECT COUNT(*) FROM matches""")
 	result = crsr.fetchone()
 	print('matches: ' + str(result[0]))
+
+	crsr.execute("""SELECT COUNT(*) FROM matches WHERE completed = False""")
+	result = crsr.fetchone()
+	print('matches in progress: ' + str(result[0]))
 
 	crsr.execute("""SELECT COUNT(*) FROM votes""")
 	result = crsr.fetchone()
