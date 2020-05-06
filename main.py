@@ -89,9 +89,9 @@ async def execute_sql(query, attempt=1):
 			await action_log('connection failed')
 	return
 
-# continue_polls task
+# end_polls task
 @tasks.loop()
-async def continue_polls():
+async def end_polls():
 	# find all ended polls
 	query = f'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url, poll_start_time, poll_extensions, poll_message_id FROM matches WHERE completed = False AND poll_start_time IS NOT NULL AND poll_start_time <= {int(time.time()) - config.BASE_POLL_TIME}'
 	await execute_sql(query)
@@ -353,12 +353,12 @@ async def continue_polls():
 		if sleep_time < 5:
 			sleep_time = 5
 	# sleep before looping again
-	await action_log(f'{len(results)} polls ended, continue_polls sleeping for {functions.time_string(sleep_time)}')
+	await action_log(f'{len(results)} polls ended, end_polls sleeping for {functions.time_string(sleep_time)}')
 	await asyncio.sleep(sleep_time)
 
-# make sure the client is ready before starting the continue_polls task
-@continue_polls.before_loop
-async def before_continue_polls():
+# make sure the client is ready before starting the end_polls task
+@end_polls.before_loop
+async def before_end_polls():
 	await client.wait_until_ready()
 
 # client event triggers on any discord message
@@ -393,7 +393,7 @@ async def on_message(message):
 					await execute_sql(query)
 					connect.conn.commit()
 					await action_log('unvoted_match_start_time set for valid participants')
-					
+
 				return
 
 			if message.channel.id == config.TEMPLATE_CHAN_ID and message.nonce == 'template':
@@ -1963,23 +1963,6 @@ async def on_message(message):
 		if message_content == '.dbstats':
 			return
 
-		# '.restartpolls' command (duel-mods)
-		if message_content == '.restartpolls':
-			try:
-				connected_polls = await continue_polls(client)
-			except:
-				embed_title = 'Poll Restart Failed'
-				embed_description = 'Please contact lukenamop#0918.'
-				embed = await generate_embed('red', embed_title, embed_description)
-				await message.channel.send(embed=embed)
-				return
-
-			embed_title = 'Polls Successfully Restarted'
-			embed_description = f'`{connected_polls}` polls successfully restarted.'
-			embed = await generate_embed('green', embed_title, embed_description)
-			await message.channel.send(embed=embed)
-			return
-
 		# '.help' command (duel-mods)
 		if message_content == '.help':
 			# build base embed
@@ -3310,9 +3293,9 @@ async def on_ready():
 		print('Currently in TESTING MODE')
 	print('------')
 
-	# start continue_polls task
-	if continue_polls.get_task() is None:
-		continue_polls.start()
+	# start end_polls task
+	if end_polls.get_task() is None:
+		end_polls.start()
 	return
 
 # starts instance of discord bot client
