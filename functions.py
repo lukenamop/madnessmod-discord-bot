@@ -26,3 +26,28 @@ def format_lb_entry(lb_page, lb_rank, member_name, lb_points):
 			return f'**`{lb_rank}:` {escape_underscores(member_name)}** - {lb_points} points\n'
 	else:
 		return f'**`{lb_rank}:` {escape_underscores(member_name)}** - {lb_points} points\n'
+
+# function to translate seconds into hours/minutes/seconds
+def time_string(seconds):
+	m, s = divmod(seconds, 60)
+	h, m = divmod(m, 60)
+	d, h = divmod(h, 24)
+	if d > 0:
+		if h > 0:
+			return f'{int(d)}d {int(h)}h'
+		else:
+			return f'{int(d)}d'
+	elif h > 0:
+		if m > 0:
+			return f'{int(h)}h {int(m)}m'
+		else:
+			return f'{int(h)}h'
+	elif m > 0:
+		if s > 0:
+			return f'{int(m)}m {int(s)}s'
+		else:
+			return f'{int(m)}m'
+	elif s > 0:
+		return f'{int(s)}s'
+	else:
+		return 'invalid'
