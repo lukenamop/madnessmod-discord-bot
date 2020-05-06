@@ -82,16 +82,20 @@ def execute_sql(query, q_args=None, attempt=1):
 
 	except connect.psycopg2.errors.InFailedSqlTransaction as error:
 		reconnect_and_retry = True
-		await action_log(f'failed SQL transaction, reconnecting automatically: {type(error)}: {error}')
+		reason = f'failed SQL transaction, reconnecting automatically: {type(error)}: {error}'
+		await action_log(reason)
 	except connect.psycopg2.OperationalError as error:
 		reconnect_and_retry = True
-		await action_log(f'failed SQL transaction, reconnecting automatically: {type(error)}: {error}')
+		reason = f'failed SQL transaction, reconnecting automatically: {type(error)}: {error}'
+		await action_log(reason)
 	except connect.psycopg2.InterfaceError as error:
 		reconnect_and_retry = True
-		await action_log(f'failed SQL transaction, reconnecting automatically: {type(error)}: {error}')
+		reason = f'failed SQL transaction, reconnecting automatically: {type(error)}: {error}'
+		await action_log(reason)
 	except connect.psycopg2.DatabaseError as error:
 		reconnect_and_retry = True
-		await action_log(f'failed SQL transaction, reconnecting automatically: {type(error)}: {error}')
+		reason = f'failed SQL transaction, reconnecting automatically: {type(error)}: {error}'
+		await action_log(reason)
 
 	# reconnect to the database and try to re-execute the SQL query
 	if reconnect_and_retry:
