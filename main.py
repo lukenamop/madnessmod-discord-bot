@@ -1334,6 +1334,9 @@ async def on_message(message):
 		# '.activepolls' command (duel-mods)
 		if message_content == '.activepolls':
 			query = f'SELECT channel_id, poll_start_time FROM matches WHERE poll_start_time IS NOT NULL AND completed = False'
+			await execute_sql(query)
+			results = connect.crsr.fetchall()
+			embed_title = 'Active Polls'
 			# check to make sure there are active polls
 			if results is not None:
 				# build activepolls embed
