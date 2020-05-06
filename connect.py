@@ -31,6 +31,14 @@ def db_connect():
 	# crsr.execute("""UPDATE participants SET match_votes = 0, lb_points = 0, longest_vote_streak = 0, vote_streak = 0, last_vote_streak_time = 0, unvoted_match_start_time = NULL""")
 	# conn.commit()
 
+	crsr.execute("""ALTER TABLE matches ADD completed BOOLEAN DEFAULT True""")
+	conn.commit()
+	crsr.execute("""UPDATE matches SET completed = False WHERE channel_id = 707341586454937781""")
+	conn.commit()
+	crsr.execute("""ALTER TABLE matches ALTER COLUMN completed DROP DEFAULT""")
+	conn.commit()
+	crsr.execute("""ALTER TABLE matches ALTER COLUMN completed SET DEFAULT False""")
+
 	crsr.execute("""SELECT COUNT(*) FROM matches""")
 	result = crsr.fetchone()
 	print('matches: ' + str(result[0]))
@@ -91,6 +99,7 @@ db_connect()
 # poll_extensions NUMERIC(1) DEFAULT 0
 # is_final BOOLEAN DEFAULT False
 # cancelled BOOLEAN DEFAULT False
+# completed BOOLEAN DEFAULT False
 
 # TABLE votes
 # db_id SERIAL PRIMARY KEY

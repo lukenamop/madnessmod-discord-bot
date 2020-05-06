@@ -155,12 +155,7 @@ async def on_message(message):
 				await execute_sql(query)
 				result = connect.crsr.fetchone()
 				# initialize important variables
-				db_id = result[0]
-				u1_id = result[1]
-				u2_id = result[2]
-				a_meme = result[3]
-				u1_image_url = result[4]
-				u2_image_url = result[5]
+				db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url, poll_start_time, poll_extensions = result
 				try:
 					poll_start_time = int(result[6])
 				except:
