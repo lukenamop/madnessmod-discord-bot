@@ -93,7 +93,7 @@ async def execute_sql(query, attempt=1):
 @tasks.loop()
 async def end_polls():
 	# find all ended polls
-	query = f'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url, poll_start_time, poll_extensions, poll_message_id FROM matches WHERE completed = False AND poll_start_time IS NOT NULL AND poll_start_time <= {int(time.time()) - config.BASE_POLL_TIME}'
+	query = f'SELECT db_id, u1_id, u2_id, a_meme, u1_image_url, u2_image_url, poll_start_time, poll_extensions, poll_message_id, channel_id FROM matches WHERE completed = False AND poll_start_time IS NOT NULL AND poll_start_time <= {int(time.time()) - config.BASE_POLL_TIME}'
 	await execute_sql(query)
 	results = connect.crsr.fetchall()
 	if len(results) > 0:
