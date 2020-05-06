@@ -66,7 +66,7 @@ async def generate_embed(color, title, description, attachment=None, timestamp=N
 	return embed
 
 # function to safely execute SQL queries, with error handling for closed connections
-def execute_sql(query, q_args=None, attempt=1):
+async def execute_sql(query, q_args=None, attempt=1):
 	reconnect_and_retry = False
 	try:
 		if q_args is None:
@@ -82,20 +82,16 @@ def execute_sql(query, q_args=None, attempt=1):
 
 	except connect.psycopg2.errors.InFailedSqlTransaction as error:
 		reconnect_and_retry = True
-		reason = f'failed SQL transaction, reconnecting automatically: {type(error)}: {error}'
-		await action_log(reason)
+		await action_log(f'failed SQL transaction, reconnecting automatically: {type(error)}: {error}')
 	except connect.psycopg2.OperationalError as error:
 		reconnect_and_retry = True
-		reason = f'failed SQL transaction, reconnecting automatically: {type(error)}: {error}'
-		await action_log(reason)
+		await action_log(f'failed SQL transaction, reconnecting automatically: {type(error)}: {error}')
 	except connect.psycopg2.InterfaceError as error:
 		reconnect_and_retry = True
-		reason = f'failed SQL transaction, reconnecting automatically: {type(error)}: {error}'
-		await action_log(reason)
+		await action_log(f'failed SQL transaction, reconnecting automatically: {type(error)}: {error}')
 	except connect.psycopg2.DatabaseError as error:
 		reconnect_and_retry = True
-		reason = f'failed SQL transaction, reconnecting automatically: {type(error)}: {error}'
-		await action_log(reason)
+		await action_log(f'failed SQL transaction, reconnecting automatically: {type(error)}: {error}')
 
 	# reconnect to the database and try to re-execute the SQL query
 	if reconnect_and_retry:
