@@ -31,9 +31,6 @@ def db_connect():
 	# crsr.execute("""UPDATE participants SET match_votes = 0, lb_points = 0, longest_vote_streak = 0, vote_streak = 0, last_vote_streak_time = 0, unvoted_match_start_time = NULL""")
 	# conn.commit()
 
-	crsr.execute("""UPDATE matches SET poll_start_time = 1588860060, poll_message_id = 707955214568915025 WHERE channel_id = 707949864683831318""")
-	conn.commit()
-
 	crsr.execute("""SELECT COUNT(*) FROM matches""")
 	result = crsr.fetchone()
 	print('matches: ' + str(result[0]))
