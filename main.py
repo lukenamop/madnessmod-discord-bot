@@ -412,7 +412,7 @@ async def on_message(message):
 				await execute_sql(query, q_args)
 				result = connect.crsr.fetchone()
 				# initialize important variables
-				db_id, u1_id, u2_id = result[0]
+				db_id, u1_id, u2_id = result
 				time_now = int(time.time())
 
 				# set poll start time in the match database
