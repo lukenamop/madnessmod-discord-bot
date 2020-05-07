@@ -407,12 +407,12 @@ async def on_message(message):
 				await action_log('added reactions to poll message')
 
 				# pull the match data
-				query = 'SELECT db_id FROM matches WHERE channel_id = %s ORDER BY db_id DESC'
+				query = 'SELECT db_id, u1_id, u2_id FROM matches WHERE channel_id = %s ORDER BY db_id DESC'
 				q_args = [message.channel.id]
 				await execute_sql(query, q_args)
 				result = connect.crsr.fetchone()
 				# initialize important variables
-				db_id = result[0]
+				db_id, u1_id, u2_id = result[0]
 				time_now = int(time.time())
 
 				# set poll start time in the match database
@@ -420,7 +420,7 @@ async def on_message(message):
 				q_args = [time_now, message.id, db_id]
 				await execute_sql(query, q_args)
 				connect.conn.commit()
-				await action_log(f'poll_start_time set in database ({poll_start_time})')
+				await action_log(f'poll_start_time set in database ({time_now})')
 
 				if not config.TESTING:
 					# set participants' unvoted_match_start_time to the current time (if not already set)
