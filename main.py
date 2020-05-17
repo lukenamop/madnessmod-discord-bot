@@ -125,8 +125,6 @@ async def end_polls():
 			# these two will be used later
 			time_now = int(time.time())
 			extension_embed_message = None
-
-			await action_log('check 1')
 			
 			# # create a poll extension message if there should be one
 			# if poll_extensions > 0:
@@ -183,7 +181,6 @@ async def end_polls():
 
 			# get the match channel
 			match_channel = client.get_channel(channel_id)
-			await action_log('check 2')
 
 			try:
 				# fetch the poll message
@@ -195,8 +192,6 @@ async def end_polls():
 			except:
 				await action_log('could not find poll message')
 
-			await action_log('check 3')
-
 			# check how many votes image A got
 			query = 'SELECT COUNT(*) FROM votes WHERE match_id = %s AND a_vote = True'
 			q_args = [db_id]
@@ -207,8 +202,6 @@ async def end_polls():
 			q_args = [db_id]
 			await execute_sql(query, q_args)
 			b_votes = connect.crsr.fetchone()[0]
-			
-			await action_log('check 4')
 
 			# find winning image
 			if a_votes > b_votes:
