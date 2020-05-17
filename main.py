@@ -456,12 +456,6 @@ async def on_message(message):
 				await message.add_reaction('👎')
 				return
 			if message.channel.id == config.DUELMODS_CHAN_ID and message.nonce is not None:
-				if message.nonce.startswith('tempcon'):
-					# add reactions to normal template confirmations in #duel-mods
-					await message.add_reaction('<:check_mark:637394596472815636>')
-					await message.add_reaction('<:x_mark:637394622200676396>')
-					return
-			if message.channel.id == config.DUELMODS_CHAN_ID and message.nonce is not None:
 				if message.nonce.startswith('spltemp'):
 					# add reactions to split template confirmations in #duel-mods
 					await message.add_reaction('<:check_mark:637394596472815636>')
@@ -2190,8 +2184,10 @@ async def on_message(message):
 				embed_description = f'Here\'s a random template! This template was submitted by {template_author.display_name}'
 				embed = await generate_embed('green', embed_title, embed_description, attachment=template_url)
 				nonce = f'tempcon{channel_id}'
-				await duelmods_chan.send(embed=embed, nonce=nonce)
 				await duelmods_chan.send(message.author.mention)
+				tempcon_message = await duelmods_chan.send(embed=embed, nonce=nonce)
+				await tempcon_message.add_reaction('<:check_mark:637394596472815636>')
+				await tempcon_message.add_reaction('<:x_mark:637394622200676396>')
 				await action_log('template confirmation sent to duel-mods')
 				return
 			else:
@@ -3261,7 +3257,7 @@ async def on_reaction_add(reaction, user):
 					await message.delete()
 					# build template accepted embed
 					embed_title = 'Template Accepted'
-					embed_description = 'The randomized template was accepted and sent in the match channel!'
+					embed_description = f'The randomized template was accepted and sent in the match channel: {match_channel.mention}'
 					embed = await generate_embed('green', embed_title, embed_description)
 					await message.channel.send(embed=embed)
 					await action_log('randomized template accepted')
