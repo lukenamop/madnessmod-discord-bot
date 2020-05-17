@@ -383,8 +383,8 @@ async def end_polls():
 		sleep_time = config.BASE_POLL_TIME
 	else:
 		sleep_time = (int(result[0]) + config.BASE_POLL_TIME) - int(time.time()) + 5
-		if sleep_time < 5:
-			sleep_time = 5
+	if sleep_time < 5:
+		sleep_time = 5
 	# sleep before looping again
 	await action_log(f'{len(results)} polls ended, end_polls sleeping for {functions.time_string(sleep_time)}')
 	await asyncio.sleep(sleep_time)
