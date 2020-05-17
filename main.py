@@ -125,6 +125,8 @@ async def end_polls():
 			# these two will be used later
 			time_now = int(time.time())
 			extension_embed_message = None
+
+			await action_log('check 1')
 			
 			# # create a poll extension message if there should be one
 			# if poll_extensions > 0:
@@ -184,10 +186,14 @@ async def end_polls():
 			# fetch the poll message
 			message = await match_channel.fetch_message(poll_message_id)
 
+			await action_log('check 2')
+
 			# clear poll messages from the channel
 			await message.delete()
 			if extension_embed_message is not None:
 				await extension_embed_message.delete()
+
+			await action_log('check 3')
 
 			# check how many votes image A got
 			query = 'SELECT COUNT(*) FROM votes WHERE match_id = %s AND a_vote = True'
