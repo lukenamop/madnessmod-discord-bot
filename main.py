@@ -270,6 +270,12 @@ async def end_polls():
 					await action_log('a_member dm sent')
 					await b_channel.send(embed=embed)
 					await action_log('b_member dm sent')
+			
+					# update the match in the database
+					query = 'UPDATE matches SET completed = True WHERE db_id = %s'
+					q_args = [db_id]
+					await execute_sql(query, q_args)
+					connect.conn.commit()
 					return
 				else:
 					await action_log('winner not found or a_meme not defined in postgresql')
