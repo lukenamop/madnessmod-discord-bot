@@ -3429,7 +3429,7 @@ async def on_reaction_add(reaction, user):
 @client.event
 async def on_ready():
 	# change discord bot client presence to 'playing Meme Madness' 
-	await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name='Meme Madness'))
+	await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name='Meme Madness at https://discord.gg/vV4uvQW'))
 
 	# send ready confirmation to command line
 	print(f'Logged in as {client.user.name} - {client.user.id}')
