@@ -3184,7 +3184,7 @@ async def on_reaction_add(reaction, user):
 					await message.delete()
 					# build template accepted embed
 					embed_title = 'Template Accepted'
-					embed_description = 'The randomized template was accepted. It has been stored in the database.'
+					embed_description = f'The randomized template was accepted. It has been stored in the database: {match_channel.mention}'
 					embed = await generate_embed('green', embed_title, embed_description)
 					await message.channel.send(embed=embed)
 					await action_log('randomized template accepted')
@@ -3208,7 +3208,7 @@ async def on_reaction_add(reaction, user):
 					await message.delete()
 					# build template rejected embed
 					embed_title = 'Template Rejected'
-					embed_description = 'The randomized template was rejected. Please try `.splitmatch` again.'
+					embed_description = f'The randomized template was rejected. Please try `.splitmatch` again: {match_channel.mention}'
 					embed = await generate_embed('red', embed_title, embed_description)
 					await message.channel.send(embed=embed)
 					await action_log('randomized template rejected')
@@ -3404,7 +3404,7 @@ async def on_reaction_add(reaction, user):
 					await message.delete()
 					# build template rejected embed
 					embed_title = 'Template Rejected'
-					embed_description = 'The randomized template was rejected. Please try `.startmatch` again.'
+					embed_description = f'The randomized template was rejected. Please try `.startmatch` again: {match_channel.mention}'
 					embed = await generate_embed('red', embed_title, embed_description)
 					await message.channel.send(embed=embed)
 					await action_log('randomized template rejected')
