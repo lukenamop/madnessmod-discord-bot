@@ -2750,14 +2750,14 @@ async def on_message(message):
 
 			# send final memes to match channel
 			# submission embed for image A
-			embed_description = 'Image A'
+			embed_title = 'Image A'
 			embed_link = u1_link
-			embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
+			embed = await generate_embed('green', embed_title, '', attachment=embed_link)
 			await message.channel.send(embed=embed)
 			# submission embed for image B
-			embed_description = 'Image B'
+			embed_title = 'Image B'
 			embed_link = u2_link
-			embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
+			embed = await generate_embed('green', embed_title, '', attachment=embed_link)
 			await message.channel.send(embed=embed)
 
 			if match_is_final:
