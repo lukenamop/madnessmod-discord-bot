@@ -1953,13 +1953,13 @@ async def on_message(message):
 			# check to be sure only admin user uses command
 			if message.author.id == 324273473360887808:
 				# make adjustments
-				query = 'UPDATE participants SET total_matches = total_matches - 6, match_wins = match_wins - 6, total_votes_for = total_votes_for - 120 WHERE user_id = 533294498755641379'
+				query = 'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1 WHERE user_id = 533294498755641379'
 				await execute_sql(query)
-				query = 'UPDATE participants SET total_matches = total_matches - 6, match_losses = match_losses - 6, total_votes_for = total_votes_for - 100 WHERE user_id = 401148623829598208'
+				query = 'UPDATE participants SET total_matches = total_matches + 1, match_losses = match_losses + 1 WHERE user_id = 401148623829598208'
 				await execute_sql(query)
-				query = 'UPDATE participants SET total_matches = total_matches - 3, match_wins = match_wins - 3, total_votes_for = total_votes_for - 50 WHERE user_id = 393137628083388430'
+				query = 'UPDATE participants SET total_matches = total_matches + 1, match_wins = match_wins + 1 WHERE user_id = 393137628083388430'
 				await execute_sql(query)
-				query = 'UPDATE participants SET total_matches = total_matches - 3, match_losses = match_losses - 3, total_votes_for = total_votes_for - 40 WHERE user_id = 637750464317751306'
+				query = 'UPDATE participants SET total_matches = total_matches + 1, match_losses = match_losses + 1 WHERE user_id = 637750464317751306'
 				await execute_sql(query)
 				connect.conn.commit()
 
