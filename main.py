@@ -1930,23 +1930,47 @@ async def on_message(message):
 		# 		return
 		# 	return
 
-		# # '.clearlbpoints' command (duel-mods)
-		# if message_content == '.clearlbpoints':
-		# 	# check to be sure only admin user uses command
-		# 	if message.author.id in config.ADMIN_IDS:
-		# 		# reset participant lb_points to default in database
-		# 		query = 'UPDATE participants SET lb_points = DEFAULT'
-		# 		await execute_sql(query)
-		# 		connect.conn.commit()
+		# '.clearlbpoints' command (duel-mods)
+		if message_content == '.clearlbpoints':
+			# check to be sure only admin user uses command
+			if message.author.id in config.ADMIN_IDS:
+				# reset participant lb_points to default in database
+				query = 'UPDATE participants SET lb_points = DEFAULT'
+				await execute_sql(query)
+				connect.conn.commit()
 
-		# 		# build clearlbpoints confirmation embed
-		# 		embed_title = 'Leaderboard Points Reset'
-		# 		embed_description = 'All participants\' leaderboard points were cleared from the database.'
-		# 		embed = await generate_embed('green', embed_title, embed_description)
-		# 		await message.channel.send(embed=embed)
-		# 		await action_log('leaderboard points cleared by duel-mods')
-		# 		return
-		# 	return
+				# build clearlbpoints confirmation embed
+				embed_title = 'Leaderboard Points Reset'
+				embed_description = 'All participants\' leaderboard points were cleared from the database.'
+				embed = await generate_embed('green', embed_title, embed_description)
+				await message.channel.send(embed=embed)
+				await action_log('leaderboard points cleared by duel-mods')
+				return
+			return
+
+		# '.adminfix' command (duel-mods)
+		if message_content == '.adminfix':
+			# check to be sure only admin user uses command
+			if message.author.id == 324273473360887808:
+				# make adjustments
+				query = 'UPDATE participants SET total_matches = total_matches - 6, match_wins = match_wins - 6, total_votes_for = total_votes_for - 120 WHERE db_id = 533294498755641379'
+				await execute_sql(query)
+				query = 'UPDATE participants SET total_matches = total_matches - 6, match_losses = match_losses - 6, total_votes_for = total_votes_for - 100 WHERE db_id = 401148623829598208'
+				await execute_sql(query)
+				query = 'UPDATE participants SET total_matches = total_matches - 3, match_wins = match_wins - 3, total_votes_for = total_votes_for - 50 WHERE db_id = 393137628083388430'
+				await execute_sql(query)
+				query = 'UPDATE participants SET total_matches = total_matches - 3, match_losses = match_losses - 3, total_votes_for = total_votes_for - 40 WHERE db_id = 637750464317751306'
+				await execute_sql(query)
+				connect.conn.commit()
+
+				# build confirmation embed
+				embed_title = 'Admin Fix Finalized'
+				embed_description = 'Participant stats have been re-adjusted.'
+				embed = await generate_embed('green', embed_title, embed_description)
+				await message.channel.send(embed=embed)
+				await action_log('adminfix command used in duel-mods')
+				return
+			return
 
 		# '.clearsignups' command (duel-mods)
 		if message_content == '.clearsignups':
