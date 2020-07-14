@@ -2826,7 +2826,7 @@ async def on_message(message):
 		# '.testimage' command (contest category)
 		if message_content == '.testimage':
 			file = discord.File('resources/match_frame.png')
-			await channel.send('content', file=file)
+			await message.channel.send('content', file=file)
 			return
 		return
 
