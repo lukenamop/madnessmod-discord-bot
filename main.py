@@ -17,6 +17,10 @@ from time import gmtime
 from time import strftime
 from math import ceil
 
+stream = os.popen('ls')
+output = stream.read()
+print(f'os stream output: {output}')
+
 # import additional files
 import config
 import connect
