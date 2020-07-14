@@ -16,11 +16,12 @@ from unidecode import unidecode
 from time import gmtime
 from time import strftime
 from math import ceil
+from PIL import Image, ImageDraw
 
 # manually install the pychallonge dependency (otherwise: -e git+https://github.com/russ-/pychallonge#egg=pychallonge)
-stream = os.popen('cd pychallonge071420 && python setup.py install')
-output = stream.read()
-# print(f'os stream output: {output}')
+os_stream = os.popen('cd pychallonge071420 && python setup.py install')
+# os_output = os_stream.read()
+# print(f'os stream output: {os_output}')
 
 # import additional files
 import config
@@ -2820,6 +2821,12 @@ async def on_message(message):
 			embed_description = 'The next match has been set as final in the database.'
 			embed = await generate_embed('green', embed_title, embed_description)
 			await message.channel.send(embed=embed)
+			return
+
+		# '.testimage' command (contest category)
+		if message_content == '.testimage':
+			file = discord.File('resources/match_frame.png')
+			await channel.send('content', file=file)
 			return
 		return
 
