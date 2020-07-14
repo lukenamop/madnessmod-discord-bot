@@ -3,7 +3,6 @@ praw
 prawcore
 psycopg2
 requests
-pillow
 git+https://github.com/Rapptz/discord.py
 git+https://github.com/takluyver/Unidecode.git
 -e git+http://github.com/russ-/pychallonge#egg=pychallonge
