@@ -20,7 +20,7 @@ from math import ceil
 # manually install the pychallonge dependency (otherwise: -e git+https://github.com/russ-/pychallonge#egg=pychallonge)
 stream = os.popen('cd pychallonge071420 && python setup.py install')
 output = stream.read()
-print(f'os stream output: {output}')
+# print(f'os stream output: {output}')
 
 # import additional files
 import config
