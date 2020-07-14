@@ -1,4 +1,5 @@
 iso8601==0.1.11
+pillow
 praw
 prawcore
 psycopg2
