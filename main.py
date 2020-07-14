@@ -17,7 +17,7 @@ from time import gmtime
 from time import strftime
 from math import ceil
 
-os.system('pychallonge071420')
+os.system('cd pychallonge071420')
 stream = os.popen('python setup.py install')
 output = stream.read()
 print(f'os stream output: {output}')
