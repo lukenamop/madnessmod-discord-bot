@@ -2881,10 +2881,10 @@ async def on_message(message):
 				draw_member2_name.text((812, 639), member2_display_name, fill='white', font=roboto_font)
 			else:
 				W_difference = 361 - w_2
-				px_per_pt = 12
-				px_change = -int(W_difference / px_per_pt)
-				roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=(55 - px_change))
-				draw_member2_name.text(((812 + px_change), (639 + px_change)), member2_display_name, fill='white', font=roboto_font)
+				px_per_pt = 12.5
+				pt_change = -int(W_difference / px_per_pt)
+				roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=(55 - pt_change))
+				draw_member2_name.text((812, (639 + pt_change)), member2_display_name, fill='white', font=roboto_font)
 
 
 
