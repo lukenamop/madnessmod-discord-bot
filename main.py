@@ -2869,8 +2869,17 @@ async def on_message(message):
 			# add the first mentioned member's username to the image
 			roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=55)
 			draw_member1_name = ImageDraw.Draw(match_frame_source)
-			w_1, h_1 = draw_member1_name.textsize(member1.display_name, font=roboto_font)
-			draw_member1_name.text(((368 - w_1 + 258), 639), member1.display_name, fill='white', font=roboto_font)
+			member1_display_name = member1.display_name
+			w_1, h_1 = draw_member1_name.textsize(member1_display_name, font=roboto_font)
+			if 361 - w_1 >= 0:
+				draw_member1_name.text(((368 - w_1 + 258), 639), member1_display_name, fill='white', font=roboto_font)
+			else:
+				W_difference = 361 - w_1
+				px_per_pt = 13.5
+				pt_change = -int(W_difference / px_per_pt)
+				roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=(55 - pt_change))
+				w_1, h_1 = draw_member1_name.textsize(member1_display_name, font=roboto_font)
+				draw_member1_name.text(((368 - w_1 + 258), 639 + int(pt_change * 0.85)), member1_display_name, fill='white', font=roboto_font)
 
 			# add the second mentioned member's username to the image
 			roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=55)
@@ -2885,16 +2894,6 @@ async def on_message(message):
 				pt_change = -int(W_difference / px_per_pt)
 				roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=(55 - pt_change))
 				draw_member2_name.text((812, (639 + int(pt_change * 0.85))), member2_display_name, fill='white', font=roboto_font)
-
-
-
-			if len(member2_display_name) <= 12:
-				roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=55)
-				draw_member2_name.text((812, 639), member2_display_name, fill='white', font=roboto_font)
-			elif len(member2_display_name) > 12 and len(member2_display_name) <= 14:
-				pass
-			elif len(member2_display_name) > 14 and len(member2_display_name) <= 16:
-				pass
 
 			# ImageDraw.Draw(match_frame_source).text((175, 180), member1.display_name, fill='rgb(255,255,255)', font=font)
 			# ImageDraw.Draw(match_frame_source).text((720, 895), member2.display_name, fill='rgb(255,255,255)', font=font)
