@@ -2884,7 +2884,7 @@ async def on_message(message):
 				px_per_pt = 13
 				pt_change = -int(W_difference / px_per_pt)
 				roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=(55 - pt_change))
-				draw_member2_name.text((812, (639 + int(pt_change * 0.95))), member2_display_name, fill='white', font=roboto_font)
+				draw_member2_name.text((812, (639 + int(pt_change * 0.85))), member2_display_name, fill='white', font=roboto_font)
 
 
 
