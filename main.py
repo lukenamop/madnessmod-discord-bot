@@ -2827,13 +2827,13 @@ async def on_message(message):
 		# '.testimage' command (contest category)
 		if message_content == '.testimage':
 			await message.channel.trigger_typing()
-			
+
 			file = discord.File('resources/match_frame.png')
 			im1 = Image.open('resources/match_frame.png')
 
 			author_avatar = message.author.avatar_url_as(format='png', size=1024)
 			im2 = Image.open(io.BytesIO(await author_avatar.read()))
-			im2.resize(545, 545)
+			im2.resize((545, 545), resample=Image.BICUBIC)
 
 			im1.paste(im2, (175, 265))
 			final_image = io.BytesIO()
