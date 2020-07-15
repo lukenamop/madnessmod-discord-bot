@@ -7,6 +7,7 @@ import time
 import datetime
 import re
 import os
+import io
 import requests
 import random
 import string
@@ -2826,7 +2827,14 @@ async def on_message(message):
 		# '.testimage' command (contest category)
 		if message_content == '.testimage':
 			file = discord.File('resources/match_frame.png')
-			await message.channel.send(file=file)
+			im1 = Image.open('resources/match_frame.png')
+
+			author_avatar = message.author.avatar_url_as(format=png, size=1024)
+			im2 = Image.open(await author_avatar.read())
+
+			im1.paste(im2)
+
+			await message.channel.send(file=im1)
 			return
 		return
 
