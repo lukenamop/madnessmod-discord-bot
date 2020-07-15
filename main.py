@@ -17,7 +17,7 @@ from unidecode import unidecode
 from time import gmtime
 from time import strftime
 from math import ceil
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 # manually install the pychallonge dependency (otherwise: -e git+https://github.com/russ-/pychallonge#egg=pychallonge)
 os_stream = os.popen('cd pychallonge071420 && python setup.py install')
@@ -2834,21 +2834,30 @@ async def on_message(message):
 			except:
 				await message.channel.send('No.')
 				return
-				
-			match_frame = Image.open('resources/match_frame.png')
 
+			# load the match frame from the resources folder
+			match_frame = Image.open('resources/images/match_frame.png')
+
+			# load the mentioned members' avatars and resize them
 			member1_avatar = Image.open(io.BytesIO(await member1.avatar_url_as(format='png', size=1024).read())).resize((545, 545), resample=Image.BICUBIC)
 			member2_avatar = Image.open(io.BytesIO(await member2.avatar_url_as(format='png', size=1024).read())).resize((545, 545), resample=Image.BICUBIC)
 
+			# paste the avatars on the match frame
 			match_frame.paste(member1_avatar, (175, 265))
 			match_frame.paste(member2_avatar, (720, 330))
 
+			# add the mentioned members' usernames to the image
+			font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=20)
+			ImageDraw.draw(match_frame).text((175, 225), member1.display_name, fill='rgb(255,255,255)', font=font)
+			ImageDraw.draw(match_frame).text((720, 900), member2.display_name, fill='rgb(255,255,255)', font=font)
+
+			# save the final image to memory
 			final_image = io.BytesIO()
 			match_frame.save(final_image, format='png')
 			final_image.seek(0)
-
 			final_file = discord.File(final_image, 'match_frame_edited.png')
 
+			# upload the final image back to the channel
 			await message.channel.send(file=final_file)
 			return
 		return
