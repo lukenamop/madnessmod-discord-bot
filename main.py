@@ -2826,6 +2826,8 @@ async def on_message(message):
 
 		# '.testimage' command (contest category)
 		if message_content == '.testimage':
+			await message.channel.trigger_typing()
+			
 			file = discord.File('resources/match_frame.png')
 			im1 = Image.open('resources/match_frame.png')
 
