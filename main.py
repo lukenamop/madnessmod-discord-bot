@@ -2858,13 +2858,13 @@ async def on_message(message):
 			match_frame_transparent = Image.open('resources/images/match_frame_transparent.png')
 
 			# paste the match frame
-			match_frame_source.paste(match_frame_transparent)
+			match_frame_source.paste(match_frame_transparent, mask=match_frame_transparent)
 
 			# load the match frame lines
 			match_frame_lines = Image.open('resources/images/match_frame_lines.png')
 
 			# paste the match frame lines
-			match_frame_source.paste(match_frame_lines)
+			match_frame_source.paste(match_frame_lines, mask=match_frame_lines)
 
 			# # add the mentioned members' usernames to the image
 			# font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=45)
