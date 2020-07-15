@@ -1355,6 +1355,14 @@ async def on_message(message):
 			await message.channel.send(embed=embed)
 			await action_log(f'help query sent to {message.author.display_name}')
 			return
+
+		# '.testmatch' command (DM)
+		if message_content == '.testmatch':
+			# build embed
+			embed_title = 'Match Started'
+			embed_description = 'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.** Here is your template:\nNot sure where to get started? [Use this link on any platform to quickly edit captions: https://kapwi.ng/c/k7OEL0gK](https://kapwi.ng/c/k7OEL0gK)'
+			embed = await generate_embed('yellow', embed_title, embed_description, 'https://cdn.discordapp.com/attachments/622187852121243648/731718539446059068/unknown.png')
+			await message.channel.send(embed=embed)
 		return
 
 	# stats-flex specific commands
