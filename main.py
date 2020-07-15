@@ -2870,10 +2870,10 @@ async def on_message(message):
 			roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=45)
 			draw_member1_name = ImageDraw.Draw(match_frame_source)
 			w_1, h_1 = draw_member1_name.textsize(member1.display_name, font=roboto_font)
-			draw_member1_name.text(((375 - w_1 + 258), 641), member1.display_name, fill='black', font=roboto_font)
+			draw_member1_name.text(((375 - w_1 + 258), 641), member1.display_name, fill='white', font=roboto_font)
 
 			draw_member2_name = ImageDraw.Draw(match_frame_source)
-			draw_member2_name.text((805, 641), member2.display_name, fill='black', font=roboto_font)
+			draw_member2_name.text((805, 641), member2.display_name, fill='white', font=roboto_font)
 
 			# ImageDraw.Draw(match_frame_source).text((175, 180), member1.display_name, fill='rgb(255,255,255)', font=font)
 			# ImageDraw.Draw(match_frame_source).text((720, 895), member2.display_name, fill='rgb(255,255,255)', font=font)
