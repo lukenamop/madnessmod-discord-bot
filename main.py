@@ -2834,7 +2834,7 @@ async def on_message(message):
 
 			im1.paste(im2)
 			final_image = io.BytesIO()
-			img1.save(final_image, format='png')
+			im1.save(final_image, format='png')
 			final_image.seek(0)
 
 			final_file = discord.File(final_image)
