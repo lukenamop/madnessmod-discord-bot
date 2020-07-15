@@ -112,7 +112,8 @@ async def execute_sql(query, q_args=None, attempt=1):
 			await action_log('connection failed')
 	return
 
-async def match_frame_image(member1, member2):
+# function to create a custom match frame image for the start of a match
+async def create_match_frame_image(member1, member2):
 	# make sure the members are accessible and in the guild
 	try:
 		member1_display_name = member1.display_name
@@ -1942,7 +1943,7 @@ async def on_message(message):
 						else:
 							# await match_channel.send(f'Please DM each other to find a 30 minute window to complete your match. When you\'re both available, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. Good luck!\n{member1.mention} {member2.mention}')
 							match_start_string = f'**MATCH {match_number} - {member1.mention} VS {member2.mention}**'
-							match_frame_image = await match_frame_image(member1, member2)
+							match_frame_image = await create_match_frame_image(member1, member2)
 							await match_channel.send(file=match_frame_image)
 						match_start_string += f'\nWorthy competitors! Now is the time to duel and find the *true meme master*! DM each other to find a 30 minute window to complete your match. When you\'re both available, @ Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. May the best meme win!'
 						await match_channel.send(match_start_string)
