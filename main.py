@@ -2866,14 +2866,35 @@ async def on_message(message):
 			# paste the match frame lines
 			match_frame_source.paste(match_frame_lines, mask=match_frame_lines.split()[3])
 
-			# add the mentioned members' usernames to the image
+			# add the first mentioned member's username to the image
 			roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=55)
 			draw_member1_name = ImageDraw.Draw(match_frame_source)
 			w_1, h_1 = draw_member1_name.textsize(member1.display_name, font=roboto_font)
 			draw_member1_name.text(((368 - w_1 + 258), 639), member1.display_name, fill='white', font=roboto_font)
 
+			# add the second mentioned member's username to the image
+			roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=55)
 			draw_member2_name = ImageDraw.Draw(match_frame_source)
-			draw_member2_name.text((812, 639), member2.display_name, fill='white', font=roboto_font)
+			member2_display_name = member2.display_name
+			w_2, h_2 = draw_member2_name.textsize(member2_display_name, font=roboto_font)
+			if 361 - w_2 >= 0:
+				draw_member2_name.text((812, 639), member2_display_name, fill='white', font=roboto_font)
+			else:
+				W_difference = 361 - w_2
+				px_per_pt = 5
+				px_change = int(W_difference / px_per_pt)
+				roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=(55 - px_change))
+				draw_member2_name.text(((812 + px_change), (639 + px_change)), member2_display_name, fill='white', font=roboto_font)
+
+
+
+			if len(member2_display_name) <= 12:
+				roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=55)
+				draw_member2_name.text((812, 639), member2_display_name, fill='white', font=roboto_font)
+			elif len(member2_display_name) > 12 and len(member2_display_name) <= 14:
+				pass
+			elif len(member2_display_name) > 14 and len(member2_display_name) <= 16:
+				pass
 
 			# ImageDraw.Draw(match_frame_source).text((175, 180), member1.display_name, fill='rgb(255,255,255)', font=font)
 			# ImageDraw.Draw(match_frame_source).text((720, 895), member2.display_name, fill='rgb(255,255,255)', font=font)
