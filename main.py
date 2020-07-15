@@ -2829,7 +2829,7 @@ async def on_message(message):
 			file = discord.File('resources/match_frame.png')
 			im1 = Image.open('resources/match_frame.png')
 
-			author_avatar = message.author.avatar_url_as(format=png, size=1024)
+			author_avatar = message.author.avatar_url_as(format='png', size=1024)
 			im2 = Image.open(await author_avatar.read())
 
 			im1.paste(im2)
