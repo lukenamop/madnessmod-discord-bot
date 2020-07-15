@@ -112,6 +112,71 @@ async def execute_sql(query, q_args=None, attempt=1):
 			await action_log('connection failed')
 	return
 
+async def match_frame_image(member1, member2):
+	# make sure the members are accessible and in the guild
+	try:
+		member1_display_name = member1.display_name
+		member2_display_name = member2.display_name
+	except:
+		return None
+
+	# load the source background from the resources folder
+	match_frame_source = Image.open('resources/images/transparent_background.png')
+
+	# load the mentioned members' avatars and resize them
+	member1_avatar = Image.open(io.BytesIO(await member1.avatar_url_as(format='png', size=1024).read())).resize((580, 580), resample=Image.BICUBIC)
+	member2_avatar = Image.open(io.BytesIO(await member2.avatar_url_as(format='png', size=1024).read())).resize((580, 580), resample=Image.BICUBIC)
+
+	# paste the avatars on the match frame source
+	match_frame_source.paste(member1_avatar, (140, 110))
+	match_frame_source.paste(member2_avatar, (720, 110))
+
+	# load the match frame
+	match_frame_transparent = Image.open('resources/images/match_frame_transparent.png')
+
+	# paste the match frame
+	match_frame_source.paste(match_frame_transparent, mask=match_frame_transparent.split()[3])
+
+	# load the match frame lines
+	match_frame_lines = Image.open('resources/images/match_frame_lines_logo.png')
+
+	# paste the match frame lines
+	match_frame_source.paste(match_frame_lines, mask=match_frame_lines.split()[3])
+
+	# add the first mentioned member's username to the image
+	roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=55)
+	draw_member1_name = ImageDraw.Draw(match_frame_source)
+	w_1, h_1 = draw_member1_name.textsize(member1_display_name, font=roboto_font)
+	if 361 - w_1 >= 0:
+		draw_member1_name.text(((368 - w_1 + 258), 639), member1_display_name, fill='white', font=roboto_font)
+	else:
+		W_difference = 361 - w_1
+		px_per_pt = 13.5
+		pt_change = -int(W_difference / px_per_pt)
+		roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=(55 - pt_change))
+		w_1, h_1 = draw_member1_name.textsize(member1_display_name, font=roboto_font)
+		draw_member1_name.text(((368 - w_1 + 258), 639 + int(pt_change * 0.85)), member1_display_name, fill='white', font=roboto_font)
+
+	# add the second mentioned member's username to the image
+	roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=55)
+	draw_member2_name = ImageDraw.Draw(match_frame_source)
+	w_2, h_2 = draw_member2_name.textsize(member2_display_name, font=roboto_font)
+	if 361 - w_2 >= 0:
+		draw_member2_name.text((812, 639), member2_display_name, fill='white', font=roboto_font)
+	else:
+		W_difference = 361 - w_2
+		px_per_pt = 13.5
+		pt_change = -int(W_difference / px_per_pt)
+		roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=(55 - pt_change))
+		draw_member2_name.text((812, (639 + int(pt_change * 0.85))), member2_display_name, fill='white', font=roboto_font)
+
+	# save the final image to memory
+	final_image = io.BytesIO()
+	match_frame_source.save(final_image, format='png')
+	final_image.seek(0)
+	final_file = discord.File(final_image, 'match_frame_edited.png')
+	return final_file
+
 # end_polls task
 @tasks.loop()
 async def end_polls():
@@ -1866,11 +1931,16 @@ async def on_message(message):
 						member1 = match_channel.guild.get_member_named(participant1)
 						member2 = match_channel.guild.get_member_named(participant2)
 						if member1 is None:
-							await match_channel.send(f'Please DM each other to find a 30 minute window to complete your match. When you\'re both available, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. Good luck!\n@{participant1} {member2.mention}')
+							# await match_channel.send(f'Please DM each other to find a 30 minute window to complete your match. When you\'re both available, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. Good luck!\n@{participant1} {member2.mention}')
+							await match_channel.send(f'**MATCH {str(match['suggested-play-order'])} - @{participant1} VS {member2.mention}**\nWorthy competitors! Now is the time to duel and find the *true meme master*! DM each other to find a 30 minute window to complete your match. When you\'re both available, @ Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. May the best meme win!')
 						elif member2 is None:
-							await match_channel.send(f'Please DM each other to find a 30 minute window to complete your match. When you\'re both available, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. Good luck!\n{member1.mention} @{participant2}')
+							# await match_channel.send(f'Please DM each other to find a 30 minute window to complete your match. When you\'re both available, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. Good luck!\n{member1.mention} @{participant2}')
+							await match_channel.send(f'**MATCH {str(match['suggested-play-order'])} - {member1.mention} VS @{participant2}**\nWorthy competitors! Now is the time to duel and find the *true meme master*! DM each other to find a 30 minute window to complete your match. When you\'re both available, @ Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. May the best meme win!')
 						else:
-							await match_channel.send(f'Please DM each other to find a 30 minute window to complete your match. When you\'re both available, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. Good luck!\n{member1.mention} {member2.mention}')
+							# await match_channel.send(f'Please DM each other to find a 30 minute window to complete your match. When you\'re both available, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. Good luck!\n{member1.mention} {member2.mention}')
+							match_frame_image = await match_frame_image(member1, member2)
+							await match_channel.send(file=match_frame_image)
+							await match_channel.send(f'**MATCH {str(match['suggested-play-order'])} - {member1.mention} VS {member2.mention}**\nWorthy competitors! Now is the time to duel and find the *true meme master*! DM each other to find a 30 minute window to complete your match. When you\'re both available, @ Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. May the best meme win!')
 						total_created += 1
 						if config.TESTING:
 							break
@@ -2831,80 +2901,6 @@ async def on_message(message):
 			embed = await generate_embed('green', embed_title, embed_description)
 			await message.channel.send(embed=embed)
 			return
-
-		# '.testimage' command (contest category)
-		if message_content.startswith('.testimage'):
-			await message.channel.trigger_typing()
-
-			try:
-				member1 = message.mentions[0]
-				member2 = message.mentions[1]
-			except:
-				await message.channel.send('No.')
-				return
-
-			# load the source background from the resources folder
-			match_frame_source = Image.open('resources/images/transparent_background.png')
-
-			# load the mentioned members' avatars and resize them
-			member1_avatar = Image.open(io.BytesIO(await member1.avatar_url_as(format='png', size=1024).read())).resize((580, 580), resample=Image.BICUBIC)
-			member2_avatar = Image.open(io.BytesIO(await member2.avatar_url_as(format='png', size=1024).read())).resize((580, 580), resample=Image.BICUBIC)
-
-			# paste the avatars on the match frame source
-			match_frame_source.paste(member1_avatar, (140, 110))
-			match_frame_source.paste(member2_avatar, (720, 110))
-
-			# load the match frame
-			match_frame_transparent = Image.open('resources/images/match_frame_transparent.png')
-
-			# paste the match frame
-			match_frame_source.paste(match_frame_transparent, mask=match_frame_transparent.split()[3])
-
-			# load the match frame lines
-			match_frame_lines = Image.open('resources/images/match_frame_lines_logo.png')
-
-			# paste the match frame lines
-			match_frame_source.paste(match_frame_lines, mask=match_frame_lines.split()[3])
-
-			# add the first mentioned member's username to the image
-			roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=55)
-			draw_member1_name = ImageDraw.Draw(match_frame_source)
-			member1_display_name = member1.display_name
-			w_1, h_1 = draw_member1_name.textsize(member1_display_name, font=roboto_font)
-			if 361 - w_1 >= 0:
-				draw_member1_name.text(((368 - w_1 + 258), 639), member1_display_name, fill='white', font=roboto_font)
-			else:
-				W_difference = 361 - w_1
-				px_per_pt = 13.5
-				pt_change = -int(W_difference / px_per_pt)
-				roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=(55 - pt_change))
-				w_1, h_1 = draw_member1_name.textsize(member1_display_name, font=roboto_font)
-				draw_member1_name.text(((368 - w_1 + 258), 639 + int(pt_change * 0.85)), member1_display_name, fill='white', font=roboto_font)
-
-			# add the second mentioned member's username to the image
-			roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=55)
-			draw_member2_name = ImageDraw.Draw(match_frame_source)
-			member2_display_name = member2.display_name
-			w_2, h_2 = draw_member2_name.textsize(member2_display_name, font=roboto_font)
-			if 361 - w_2 >= 0:
-				draw_member2_name.text((812, 639), member2_display_name, fill='white', font=roboto_font)
-			else:
-				W_difference = 361 - w_2
-				px_per_pt = 13.5
-				pt_change = -int(W_difference / px_per_pt)
-				roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=(55 - pt_change))
-				draw_member2_name.text((812, (639 + int(pt_change * 0.85))), member2_display_name, fill='white', font=roboto_font)
-
-			# save the final image to memory
-			final_image = io.BytesIO()
-			match_frame_source.save(final_image, format='png')
-			final_image.seek(0)
-			final_file = discord.File(final_image, 'match_frame_edited.png')
-
-			# upload the final image back to the channel
-			await message.channel.send(file=final_file)
-			return
-		return
 
 # client event triggers on any discord reaction add
 @client.event
