@@ -2837,9 +2837,9 @@ async def on_message(message):
 			im1.save(final_image, format='png')
 			final_image.seek(0)
 
-			final_file = discord.File(fp=final_image)
+			final_file = discord.File(final_image)
 
-			await message.channel.send(file=im1)
+			await message.channel.send(file=final_file)
 			return
 		return
 
