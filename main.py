@@ -7,6 +7,7 @@ import time
 import datetime
 import re
 import os
+import io
 import requests
 import random
 import string
@@ -16,7 +17,6 @@ from unidecode import unidecode
 from time import gmtime
 from time import strftime
 from math import ceil
-from io import BytesIO
 from PIL import Image, ImageDraw
 
 # manually install the pychallonge dependency (otherwise: -e git+https://github.com/russ-/pychallonge#egg=pychallonge)
@@ -2830,9 +2830,14 @@ async def on_message(message):
 			im1 = Image.open('resources/match_frame.png')
 
 			author_avatar = message.author.avatar_url_as(format='png', size=1024)
-			im2 = Image.open(BytesIO(await author_avatar.read()))
+			im2 = Image.open(io.BytesIO(await author_avatar.read()))
 
 			im1.paste(im2)
+			final_image = io.BytesIO()
+			img1.save(final_image, format='png')
+			final_image.seek(0)
+
+			final_file = discord.File(final_image)
 
 			await message.channel.send(file=im1)
 			return
