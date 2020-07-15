@@ -2829,7 +2829,7 @@ async def on_message(message):
 			file = discord.File('resources/match_frame.png')
 			im1 = Image.open('resources/match_frame.png')
 
-			author_avatar = message.author.avatar_url_as(format='png', size=1024)
+			author_avatar = message.author.avatar_url_as(format='png', size=2048)
 			im2 = Image.open(io.BytesIO(await author_avatar.read()))
 
 			im1.paste(im2)
@@ -2837,7 +2837,7 @@ async def on_message(message):
 			im1.save(final_image, format='png')
 			final_image.seek(0)
 
-			final_file = discord.File(final_image)
+			final_file = discord.File(final_image, 'match_frame_edited.png')
 
 			await message.channel.send(file=final_file)
 			return
