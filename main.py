@@ -2834,8 +2834,7 @@ async def on_message(message):
 			except:
 				await message.channel.send('No.')
 				return
-
-			file = discord.File('resources/match_frame.png')
+				
 			match_frame = Image.open('resources/match_frame.png')
 
 			member1_avatar = Image.open(io.BytesIO(await member1.avatar_url_as(format='png', size=1024).read())).resize((545, 545), resample=Image.BICUBIC)
