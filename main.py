@@ -2861,7 +2861,7 @@ async def on_message(message):
 			match_frame_source.paste(match_frame_transparent, mask=match_frame_transparent.split()[3])
 
 			# load the match frame lines
-			match_frame_lines = Image.open('resources/images/match_frame_lines.png')
+			match_frame_lines = Image.open('resources/images/match_frame_lines_logo.png')
 
 			# paste the match frame lines
 			match_frame_source.paste(match_frame_lines, mask=match_frame_lines.split()[3])
@@ -2894,9 +2894,6 @@ async def on_message(message):
 				pt_change = -int(W_difference / px_per_pt)
 				roboto_font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=(55 - pt_change))
 				draw_member2_name.text((812, (639 + int(pt_change * 0.85))), member2_display_name, fill='white', font=roboto_font)
-
-			# ImageDraw.Draw(match_frame_source).text((175, 180), member1.display_name, fill='rgb(255,255,255)', font=font)
-			# ImageDraw.Draw(match_frame_source).text((720, 895), member2.display_name, fill='rgb(255,255,255)', font=font)
 
 			# save the final image to memory
 			final_image = io.BytesIO()
