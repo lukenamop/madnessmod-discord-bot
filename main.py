@@ -2832,8 +2832,7 @@ async def on_message(message):
 			im1 = Image.open('resources/match_frame.png')
 
 			author_avatar = message.author.avatar_url_as(format='png', size=1024)
-			im2 = Image.open(io.BytesIO(await author_avatar.read()))
-			im2.resize((545, 545), resample=Image.BICUBIC)
+			im2 = Image.open(io.BytesIO(await author_avatar.read())).resize((545, 545), resample=Image.BICUBIC)
 
 			im1.paste(im2, (175, 265))
 			final_image = io.BytesIO()
