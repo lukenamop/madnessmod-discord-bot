@@ -2847,8 +2847,8 @@ async def on_message(message):
 			match_frame_source = Image.open('resources/images/transparent_background.png')
 
 			# load the mentioned members' avatars and resize them
-			member1_avatar = Image.open(io.BytesIO(await member1.avatar_url_as(format='png', size=512).read())).resize((580, 580), resample=Image.BICUBIC)
-			member2_avatar = Image.open(io.BytesIO(await member2.avatar_url_as(format='png', size=512).read())).resize((580, 580), resample=Image.BICUBIC)
+			member1_avatar = Image.open(io.BytesIO(await member1.avatar_url_as(format='png', size=1024).read())).resize((580, 580), resample=Image.BICUBIC)
+			member2_avatar = Image.open(io.BytesIO(await member2.avatar_url_as(format='png', size=1024).read())).resize((580, 580), resample=Image.BICUBIC)
 
 			# paste the avatars on the match frame source
 			match_frame_source.paste(member1_avatar, (140, 110))
@@ -2858,13 +2858,13 @@ async def on_message(message):
 			match_frame_transparent = Image.open('resources/images/match_frame_transparent.png')
 
 			# paste the match frame
-			match_frame_source.paste(match_frame_transparent, mask=match_frame_transparent)
+			match_frame_source.paste(match_frame_transparent, mask=match_frame_transparent.split()[3])
 
 			# load the match frame lines
 			match_frame_lines = Image.open('resources/images/match_frame_lines.png')
 
 			# paste the match frame lines
-			match_frame_source.paste(match_frame_lines, mask=match_frame_lines)
+			match_frame_source.paste(match_frame_lines, mask=match_frame_lines.split()[3])
 
 			# # add the mentioned members' usernames to the image
 			# font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=45)
