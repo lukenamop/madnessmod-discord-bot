@@ -1932,15 +1932,16 @@ async def on_message(message):
 						member2 = match_channel.guild.get_member_named(participant2)
 						if member1 is None:
 							# await match_channel.send(f'Please DM each other to find a 30 minute window to complete your match. When you\'re both available, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. Good luck!\n@{participant1} {member2.mention}')
-							await match_channel.send(f'**MATCH {str(match['suggested-play-order'])} - @{participant1} VS {member2.mention}**\nWorthy competitors! Now is the time to duel and find the *true meme master*! DM each other to find a 30 minute window to complete your match. When you\'re both available, @ Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. May the best meme win!')
+							match_start_string = f'**MATCH {str(match['suggested-play-order'])} - @{participant1} VS {member2.mention}**\nWorthy competitors! Now is the time to duel and find the *true meme master*! DM each other to find a 30 minute window to complete your match. When you\'re both available, @ Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. May the best meme win!'
 						elif member2 is None:
 							# await match_channel.send(f'Please DM each other to find a 30 minute window to complete your match. When you\'re both available, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. Good luck!\n{member1.mention} @{participant2}')
-							await match_channel.send(f'**MATCH {str(match['suggested-play-order'])} - {member1.mention} VS @{participant2}**\nWorthy competitors! Now is the time to duel and find the *true meme master*! DM each other to find a 30 minute window to complete your match. When you\'re both available, @ Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. May the best meme win!')
+							match_start_string = f'**MATCH {str(match['suggested-play-order'])} - {member1.mention} VS @{participant2}**\nWorthy competitors! Now is the time to duel and find the *true meme master*! DM each other to find a 30 minute window to complete your match. When you\'re both available, @ Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. May the best meme win!'
 						else:
 							# await match_channel.send(f'Please DM each other to find a 30 minute window to complete your match. When you\'re both available, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. Good luck!\n{member1.mention} {member2.mention}')
+							match_start_string = f'**MATCH {str(match['suggested-play-order'])} - {member1.mention} VS {member2.mention}**\nWorthy competitors! Now is the time to duel and find the *true meme master*! DM each other to find a 30 minute window to complete your match. When you\'re both available, @ Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. May the best meme win!'
 							match_frame_image = await match_frame_image(member1, member2)
 							await match_channel.send(file=match_frame_image)
-							await match_channel.send(f'**MATCH {str(match['suggested-play-order'])} - {member1.mention} VS {member2.mention}**\nWorthy competitors! Now is the time to duel and find the *true meme master*! DM each other to find a 30 minute window to complete your match. When you\'re both available, @ Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. May the best meme win!')
+						await match_channel.send(match_start_string)
 						total_created += 1
 						if config.TESTING:
 							break
