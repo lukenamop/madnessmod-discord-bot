@@ -2843,25 +2843,37 @@ async def on_message(message):
 				await message.channel.send('No.')
 				return
 
-			# load the match frame from the resources folder
-			match_frame = Image.open('resources/images/match_frame.png')
+			# load the source background from the resources folder
+			match_frame_source = Image.open('resources/images/transparent_background.png')
 
 			# load the mentioned members' avatars and resize them
-			member1_avatar = Image.open(io.BytesIO(await member1.avatar_url_as(format='png', size=1024).read())).resize((545, 545), resample=Image.BICUBIC)
-			member2_avatar = Image.open(io.BytesIO(await member2.avatar_url_as(format='png', size=1024).read())).resize((545, 545), resample=Image.BICUBIC)
+			member1_avatar = Image.open(io.BytesIO(await member1.avatar_url_as(format='png', size=512).read())).resize((580, 580), resample=Image.BICUBIC)
+			member2_avatar = Image.open(io.BytesIO(await member2.avatar_url_as(format='png', size=512).read())).resize((580, 580), resample=Image.BICUBIC)
 
-			# paste the avatars on the match frame
-			match_frame.paste(member1_avatar, (175, 265))
-			match_frame.paste(member2_avatar, (720, 330))
+			# paste the avatars on the match frame source
+			match_frame_source.paste(member1_avatar, (140, 110))
+			match_frame_source.paste(member2_avatar, (720, 110))
 
-			# add the mentioned members' usernames to the image
-			font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=45)
-			ImageDraw.Draw(match_frame).text((175, 180), member1.display_name, fill='rgb(255,255,255)', font=font)
-			ImageDraw.Draw(match_frame).text((720, 895), member2.display_name, fill='rgb(255,255,255)', font=font)
+			# load the match frame
+			match_frame_transparent = Image.open('resources/images/match_frame_transparent.png')
+
+			# paste the match frame
+			match_frame_source.paste(match_frame_transparent)
+
+			# load the match frame lines
+			match_frame_lines = Image.open('resources/images/match_frame_lines.png')
+
+			# paste the match frame lines
+			match_frame_source.paste(match_frame_lines)
+
+			# # add the mentioned members' usernames to the image
+			# font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=45)
+			# ImageDraw.Draw(match_frame).text((175, 180), member1.display_name, fill='rgb(255,255,255)', font=font)
+			# ImageDraw.Draw(match_frame).text((720, 895), member2.display_name, fill='rgb(255,255,255)', font=font)
 
 			# save the final image to memory
 			final_image = io.BytesIO()
-			match_frame.save(final_image, format='png')
+			match_frame_source.save(final_image, format='png')
 			final_image.seek(0)
 			final_file = discord.File(final_image, 'match_frame_edited.png')
 
