@@ -2825,18 +2825,27 @@ async def on_message(message):
 			return
 
 		# '.testimage' command (contest category)
-		if message_content == '.testimage':
+		if message_content.startswith('.testimage'):
 			await message.channel.trigger_typing()
 
+			try:
+				member1 = message.mentions[0]
+				member2 = message.mentions[1]
+			except:
+				await message.channel.send('No.')
+				return
+
 			file = discord.File('resources/match_frame.png')
-			im1 = Image.open('resources/match_frame.png')
+			match_frame = Image.open('resources/match_frame.png')
 
-			author_avatar = message.author.avatar_url_as(format='png', size=1024)
-			im2 = Image.open(io.BytesIO(await author_avatar.read())).resize((545, 545), resample=Image.BICUBIC)
+			member1_avatar = Image.open(io.BytesIO(await member1.avatar_url_as(format='png', size=1024).read())).resize((545, 545), resample=Image.BICUBIC)
+			member2_avatar = Image.open(io.BytesIO(await member2.avatar_url_as(format='png', size=1024).read())).resize((545, 545), resample=Image.BICUBIC)
 
-			im1.paste(im2, (175, 265))
+			match_frame.paste(member1_avatar, (175, 265))
+			match_frame.paste(member2_avatar, (720, 330))
+
 			final_image = io.BytesIO()
-			im1.save(final_image, format='png')
+			match_frame.save(final_image, format='png')
 			final_image.seek(0)
 
 			final_file = discord.File(final_image, 'match_frame_edited.png')
