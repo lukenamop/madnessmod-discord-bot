@@ -2847,9 +2847,9 @@ async def on_message(message):
 			match_frame.paste(member2_avatar, (720, 330))
 
 			# add the mentioned members' usernames to the image
-			font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=20)
-			ImageDraw.Draw(match_frame).text((175, 225), member1.display_name, fill='rgb(255,255,255)', font=font)
-			ImageDraw.Draw(match_frame).text((720, 900), member2.display_name, fill='rgb(255,255,255)', font=font)
+			font = ImageFont.truetype('resources/fonts/Roboto-Bold.ttf', size=45)
+			ImageDraw.Draw(match_frame).text((145, 225), member1.display_name, fill='rgb(255,255,255)', font=font)
+			ImageDraw.Draw(match_frame).text((720, 895), member2.display_name, fill='rgb(255,255,255)', font=font)
 
 			# save the final image to memory
 			final_image = io.BytesIO()
