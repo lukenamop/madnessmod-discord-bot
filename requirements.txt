@@ -5,6 +5,5 @@ praw
 prawcore
 psycopg2
 requests
-setuptools
 git+https://github.com/Rapptz/discord.py
 git+https://github.com/takluyver/Unidecode.git
