@@ -2153,26 +2153,27 @@ async def on_message(message):
 
 							await match_channel.send(f'You have 24h left to complete this match! If you haven\'t been able to line up your availability, you should plan on doing a split match. To complete a split match, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention} when you have 30 minutes free.\n{member1.mention} {member2.mention}')
 							alerted += 1
-						elif len(last_message.embeds) == 1:
-							if last_message.embeds[0].title == 'Solo Match Complete':
-								alert_match_members = True
-								try:
-									match_channel_messages = await match_channel.history(limit=100).flatten()
-									member1 = match_channel_messages[-1].mentions[0]
-									member2 = match_channel_messages[-1].mentions[1]
-								except IndexError:
-									alert_match_members = False
 
-								if alert_match_members:
-									completed_member_id = last_message.embeds[0].description.split('<@')[1].split('>')[0]
-									if member1.id == completed_member_id:
-										await match_channel.send(f'You have 24h left to complete this match! It looks like your opponent has already completed their side of a split match. To complete your half, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention} when you have 30 minutes free.\n{member2.mention}')
-										alerted += 1
-									elif member2.id == completed_member_id:
-										await match_channel.send(f'You have 24h left to complete this match! It looks like your opponent has already completed their side of a split match. To complete your half, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention} when you have 30 minutes free.\n{member1.mention}')
-										alerted += 1
-									else:
-										await message.channel.send(f'{message.guild.get_member(config.ADMIN_IDS[0]).mention} there was an error reminding a member of a split match: {completed_member_id}')
+						# elif len(last_message.embeds) == 1:
+						# 	if last_message.embeds[0].title == 'Solo Match Complete':
+						# 		alert_match_members = True
+						# 		try:
+						# 			match_channel_messages = await match_channel.history(limit=100).flatten()
+						# 			member1 = match_channel_messages[-2].mentions[0]
+						# 			member2 = match_channel_messages[-2].mentions[1]
+						# 		except IndexError:
+						# 			alert_match_members = False
+
+						# 		if alert_match_members:
+						# 			completed_member_id = last_message.embeds[0].description.split('<@')[1].split('>')[0]
+						# 			if member1.id == completed_member_id:
+						# 				await match_channel.send(f'You have 24h left to complete this match! It looks like your opponent has already completed their side of a split match. To complete your half, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention} when you have 30 minutes free.\n{member2.mention}')
+						# 				alerted += 1
+						# 			elif member2.id == completed_member_id:
+						# 				await match_channel.send(f'You have 24h left to complete this match! It looks like your opponent has already completed their side of a split match. To complete your half, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention} when you have 30 minutes free.\n{member1.mention}')
+						# 				alerted += 1
+						# 			else:
+						# 				await message.channel.send(f'{message.guild.get_member(config.ADMIN_IDS[0]).mention} there was an error reminding a member of a split match: {completed_member_id}')
 			embed_description = f'Participants in `{alerted}` match(es) have been alerted.'
 			embed = await generate_embed('green', embed_title, embed_description)
 			await message.channel.send(embed=embed)
