@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 
+# manually install the pychallonge dependency (otherwise: -e git+https://github.com/russ-/pychallonge#egg=pychallonge)
+import os
+os_stream = os.popen('cd pychallonge071420 && python setup.py install')
+# os_output = os_stream.read()
+# print(f'os stream output: {os_output}')
+
 # import libraries
 import discord
 import asyncio
 import time
 import datetime
 import re
-import os
 import io
 import requests
 import random
@@ -18,11 +23,6 @@ from time import gmtime
 from time import strftime
 from math import ceil
 from PIL import Image, ImageDraw, ImageFont
-
-# manually install the pychallonge dependency (otherwise: -e git+https://github.com/russ-/pychallonge#egg=pychallonge)
-os_stream = os.popen('cd pychallonge071420 && python setup.py install')
-# os_output = os_stream.read()
-# print(f'os stream output: {os_output}')
 
 # import additional files
 import config
