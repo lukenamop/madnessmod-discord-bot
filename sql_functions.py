@@ -5,7 +5,6 @@ import discord
 import asyncio
 import config
 import connect
-from functions import action_log
 
 # function to safely execute SQL queries, with error handling for closed connections
 async def execute_sql(query, q_args=None, attempt=1):

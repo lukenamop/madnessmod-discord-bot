@@ -2296,7 +2296,7 @@ async def submit(ctx):
 			q_args = [time_now, poll_message.id, db_id]
 			await execute_sql(query, q_args)
 			connect.conn.commit()
-			await action_log(f'poll_start_time set in database ({time_now})')
+			print(f'poll_start_time set in database ({time_now})')
 
 			if not config.TESTING:
 				# set participants' unvoted_match_start_time to the current time (if not already set)
@@ -2304,7 +2304,7 @@ async def submit(ctx):
 				q_args = [time_now, u1_id, u2_id]
 				await execute_sql(query, q_args)
 				connect.conn.commit()
-				await action_log('unvoted_match_start_time set for valid participants')
+				print('unvoted_match_start_time set for valid participants')
 		return
 	else:
 		# build submission error embed (no active match)
