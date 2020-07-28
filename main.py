@@ -965,7 +965,7 @@ async def mymatches(ctx):
 		# return
 
 	# # stats-flex specific commands
-	# if message.channel.id == 631239602736201728:
+	# if message.channel.id == config.STATS_CHAN_ID:
 	# 	# '.help' command (stats-flex)
 	# 	if message_content == '.help':
 	# 		# build help embed
@@ -2270,7 +2270,7 @@ async def submit(ctx):
 			else:
 				if not config.TESTING:
 					# await match_channel.send('-mrole 705420253957718098 voting has started in a new match, come vote!')
-					duel_mod_role = match_channel.guild.get_role(599996020171997206)
+					duel_mod_role = match_channel.guild.get_role(config.DUEL_MOD_ROLE_ID)
 					await match_channel.send(f'Voting has started, please mention `Vote Pings` to let them know! {duel_mod_role.mention}')
 				else:
 					await match_channel.send('This is just a test match, not pinging `Vote Pings` or `here`.')
@@ -2614,7 +2614,7 @@ async def verify(ctx):
 					rules_chan = client.get_channel(config.RULES_CHAN_ID)
 					embed_description = f'{base_member.mention}, welcome to Meme Madness! Signup info is always posted in {announcements_chan.mention}. Check out {info_chan.mention} and {rules_chan.mention} to see how this place is run and let a member of the mod team know if you need any help!'
 					embed = await generate_embed('green', embed_title, embed_description)
-					await client.get_channel(581695290986332162).send(embed=embed)
+					await client.get_channel(config.GENERAL_CHAN_ID).send(embed=embed)
 				# send welcome embed
 				print(f'verification compeleted by {display_name}')
 
