@@ -2720,11 +2720,11 @@ async def on_message(message):
 # client event triggers on any discord reaction add
 @client.event
 async def on_raw_reaction_add(payload):
-	# create variables for base guild and user
-	guild = client.get_guild(payload.guild_id)
-	if guild is not None:
+	# create variables for guild and base user
+	guild = client.get_guild(config.MM_GUILD_ID)
+	try:
 		user = guild.get_member(payload.user_id)
-	else:
+	except:
 		user = client.get_user(payload.user_id)
 
 	# don't respond to bots
