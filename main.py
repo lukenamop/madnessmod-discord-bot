@@ -840,10 +840,13 @@ async def forcewin(ctx):
 @client.command(name='leaderboard', aliases=['lb', 'top10'])
 @commands.cooldown(1, 60, commands.BucketType.channel)
 @only_these_channels(allowed_channel_ids=[config.STATS_CHAN_ID], allowed_in_dms=True)
-async def leaderboard(ctx, user:discord.Member=ctx.author.id):
+async def leaderboard(ctx, user:discord.Member=None):
 	# if no user is specified, use the command author
 	if user is None:
 		user = ctx.author
+
+	# find the meme madness guild
+	mm_guild = client.get_guild(config.MM_GUILD_ID)
 
 	# TODO: rewrite command to only pull necessary users instead of full database (low priority)
 	# pull top participants
@@ -860,7 +863,7 @@ async def leaderboard(ctx, user:discord.Member=ctx.author.id):
 		# iterate through the participants in the database
 		for entry in results:
 			# initialize variables for the member and their info
-			member = ctx.guild.get_member(entry[0])
+			member = mm_guild.get_member(entry[0])
 			lb_points = entry[1]
 			lb_rank = entry[2]
 			# check to be sure the member is still in the guild
