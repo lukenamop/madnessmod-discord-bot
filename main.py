@@ -681,12 +681,12 @@ async def creatematchchannels(ctx, *args):
 			await conf_message.delete()
 	return
 
-# 'dbstats' command (#mod-spam)
-@client.commands(name='dbstats')
-@commands.has_any_role('Admin')
-@only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID], allowed_in_dms=True)
-async def dbstats(ctx):
-	return
+# # 'dbstats' command (#mod-spam)
+# @client.commands(name='dbstats')
+# @commands.has_any_role('Admin')
+# @only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID], allowed_in_dms=True)
+# async def dbstats(ctx):
+# 	return
 
 # 'deletematchchannels' command (#mod-spam)
 @client.command(name='deletematchchannels')
