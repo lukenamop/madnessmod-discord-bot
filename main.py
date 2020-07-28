@@ -840,7 +840,7 @@ async def forcewin(ctx):
 @client.command(name='leaderboard', aliases=['lb', 'top10'])
 @commands.cooldown(1, 60, commands.BucketType.channel)
 @only_these_channels(allowed_channel_ids=[config.STATS_CHAN_ID], allowed_in_dms=True)
-async def leaderboard(ctx, user:discord.Member=None):
+async def leaderboard(ctx, user:discord.Member=ctx.author.id):
 	# if no user is specified, use the command author
 	if user is None:
 		user = ctx.author
