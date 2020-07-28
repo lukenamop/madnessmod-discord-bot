@@ -681,12 +681,12 @@ async def creatematchchannels(ctx, *args):
 			await conf_message.delete()
 	return
 
-# # 'dbstats' command (#mod-spam)
-# @client.commands(name='dbstats')
-# @commands.has_any_role('Admin')
-# @only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID], allowed_in_dms=True)
-# async def dbstats(ctx):
-# 	return
+# 'dbstats' command (#mod-spam)
+@client.command(name='dbstats')
+@commands.has_any_role('Admin')
+@only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID], allowed_in_dms=True)
+async def dbstats(ctx):
+	return
 
 # 'deletematchchannels' command (#mod-spam)
 @client.command(name='deletematchchannels')
@@ -727,7 +727,7 @@ async def deletematchchannels(ctx):
 	return
 
 # 'forcewin' command (contest category)
-@client.commands(name='forcewin')
+@client.command(name='forcewin')
 @commands.has_any_role('Duel Mod', 'Admin')
 @only_these_channels(allowed_category_ids=[config.MATCH_CATEGORY_ID])
 async def forcewin(ctx):
@@ -1061,7 +1061,7 @@ async def reconnect(ctx):
 	return
 
 # 'remindparticipants' command (#mod-spam)
-@client.commands(name='remindparticipants')
+@client.command(name='remindparticipants')
 @commands.has_any_role('Admin')
 @only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
 async def remindparticipants(ctx):
@@ -1113,7 +1113,7 @@ async def remindparticipants(ctx):
 	return
 
 # 'removeinvalidparticipants' command (#mod-spam)
-@client.commands(name='removeinvalidparticipants')
+@client.command(name='removeinvalidparticipants')
 @commands.has_any_role('Admin')
 @only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
 async def removeinvalidparticipants(ctx):
@@ -1312,7 +1312,7 @@ async def settournamentroles(ctx):
 	return
 
 # 'showresults' command (contest category)
-@client.commands(name='showresults')
+@client.command(name='showresults')
 @commands.has_any_role('Duel Mod', 'Admin')
 @only_these_channels(allowed_category_ids=[config.MATCH_CATEGORY_ID])
 async def showresults(ctx):
@@ -1659,7 +1659,7 @@ async def splitmatch(ctx, member1:discord.Member=None, member2:discord.Member=No
 	return
 
 # 'startmatch' command (contest category)
-@client.commands(name='startmatch')
+@client.command(name='startmatch')
 @commands.has_any_role('Duel Mod', 'Admin')
 @only_these_channels(allowed_category_ids=[config.MATCH_CATEGORY_ID])
 async def startmatch(ctx, member1:discord.Member=None, member2:discord.Member=None):
