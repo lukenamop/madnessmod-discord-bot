@@ -70,9 +70,9 @@ def only_these_channels(allowed_channel_ids=None, allowed_category_ids=None, all
 # client event triggers when a command hits an error
 @client.event
 async def on_command_error(ctx, error):
-	if isinstance(error, commands.CommandNotFound):
-		return
 	if isinstance(error, IncorrectChannel):
+		return
+	if isinstance(error, commands.CommandNotFound):
 		return
 	if isinstance(error, commands.CommandOnCooldown):
 		# build error embed
@@ -81,7 +81,7 @@ async def on_command_error(ctx, error):
 		embed = await generate_embed('red', embed_title, embed_description)
 		await ctx.send(embed=embed)
 		return
-	if isinstance(error, MissingAnyRole):
+	if isinstance(error, commands.MissingAnyRole):
 		# build error embed
 		embed_title = 'Command Error'
 		embed_description = 'You don\'t have permission to use this command.'
