@@ -72,7 +72,7 @@ def only_these_channels(allowed_channel_ids=None, allowed_category_ids=None, all
 async def on_command_error(ctx, error):
 	if isinstance(error, commands.CommandNotFound):
 		return
-	if isinstance(error, commands.IncorrectChannel):
+	if isinstance(error, IncorrectChannel):
 		return
 	if isinstance(error, commands.CommandOnCooldown):
 		# build error embed
