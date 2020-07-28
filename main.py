@@ -2701,30 +2701,18 @@ async def verify(ctx):
 # 	print('mod help guide sent to #duel-mods')
 # 	return
 
+
+##### CLIENT EVENTS #####
+
 # client event triggers on any discord message
 @client.event
 async def on_message(message):
 	# don't respond if the bot is disabled
 	if config.DISABLE_BOT and message.author.id != config.ADMIN_IDS[0]:
 		return
-
-	# process commands in specific channels
-	if message.channel.id in config.DISCORD_CHAN_IDS or message.channel.id == config.DISCORD_ADMIN_CHAN_ID or isinstance(message.channel, discord.DMChannel):
-		# check to see if the command is valid
-		message_content = unidecode(message.content.lstrip(config.DISC_CMD_PREFIX).strip())
-		if not bool(re.match(config.INPUT_RE_CHECK, message.content)) and message.content.startswith(config.DISC_CMD_PREFIX):
-			# build error embed
-			embed_title = 'Command Error'
-			embed_description = f'Your command `{message.content}` contains invalid characters. Please try again!'
-			embed = await generate_embed('red', embed_title, embed_description)
-			await message.channel.send(embed=embed)
-			return
-
+	else:
 		await client.process_commands(message)
-	return
-
-	# # process and clean message content
-	# message_content = unidecode(message.content.casefold().strip())
+		return
 
 # client event triggers on any discord reaction add
 @client.event
