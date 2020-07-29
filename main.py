@@ -2377,6 +2377,33 @@ async def template(ctx):
 	template_message = await template_chan.send(embed=embed, nonce='voluntary_template')
 	print(f'template attachment sent to #templates by {ctx.author.display_name}')
 
+	# establish a google connection
+	connect.g_connect()
+
+	# find all templates in document
+	template_worksheet = connect.template_sheet.worksheet('Templates')
+	template_sheet_list = template_worksheet.get_all_records()
+	# find how many rows there currently are
+	template_sheet_num = len(template_sheet_list)
+	template_sheet_write_row = template_sheet_num + 2
+
+	# write the template information to google sheets
+	try:
+		template_worksheet.update_cell(template_sheet_write_row, 1, str(template_message.id)) # discord message ID
+		template_worksheet.update_cell(template_sheet_write_row, 2, str(template_message.embeds[0].image.url)) # raw template link
+		# template_worksheet.update_cell(template_sheet_write_row, 3, val) # kapwing template link
+		template_worksheet.update_cell(template_sheet_write_row, 4, str(member.display_name)) # provider username
+		template_worksheet.update_cell(template_sheet_write_row, 5, str(member.id)) # provider ID
+	except gspread.exceptions.APIError:
+		print('sleeping for 150 seconds')
+		await asyncio.sleep(150)
+		print('trying again')
+		template_worksheet.update_cell(template_sheet_write_row, 1, str(template_message.id)) # discord message ID
+		template_worksheet.update_cell(template_sheet_write_row, 2, str(template_message.embeds[0].image.url)) # raw template link
+		# template_worksheet.update_cell(template_sheet_write_row, 3, val) # kapwing template link
+		template_worksheet.update_cell(template_sheet_write_row, 4, str(member.display_name)) # provider username
+		template_worksheet.update_cell(template_sheet_write_row, 5, str(member.id)) # provider ID
+
 	# add reactions to messages in the #templates channel
 	await template_message.add_reaction('👍')
 	await template_message.add_reaction('🤷')
@@ -2726,8 +2753,8 @@ async def justtesting(ctx):
 			template_worksheet.update_cell(template_sheet_write_row, 4, str(template_provider.display_name)) # provider username
 			template_worksheet.update_cell(template_sheet_write_row, 5, str(template_provider.id)) # provider ID
 		except gspread.exceptions.APIError:
-			print('sleeping for 100 seconds')
-			await asyncio.sleep(100)
+			print('sleeping for 150 seconds')
+			await asyncio.sleep(150)
 			print('trying again')
 			template_worksheet.update_cell(template_sheet_write_row, 1, str(template_message.id)) # discord message ID
 			template_worksheet.update_cell(template_sheet_write_row, 2, str(template_message.embeds[0].image.url)) # raw template link
