@@ -2694,6 +2694,9 @@ async def justtesting(ctx):
 	if ctx.author.id != config.ADMIN_IDS[0]:
 		return
 
+	# establish a google connection
+	connect.g_connect()
+
 	# find all templates in document
 	template_worksheet = connect.template_sheet.worksheet('Templates')
 	template_sheet_list = template_worksheet.get_all_records()
