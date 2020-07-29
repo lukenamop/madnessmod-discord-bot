@@ -1,5 +1,7 @@
 freetype-py
+gspread
 iso8601==0.1.11
+oauth2client
 pillow
 praw
 prawcore
