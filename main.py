@@ -2755,6 +2755,7 @@ async def justtesting(ctx, *args):
 			template_worksheet.update_cell(template_sheet_write_row, 5, str(template_provider.id)) # provider ID
 		except:
 			await ctx.send('done')
+			return
 
 		template_sheet_write_row += 1
 		temps_found += 1
