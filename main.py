@@ -17,13 +17,13 @@ import requests
 import random
 import string
 import urllib
-import gspread.exceptions.APIError as GoogleAPIError
-from discord.ext import commands
-from discord.ext import tasks
-from unidecode import unidecode
+import gspread
+from math import ceil
 from time import gmtime
 from time import strftime
-from math import ceil
+from unidecode import unidecode
+from discord.ext import commands
+from discord.ext import tasks
 
 # import additional files
 import config
@@ -2725,7 +2725,7 @@ async def justtesting(ctx):
 			template_provider = ctx.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').lstrip('!').rstrip('>')))
 			template_worksheet.update_cell(template_sheet_write_row, 4, str(template_provider.display_name)) # provider username
 			template_worksheet.update_cell(template_sheet_write_row, 5, str(template_provider.id)) # provider ID
-		except GoogleAPIError:
+		except gspread.exceptions.APIError:
 			print('sleeping for 100 seconds')
 			await asyncio.sleep(100)
 			print('trying again')
