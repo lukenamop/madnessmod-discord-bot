@@ -12,16 +12,17 @@ DB_URL = os.environ['DATABASE_URL']
 G_KEY_FILE = 'meme-madness-discord-aca84f70f7a5.json'
 
 google_key_json = {}
-google_key_json["type"] = os.environ["G_TYPE"]
-google_key_json["project_id"] = os.environ["G_PROJECT_ID"]
-google_key_json["private_key_id"] = os.environ["G_PRIVATE_KEY_ID"]
-google_key_json["private_key"] = os.environ["G_PRIVATE_KEY"]
-google_key_json["client_email"] = os.environ["G_CLIENT_EMAIL"]
-google_key_json["client_id"] = os.environ["G_CLIENT_ID"]
-google_key_json["auth_uri"] = os.environ["G_AUTH_URI"]
-google_key_json["token_uri"] = os.environ["G_TOKEN_URI"]
-google_key_json["auth_provider_x509_cert_url"] = os.environ["G_AUTH_PROVIDER_X509_CERT_URL"]
-google_key_json["client_x509_cert_url"] = os.environ["G_CLIENT_X509_CERT_URL"]
+google_key_json["type"] = os.environ['G_TYPE']
+google_key_json["project_id"] = os.environ['G_PROJECT_ID']
+google_key_json["private_key_id"] = os.environ['G_PRIVATE_KEY_ID']
+google_key_json["private_key"] = os.environ['G_PRIVATE_KEY']
+google_key_json["client_email"] = os.environ['G_CLIENT_EMAIL']
+google_key_json["client_id"] = os.environ['G_CLIENT_ID']
+google_key_json["auth_uri"] = os.environ['G_AUTH_URI']
+google_key_json["token_uri"] = os.environ['G_TOKEN_URI']
+google_key_json["auth_provider_x509_cert_url"] = os.environ['G_AUTH_PROVIDER_X509_CERT_URL']
+google_key_json["client_x509_cert_url"] = os.environ['G_CLIENT_X509_CERT_URL']
+google_key_json = json.dumps(google_key_json)
 
 # outfile = open(G_KEY_FILE, 'w')
 # outfile.write(json.dumps(google_key_json))
