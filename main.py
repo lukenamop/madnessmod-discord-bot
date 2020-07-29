@@ -2740,7 +2740,7 @@ async def justtesting(ctx, *args):
 	# gather list of all valid templates
 	template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).history(limit=500).flatten()
 	print(f'list of {len(template_list)} templates compiled from #templates')
-	template_list = template_list[int(args[0]):(int(args[0]) + 20)]
+	template_list = template_list[int(args[0]):]
 
 	# loop through until a valid template is found
 	temps_found = 0
