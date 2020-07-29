@@ -28,7 +28,7 @@ from discord.ext import tasks
 # import additional files
 import config
 import connect
-import verify
+import reddit_verify
 import help_cmd
 import tourney_manager
 from sql_functions import execute_sql
@@ -2573,10 +2573,10 @@ async def verify(ctx):
 		# check to see which server is hosting the verification and set unique message
 		if base_message.guild.id == 607342998497525808:
 			# send message via reddit
-			reddit_username = verify.send_message(reddit_username, verification_string, display_name, mex=True)
+			reddit_username = reddit_verify.send_message(reddit_username, verification_string, display_name, mex=True)
 		elif base_message.guild.id == config.MM_GUILD_ID:
 			# send message via reddit
-			reddit_username = verify.send_message(reddit_username, verification_string, display_name)
+			reddit_username = reddit_verify.send_message(reddit_username, verification_string, display_name)
 		else:
 			return
 
@@ -2647,7 +2647,7 @@ async def verify(ctx):
 				print(f'verification compeleted by {display_name}')
 
 				# check specific conditions related to the user's reddit account
-				checks = verify.extra_checks(reddit_username)
+				checks = reddit_verify.extra_checks(reddit_username)
 				if checks[0] == 1 or checks[1] == 1 or checks[2] == 1:
 					print('redditor did not pass specific checks, report sending in #modlog')
 					embed_title = f'New User {reddit_username} Joined: Low Activity'
