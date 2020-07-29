@@ -2686,6 +2686,25 @@ async def verify(ctx):
 		print('meme madness suggestion sent to verified user')
 	return
 
+# 'justtesting' command (#mod-spam)
+@client.command(name='justtesting')
+@commands.has_any_role('Admin')
+@only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
+async def justtesting(ctx):
+	if ctx.author.id != config.ADMIN_IDS[0]:
+		return
+
+	# gather list of all valid templates
+	template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).history(limit=500).flatten()
+	print(f'list of {len(template_list)} templates compiled from #templates')
+
+	# loop through until a valid template is found
+	temps_found = 0
+	for template_message in template_list:
+		temps_found += 1
+	print(temps_found)
+	return
+
 # # '.help' command (duel-mods)
 # if message_content == '.help':
 # 	# build base embed
