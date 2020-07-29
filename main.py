@@ -2726,7 +2726,7 @@ async def justtesting(ctx):
 			template_worksheet.update_cell(template_sheet_write_row, 5, str(template_provider.id)) # provider ID
 		except gspread.exceptions.APIError:
 			print('sleeping for 100 seconds')
-			time.sleep(100)
+			await asyncio.sleep(100)
 			print('trying again')
 			template_worksheet.update_cell(template_sheet_write_row, 1, str(template_message.id)) # discord message ID
 			template_worksheet.update_cell(template_sheet_write_row, 2, str(template_message.embeds[0].image.url)) # raw template link
