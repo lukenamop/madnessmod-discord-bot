@@ -2745,13 +2745,16 @@ async def justtesting(ctx, *args):
 	# loop through until a valid template is found
 	temps_found = 0
 	for template_message in template_list:
-		# write the template information to google sheets
-		template_worksheet.update_cell(template_sheet_write_row, 1, str(template_message.id)) # discord message ID
-		template_worksheet.update_cell(template_sheet_write_row, 2, str(template_message.embeds[0].image.url)) # raw template link
-		# template_worksheet.update_cell(template_sheet_write_row, 3, val) # kapwing template link
-		template_provider = ctx.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').lstrip('!').rstrip('>')))
-		template_worksheet.update_cell(template_sheet_write_row, 4, str(template_provider.display_name)) # provider username
-		template_worksheet.update_cell(template_sheet_write_row, 5, str(template_provider.id)) # provider ID
+		try:
+			# write the template information to google sheets
+			template_worksheet.update_cell(template_sheet_write_row, 1, str(template_message.id)) # discord message ID
+			template_worksheet.update_cell(template_sheet_write_row, 2, str(template_message.embeds[0].image.url)) # raw template link
+			# template_worksheet.update_cell(template_sheet_write_row, 3, val) # kapwing template link
+			template_provider = ctx.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').lstrip('!').rstrip('>')))
+			template_worksheet.update_cell(template_sheet_write_row, 4, str(template_provider.display_name)) # provider username
+			template_worksheet.update_cell(template_sheet_write_row, 5, str(template_provider.id)) # provider ID
+		except:
+			await ctx.send('done')
 
 		template_sheet_write_row += 1
 		temps_found += 1
