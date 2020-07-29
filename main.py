@@ -2724,7 +2724,7 @@ async def justtesting(ctx):
 			template_provider = ctx.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').lstrip('!').rstrip('>')))
 			template_worksheet.update_cell(template_sheet_write_row, 4, str(template_provider.display_name)) # provider username
 			template_worksheet.update_cell(template_sheet_write_row, 5, str(template_provider.id)) # provider ID
-		except APIError:
+		except gspread.exceptions.APIError:
 			print('sleeping for 100 seconds')
 			time.sleep(100)
 			print('trying again')
