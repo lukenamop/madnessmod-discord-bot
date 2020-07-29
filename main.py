@@ -2694,6 +2694,18 @@ async def justtesting(ctx):
 	if ctx.author.id != config.ADMIN_IDS[0]:
 		return
 
+	# find all templates in document
+	template_worksheet = connect.template_sheet.worksheet('Templates')
+	template_sheet_list = template_worksheet.get_all_records()
+	# find how many rows there currently are
+	template_sheet_num = len(template_sheet_list) - 1
+	template_sheet_write_row = template_sheet_num + 2
+
+	# # pick a random template
+	# active_sheet_template = random.choice(template_sheet_list)
+	# # find the template's discord message ID
+	# active_sheet_template['Discord Message ID']
+
 	# gather list of all valid templates
 	template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).history(limit=500).flatten()
 	print(f'list of {len(template_list)} templates compiled from #templates')
@@ -2702,6 +2714,14 @@ async def justtesting(ctx):
 	temps_found = 0
 	for template_message in template_list:
 		temps_found += 1
+		if temps_found <= 3:
+			template_worksheet.update_cell(template_sheet_write_row, 1, str(template_message.id)) # discord message ID
+			template_worksheet.update_cell(template_sheet_write_row, 2, str(template_message.embeds[0].image.url)) # raw template link
+			# template_worksheet.update_cell(template_sheet_write_row, 3, val) # kapwing template link
+			template_provider = ctx.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').lstrip('!').rstrip('>')))
+			template_worksheet.update_cell(template_sheet_write_row, 4, str(template_provider.display_name)) # provider username
+			template_worksheet.update_cell(template_sheet_write_row, 5, str(template_provider.id)) # provider ID
+			template_sheet_write_row += 1
 	print(temps_found)
 	return
 
@@ -2776,7 +2796,7 @@ async def on_raw_reaction_add(payload):
 				await message.remove_reaction(emoji, user)
 			except:
 				print('unable to remove reaction')
-		
+
 		# match voting polls
 		if message.embeds[0].title == 'Match Voting' and message.embeds[0].description.startswith('**Vote for your favorite!'):
 			# check for existing participant in database

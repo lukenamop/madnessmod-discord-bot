@@ -2,6 +2,7 @@
 
 # import libraries
 import psycopg2
+import gspread
 import os
 
 # import additional files
@@ -46,6 +47,15 @@ def db_connect():
 	return True
 
 db_connect()
+
+def g_connect():
+	# establish Google API connection
+	g_client = gspread.authorize(config.G_CREDS)
+
+	global template_sheet
+	template_sheet = g_client.open('Meme Madness x Kapwing Templates')
+
+	return True
 
 # TABLE settings
 # db_id SERIAL PRIMARY KEY
