@@ -2768,14 +2768,15 @@ async def on_raw_reaction_add(payload):
 	# create variable for the reaction emoji
 	emoji = payload.emoji.name
 
-	# remove the reaction
-	try:
-		await message.remove_reaction(emoji, user)
-	except:
-		print('unable to remove reaction')
-
 	# make sure there is an embed before accessing embed fields
 	if len(message.embeds) == 1:
+		if message.embeds[0].title != 'Voluntary Template Submission':
+			# remove the reaction
+			try:
+				await message.remove_reaction(emoji, user)
+			except:
+				print('unable to remove reaction')
+		
 		# match voting polls
 		if message.embeds[0].title == 'Match Voting' and message.embeds[0].description.startswith('**Vote for your favorite!'):
 			# check for existing participant in database
