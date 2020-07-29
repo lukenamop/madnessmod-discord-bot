@@ -2766,6 +2766,10 @@ async def on_raw_reaction_add(payload):
 	except:
 		user = client.get_user(payload.user_id)
 
+	# make sure the user exists
+	if user is None:
+		return
+
 	# don't respond to bots
 	if user.bot:
 		return

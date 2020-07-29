@@ -22,7 +22,7 @@ google_key_json['token_uri'] = os.environ['G_TOKEN_URI']
 google_key_json['auth_provider_x509_cert_url'] = os.environ['G_AUTH_PROVIDER_X509_CERT_URL']
 google_key_json['client_x509_cert_url'] = os.environ['G_CLIENT_X509_CERT_URL']
 
-with open(GOOGLE_KEY_FILE, 'w') as outfile:
+with open(G_KEY_FILE, 'w') as outfile:
 	json.dump(google_key_json, outfile)
 
 # Google API scope
