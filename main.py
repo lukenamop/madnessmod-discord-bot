@@ -2759,9 +2759,9 @@ async def justtesting(ctx, *args):
 			return
 
 		template_sheet_write_row += 1
-		temps_found += 1
 
-	print(temps_found)
+	print('done!')
+	await ctx.send('all the way done!')
 	return
 
 # # '.help' command (duel-mods)
