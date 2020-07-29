@@ -2701,7 +2701,7 @@ async def justtesting(ctx):
 	template_worksheet = connect.template_sheet.worksheet('Templates')
 	template_sheet_list = template_worksheet.get_all_records()
 	# find how many rows there currently are
-	template_sheet_num = len(template_sheet_list) - 1
+	template_sheet_num = len(template_sheet_list)
 	template_sheet_write_row = template_sheet_num + 2
 
 	# # pick a random template
