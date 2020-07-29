@@ -24,7 +24,7 @@ google_key_json['auth_provider_x509_cert_url'] = os.environ['G_AUTH_PROVIDER_X50
 google_key_json['client_x509_cert_url'] = os.environ['G_CLIENT_X509_CERT_URL']
 
 outfile = open(G_KEY_FILE, 'w')
-outfile.write(json.dumps(google_key_json, outfile))
+outfile.write(json.dumps(google_key_json))
 outfile.close()
 
 # Google API scope
