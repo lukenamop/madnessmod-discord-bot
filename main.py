@@ -3039,60 +3039,60 @@ async def on_raw_reaction_add(payload):
 				print('vote confirmation sent to user')
 			return
 
-		# mod help guide
-		if message.embeds[0].title == 'Mod Help Guide':
-			embed_title = 'Mod Help Guide'
-			# check to see which emoji was used
-			if emoji == '⚔️':
-				# match commands
-				embed_description = """**⚔️ Match Commands**
-					\n`.cancelmatch` - cancels the match in a given match channel
-					\n`.forcewin` - ends a match by forcing one of the participants to win (use in matches when one participant hasn't submitted)
-					\n`.matchisfinal` - sets the next match as a final match which will ping `Verified` and `everyone`
-					\n`.showresults` - shows the results of the most recent match in the match channel it's called in
-					\n`.splitmatch @<user> @<user>` - splits a match between two users so they can compete separately
-					\n`.startmatch @<user> @<user>` - starts a match between two users
-					\n`.startsolo @<user>` - starts a user's solo match (use after `.splitmatch`)"""
-			elif emoji == '🏆':
-				# tournament commands
-				embed_description = """**🏆 Tournament Commands**
-					\n`.remindparticipants` - alerts all participants of unfinished matches
-					\n`.createbracket <tournament reference>` - creates a Challonge bracket with the given tournament reference (for example, use `10` to get Meme Madness 10) and populates all participants
-					\n`.creatematchchannels <tournament reference>` - creates a match channel for every "open" match from the specified Challonge bracket
-					\n`.deletematchchannels` - deletes existing match channels from the matches category
-					\n`.prelim <user ID>` - sets a user's tournament role to `Preliminary` (deprecated)
-					\n`.removetournamentroles` - remove past participants' round roles (deprecated)
-					\n`.resignup <user ID> <reason>` - deletes a user's template and DMs them with `<reason>`, prompting them to re-signup
-					\n`.settournamentroles` - removes all past tournament roles and initializes the tournament's participants' round roles (sets them to Round 1)
-					\n`.signuplist` - displays a full list of signups for the current tournament"""
-			elif emoji == '📎':
-				# admin commands
-				embed_description = """**📎 Admin Commands**
-					\n`.activematches` - displays all currently active matches
-					\n`.activepolls` - displays all currently active polls
-					\n`.clearmatches` - clears all matches and votes from the database
-					\n`.clearsignups` - clears all signups from the database
-					\n`.reconnect` - forces the bot to reconnect to its database
-					\n`.removeinvalidparticipants` - removes users who have left the server from the database
-					\n`.restartpolls` - fixes any match polls that are no longer counting votes
-					\n`.togglesignups` - open or close tournament signups
-					\n`.toggletemplates` - enable or disable template requirements with `.signup`"""
-			elif emoji == '↩️':
-				# back to main help menu
-				embed_description = """Use the emojis to navigate this help guide:
-					\n⚔️ Match Commands
-					\n🏆 Tournament Commands
-					\n📎 Admin Commands
-					\n↩️ Return Here"""
-			else:
-				# invalid emoji, do nothing
-				return
+		# # mod help guide
+		# if message.embeds[0].title == 'Mod Help Guide':
+		# 	embed_title = 'Mod Help Guide'
+		# 	# check to see which emoji was used
+		# 	if emoji == '⚔️':
+		# 		# match commands
+		# 		embed_description = """**⚔️ Match Commands**
+		# 			\n`.cancelmatch` - cancels the match in a given match channel
+		# 			\n`.forcewin` - ends a match by forcing one of the participants to win (use in matches when one participant hasn't submitted)
+		# 			\n`.matchisfinal` - sets the next match as a final match which will ping `Verified` and `everyone`
+		# 			\n`.showresults` - shows the results of the most recent match in the match channel it's called in
+		# 			\n`.splitmatch @<user> @<user>` - splits a match between two users so they can compete separately
+		# 			\n`.startmatch @<user> @<user>` - starts a match between two users
+		# 			\n`.startsolo @<user>` - starts a user's solo match (use after `.splitmatch`)"""
+		# 	elif emoji == '🏆':
+		# 		# tournament commands
+		# 		embed_description = """**🏆 Tournament Commands**
+		# 			\n`.remindparticipants` - alerts all participants of unfinished matches
+		# 			\n`.createbracket <tournament reference>` - creates a Challonge bracket with the given tournament reference (for example, use `10` to get Meme Madness 10) and populates all participants
+		# 			\n`.creatematchchannels <tournament reference>` - creates a match channel for every "open" match from the specified Challonge bracket
+		# 			\n`.deletematchchannels` - deletes existing match channels from the matches category
+		# 			\n`.prelim <user ID>` - sets a user's tournament role to `Preliminary` (deprecated)
+		# 			\n`.removetournamentroles` - remove past participants' round roles (deprecated)
+		# 			\n`.resignup <user ID> <reason>` - deletes a user's template and DMs them with `<reason>`, prompting them to re-signup
+		# 			\n`.settournamentroles` - removes all past tournament roles and initializes the tournament's participants' round roles (sets them to Round 1)
+		# 			\n`.signuplist` - displays a full list of signups for the current tournament"""
+		# 	elif emoji == '📎':
+		# 		# admin commands
+		# 		embed_description = """**📎 Admin Commands**
+		# 			\n`.activematches` - displays all currently active matches
+		# 			\n`.activepolls` - displays all currently active polls
+		# 			\n`.clearmatches` - clears all matches and votes from the database
+		# 			\n`.clearsignups` - clears all signups from the database
+		# 			\n`.reconnect` - forces the bot to reconnect to its database
+		# 			\n`.removeinvalidparticipants` - removes users who have left the server from the database
+		# 			\n`.restartpolls` - fixes any match polls that are no longer counting votes
+		# 			\n`.togglesignups` - open or close tournament signups
+		# 			\n`.toggletemplates` - enable or disable template requirements with `.signup`"""
+		# 	elif emoji == '↩️':
+		# 		# back to main help menu
+		# 		embed_description = """Use the emojis to navigate this help guide:
+		# 			\n⚔️ Match Commands
+		# 			\n🏆 Tournament Commands
+		# 			\n📎 Admin Commands
+		# 			\n↩️ Return Here"""
+		# 	else:
+		# 		# invalid emoji, do nothing
+		# 		return
 
-			# update the help guide
-			embed = await generate_embed('yellow', embed_title, embed_description)
-			await message.edit(embed=embed)
-			print('mod help guide edited')
-			return
+		# 	# update the help guide
+		# 	embed = await generate_embed('yellow', embed_title, embed_description)
+		# 	await message.edit(embed=embed)
+		# 	print('mod help guide edited')
+		# 	return
 
 		# points leaderboard (overall)
 		if message.embeds[0].title == 'Overall Points Leaderboard':
@@ -3164,6 +3164,35 @@ async def on_raw_reaction_add(payload):
 
 			embed = await generate_embed('blue', embed_title, embed_description)
 			await message.edit(embed=embed)
+			return
+
+		# voluntary template submissions
+		if message.embeds[0].title == 'Voluntary Template Submission':
+			# check to see which emoji was used
+			if emoji == '👎':
+				if user.id == config.ADMIN_IDS[0]:
+					# establish a google connection
+					connect.g_connect()
+
+					# find all templates in document
+					template_worksheet = connect.template_sheet.worksheet('Templates')
+					template_list = template_worksheet.get_all_records()
+					# find the entry for the template
+					template_num = 1
+					template_found = False
+					for template_entry in template_list:
+						template_num += 1
+						if template_entry['Discord Message ID'] == message.id:
+							# template found, break out
+							template_found = True
+							break
+
+					# if the template was found, remove it from the document
+					if template_found:
+						template_worksheet.delete_row(template_num)
+
+					# remove the template from #templates
+					await message.delete()
 			return
 	return
 
