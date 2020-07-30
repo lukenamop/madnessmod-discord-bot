@@ -1657,7 +1657,7 @@ async def splitmatch(ctx, member1:discord.Member=None, member2:discord.Member=No
 	embed_title = f'Template for #{ctx.channel.name}'
 	template_author = template_entry['Provider Username']
 	embed_description = f'Here\'s a random template! This template was submitted by {template_author}'
-	embed = await generate_embed('green', embed_title, embed_description, attachment=template_url)
+	embed = await generate_embed('green', embed_title, embed_description, attachment=template_entry['Raw Template Link'])
 	nonce = f'spltemp{channel_id}'
 	spltemp_message = await duelmods_chan.send(embed=embed, nonce=nonce)
 	await spltemp_message.add_reaction('<:check_mark:637394596472815636>')
