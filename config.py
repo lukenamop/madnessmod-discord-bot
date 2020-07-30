@@ -31,7 +31,7 @@ G_CREDS = ServiceAccountCredentials.from_json_keyfile_dict(keyfile_dict=google_k
 
 TOKEN = os.environ['DISCORD_TOKEN']
 CMD_PREFIX = '.' # the bot's command prefix
-TESTING = True # if set to true, stats will not be recorded to the database
+TESTING = False # if set to true, stats will not be recorded to the database
 DISABLE_BOT = False # if set to true, only lukenamop can use the bot
 MM_GUILD_ID = 581695290986332160 # Meme Madness guild ID
 ADMIN_IDS = [324273473360887808, 380462665358901268, 583050600984346655] # admin user IDs (lukenamop, eltoch, UncreativeFilth)
