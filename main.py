@@ -3376,6 +3376,9 @@ async def on_reaction_add(reaction, user):
 						await client.get_channel(config.TEMP_ARCHIVE_CHAN_ID).send(embed=template_message.embeds[0])
 						await template_message.delete()
 						print('template deleted from templates channel')
+						# delete template entry from google sheet
+						template_worksheet.delete_row(template_num)
+						print('template deleted from google sheet')
 
 					# sleep for 15 minutes (config.MATCH_WARN1_TIME seconds)
 					await asyncio.sleep(config.MATCH_WARN1_TIME)
