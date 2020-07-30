@@ -2781,7 +2781,10 @@ async def on_raw_reaction_add(payload):
 				embed_title = 'Signups Closed'
 				embed_description = f'Signups are closed for the current tournament! Please try again when signups have opened again. To receive a notification when signups open, head to {client.get_channel(600355436033736714).mention} and give yourself the `Sign-Up Pings` role.'
 				embed = await generate_embed('red', embed_title, embed_description)
-				await dm_channel.send(embed=embed)
+				try:
+					await dm_channel.send(embed=embed)
+				except discord.errors.Forbidden:
+					print(f'failed to send DM to {member.display_name}')
 				print(f'signups closed, signup rejected from {member.display_name}')
 				return
 
@@ -2796,7 +2799,10 @@ async def on_raw_reaction_add(payload):
 				embed_title = 'Error: Already Signed Up'
 				embed_description = 'It looks like you\'ve already signed up for this cycle of Meme Madness! Contact a moderator if this is incorrect.'
 				embed = await generate_embed('red', embed_title, embed_description)
-				await dm_channel.send(embed=embed)
+				try:
+					await dm_channel.send(embed=embed)
+				except discord.errors.Forbidden:
+					print(f'failed to send DM to {member.display_name}')
 				print(f'already signed up from {member.display_name}')
 				return
 
@@ -2810,7 +2816,10 @@ async def on_raw_reaction_add(payload):
 			embed_title = 'Signup Confirmation'
 			embed_description = f'Thank you for signing up {member.mention}! If there are any issues with your entry you will be contacted.'
 			embed = await generate_embed('green', embed_title, embed_description)
-			await dm_channel.send(embed=embed)
+			try:
+				await dm_channel.send(embed=embed)
+			except discord.errors.Forbidden:
+				print(f'failed to send DM to {member.display_name}')
 
 			# send signup to #signups
 			embed_title = 'Signup Confirmed'
