@@ -2739,14 +2739,7 @@ async def on_raw_reaction_add(payload):
 		channel = dm_channel
 	message = await channel.fetch_message(payload.message_id)
 
-	# only act on reactions to the bot
-	if message.author.id != client.user.id:
-		return
-
-	# create variable for the reaction emoji
-	emoji = payload.emoji.name
-
-	# respond to signup emojis
+	# act on signup emojis
 	if emoji == '✍️':
 		if message.channel.id == config.ANNOUNCEMENTS_CHAN_ID and message.content.startswith('__**Meme Madness'):
 			# verify member exists
@@ -2809,6 +2802,13 @@ async def on_raw_reaction_add(payload):
 				connect.conn.commit()
 				print('user added to participants table in postgresql')
 			return
+
+	# generally, only act on reactions to the bot
+	if message.author.id != client.user.id:
+		return
+
+	# create variable for the reaction emoji
+	emoji = payload.emoji.name
 
 	# make sure there is an embed before accessing embed fields
 	if len(message.embeds) == 1:
