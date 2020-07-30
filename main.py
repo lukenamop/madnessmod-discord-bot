@@ -1178,86 +1178,86 @@ async def removetournamentroles(ctx):
 		return
 	return
 
-# 'resignup' command (#mod-spam)
-@client.command(name='resignup')
-@commands.has_any_role('Duel Mod', 'Admin')
-@only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
-# TODO: rewrite "*args"
-async def resignup(ctx, *args):
-	print('resignup command in #duel-mods')
-	# IndexError triggers if no reason is included in command
-	# ValueError triggers if a string is used instead of a number
-	try:
-		# split message apart and save variables
-		user_id = int(args[0])
-		reason = ' '.join(args[1:])
+# # 'resignup' command (#mod-spam)
+# @client.command(name='resignup')
+# @commands.has_any_role('Duel Mod', 'Admin')
+# @only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
+# # TODO: rewrite "*args"
+# async def resignup(ctx, *args):
+# 	print('resignup command in #duel-mods')
+# 	# IndexError triggers if no reason is included in command
+# 	# ValueError triggers if a string is used instead of a number
+# 	try:
+# 		# split message apart and save variables
+# 		user_id = int(args[0])
+# 		reason = ' '.join(args[1:])
 
-		# check signups database for specified user_id
-		query = 'SELECT message_id FROM signups WHERE user_id = %s AND submission_time >= %s'
-		q_args = [user_id, time.time() - config.CYCLE]
-		await execute_sql(query, q_args)
-		result = connect.crsr.fetchone()
-		if result is not None:
-			# DM user to notify of resignup
-			user_channel = client.get_user(user_id).dm_channel
-			if user_channel is None:
-				user_channel = await client.get_user(user_id).create_dm()
+# 		# check signups database for specified user_id
+# 		query = 'SELECT message_id FROM signups WHERE user_id = %s AND submission_time >= %s'
+# 		q_args = [user_id, time.time() - config.CYCLE]
+# 		await execute_sql(query, q_args)
+# 		result = connect.crsr.fetchone()
+# 		if result is not None:
+# 			# DM user to notify of resignup
+# 			user_channel = client.get_user(user_id).dm_channel
+# 			if user_channel is None:
+# 				user_channel = await client.get_user(user_id).create_dm()
 
-			# build resignup embed
-			embed_title = 'Re-signup Required'
-			embed_description = f'Your signup was removed for reason: `{reason}`. To enter this cycle of Meme Madness please `.signup` with a new template. If you have any questions please contact the moderators. Thank you!'
-			embed = await generate_embed('red', embed_title, embed_description)
-			await user_channel.send(embed=embed)
-			print('DM sent to user')
+# 			# build resignup embed
+# 			embed_title = 'Re-signup Required'
+# 			embed_description = f'Your signup was removed for reason: `{reason}`. To enter this cycle of Meme Madness please `.signup` with a new template. If you have any questions please contact the moderators. Thank you!'
+# 			embed = await generate_embed('red', embed_title, embed_description)
+# 			await user_channel.send(embed=embed)
+# 			print('DM sent to user')
 
-			# remove template/signup message from the #signups or #templates channel
-			template_message_id = result[0]
-			# error triggers if template/signup message does not exist
-			try:
-				template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
-				print(template_message.content)
-				await template_message.delete()
-				print('template message deleted')
-			except:
-				print('no template message to delete')
+# 			# remove template/signup message from the #signups or #templates channel
+# 			template_message_id = result[0]
+# 			# error triggers if template/signup message does not exist
+# 			try:
+# 				template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
+# 				print(template_message.content)
+# 				await template_message.delete()
+# 				print('template message deleted')
+# 			except:
+# 				print('no template message to delete')
 
-			# remove signup info from postgresql
-			query = 'DELETE FROM signups WHERE user_id = %s AND submission_time >= %s'
-			q_args = [user_id, time.time() - config.CYCLE]
-			await execute_sql(query, q_args)
-			connect.conn.commit()
-			print('signup info deleted')
+# 			# remove signup info from postgresql
+# 			query = 'DELETE FROM signups WHERE user_id = %s AND submission_time >= %s'
+# 			q_args = [user_id, time.time() - config.CYCLE]
+# 			await execute_sql(query, q_args)
+# 			connect.conn.commit()
+# 			print('signup info deleted')
 
-			# build resignup confirmation embed
-			embed_title = 'Signup Deleted'
-			embed_description = f'{ctx.guild.get_member(user_id).mention}\'s signup has been deleted. I have sent them a DM including your reason for removing their signup and told them to `.signup` again if they\'d like to participate.'
-			embed = await generate_embed('green', embed_title, embed_description)
-			await ctx.send(embed=embed)
-			return
-		else:
-			# build resignup error embed (no matching signup)
-			embed_title = 'Error: No Matching Signup'
-			embed_description = 'Double check that you\'ve copied the user\'s exact 18 digit ID (e.g. `client.user.id`).'
-			embed = await generate_embed('red', embed_title, embed_description)
-			await ctx.send(embed=embed)
-			print('no matching submission error with resignup')
-			return
-	except IndexError:
-		# build resignup error embed (no reason given)
-		embed_title = 'Error: No Reason Given'
-		embed_description = 'Please include a reason for removing the specified signup! The format is `.resignup <user ID> <reason>`.'
-		embed = await generate_embed('red', embed_title, embed_description)
-		await ctx.send(embed=embed)
-		print('no reason given for resignup')
-		return
-	except ValueError:
-		# build resignup error embed (no matching signup)
-		embed_title = 'Error: No Matching Signup'
-		embed_description = 'Double check that you\'ve copied the user\'s exact 18 digit ID (e.g. `client.user.id`).'
-		embed = await generate_embed('red', embed_title, embed_description)
-		await ctx.send(embed=embed)
-		print('non-int passed to resignup')
-		return
+# 			# build resignup confirmation embed
+# 			embed_title = 'Signup Deleted'
+# 			embed_description = f'{ctx.guild.get_member(user_id).mention}\'s signup has been deleted. I have sent them a DM including your reason for removing their signup and told them to `.signup` again if they\'d like to participate.'
+# 			embed = await generate_embed('green', embed_title, embed_description)
+# 			await ctx.send(embed=embed)
+# 			return
+# 		else:
+# 			# build resignup error embed (no matching signup)
+# 			embed_title = 'Error: No Matching Signup'
+# 			embed_description = 'Double check that you\'ve copied the user\'s exact 18 digit ID (e.g. `client.user.id`).'
+# 			embed = await generate_embed('red', embed_title, embed_description)
+# 			await ctx.send(embed=embed)
+# 			print('no matching submission error with resignup')
+# 			return
+# 	except IndexError:
+# 		# build resignup error embed (no reason given)
+# 		embed_title = 'Error: No Reason Given'
+# 		embed_description = 'Please include a reason for removing the specified signup! The format is `.resignup <user ID> <reason>`.'
+# 		embed = await generate_embed('red', embed_title, embed_description)
+# 		await ctx.send(embed=embed)
+# 		print('no reason given for resignup')
+# 		return
+# 	except ValueError:
+# 		# build resignup error embed (no matching signup)
+# 		embed_title = 'Error: No Matching Signup'
+# 		embed_description = 'Double check that you\'ve copied the user\'s exact 18 digit ID (e.g. `client.user.id`).'
+# 		embed = await generate_embed('red', embed_title, embed_description)
+# 		await ctx.send(embed=embed)
+# 		print('non-int passed to resignup')
+# 		return
 
 # 'settournamentroles' command (#mod-spam)
 @client.command(name='settournamentroles')
@@ -2779,7 +2779,7 @@ async def on_raw_reaction_add(payload):
 
 			# check to see if user has signed up in the last 7 days (config.CYCLE seconds)
 			query = 'SELECT * FROM signups WHERE user_id = %s AND submission_time >= %s'
-			q_args = [ctx.author.id, time.time() - config.CYCLE]
+			q_args = [member.id, time.time() - config.CYCLE]
 			await execute_sql(query, q_args)
 			result = connect.crsr.fetchone()
 			# don't create a new signup for previously signed up users
@@ -2800,7 +2800,7 @@ async def on_raw_reaction_add(payload):
 			print('signup info added to postgresql')
 
 			embed_title = 'Signup Confirmation'
-			embed_description = f'Thank you for signing up {user.mention}! If there are any issues with your entry you will be contacted.'
+			embed_description = f'Thank you for signing up {member.mention}! If there are any issues with your entry you will be contacted.'
 			embed = await generate_embed('green', embed_title, embed_description)
 			await dm_channel.send(embed=embed)
 
