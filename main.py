@@ -1403,6 +1403,13 @@ async def signup(ctx):
 	if member is None:
 		return
 
+	# check tournament settings via database
+	query = 'SELECT signups_open FROM settings WHERE guild_id = %s'
+	q_args = [config.MM_GUILD_ID]
+	await execute_sql(query, q_args)
+	result = connect.crsr.fetchone()
+	signups_open = result[0]
+
 	# check to see if signups are open
 	if not signups_open:
 		embed_title = 'Signups Closed'
@@ -2708,8 +2715,8 @@ async def on_message(message):
 	else:
 		# add reactions to specific announcements
 		if message.channel.id == config.ANNOUNCEMENTS_CHAN_ID:
-			# add a signup emoji
 			if message.content.startswith('__**Meme Madness'):
+				# add a signup emoji
 				await message.add_reaction('✍️')
 		await client.process_commands(message)
 		return
@@ -2743,7 +2750,7 @@ async def on_raw_reaction_add(payload):
 	if channel is None:
 		channel = dm_channel
 	message = await channel.fetch_message(payload.message_id)
-	
+
 	# create variable for the reaction emoji
 	emoji = payload.emoji.name
 
@@ -2753,6 +2760,13 @@ async def on_raw_reaction_add(payload):
 			# verify member exists
 			if member is None or dm_channel is None:
 				return
+
+			# check tournament settings via database
+			query = 'SELECT signups_open FROM settings WHERE guild_id = %s'
+			q_args = [config.MM_GUILD_ID]
+			await execute_sql(query, q_args)
+			result = connect.crsr.fetchone()
+			signups_open = result[0]
 
 			# check to see if signups are open
 			if not signups_open:
