@@ -1450,8 +1450,8 @@ async def signup(ctx):
 	embed_title = 'Signup Confirmed'
 	embed_description = f'{member.mention} ({escape_underscores(member.display_name)}, {member.id})'
 	embed = await generate_embed('green', embed_title, embed_description)
-	template_chan = client.get_channel(config.SIGNUP_CHAN_ID)
-	template_message = await template_chan.send(embed=embed)
+	signup_chan = client.get_channel(config.SIGNUP_CHAN_ID)
+	template_message = await signup_chan.send(embed=embed)
 	print(f'signup sent to #signups by {ctx.author.display_name}')
 
 	# check for existing participant in database
