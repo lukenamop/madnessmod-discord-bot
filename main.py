@@ -1697,55 +1697,40 @@ async def startmatch(ctx, member1:discord.Member=None, member2:discord.Member=No
 	embed = await generate_embed('yellow', embed_title, embed_description)
 	await ctx.send(embed=embed)
 
-	# gather list of all valid templates
-	template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).history(limit=500).flatten()
-	print(f'list of {len(template_list)} templates compiled from #templates')
+	# establish a google connection
+	connect.g_connect()
+
+	# find all templates in document
+	template_worksheet = connect.template_sheet.worksheet('Templates')
+	template_list = template_worksheet.get_all_records()
+	print(f'list of {len(template_list)} templates compiled from google sheet')
 	duelmods_chan = client.get_channel(config.MOD_SPAM_CHAN_ID)
 
 	# loop through until a valid template is found
-	found_template = False
 	iteration = 0
-	while (not found_template) and iteration >= 0:
+	while iteration >= 0:
 		iteration = iteration + 1
 		# don't allow an infinite loop
-		if iteration >= 50:
+		if iteration >= 250:
 			embed_title = 'No Valid Template'
-			embed_description = 'Template search stopped after iterating through 50 templates. Please try again.'
+			embed_description = 'Template search stopped after iterating through 250 templates. Please try again.'
 			embed = await generate_embed('red', embed_title, embed_description)
 			await ctx.send(embed=embed)
-			print('50 templates searched, no valid template found, stopping while loop')
+			print('250 templates searched, no valid template found, stopping while loop')
 			return
 
 		# check to make sure there is at least one template in the list
 		if len(template_list) >= 1:
-			template_message = random.choice(template_list)
-			# initiate reaction-related variables
-			ups = 0
-			shrugs = 0
-			downs = 0
-			if len(template_message.reactions) >= 1:
-				for reaction in template_message.reactions:
-					# count relevant reactions (subtract 1 so that bot reactions aren't counted)
-					if reaction.emoji == '👍':
-						ups = reaction.count - 1
-					elif reaction.emoji == '🤷':
-						shrugs = reaction.count - 1
-					elif reaction.emoji == '👎':
-						downs = reaction.count - 1
-			# check to see if the template is quality
-			if ups >= 2 and downs <= 1:
-				if len(template_message.embeds) == 1:
-					template_url = template_message.embeds[0].image.url
-					template_author = ctx.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').lstrip('!').rstrip('>')))
-				else:
-					template_url = template_message.attachments[0].url
-					template_author = template_message.author
+			template_entry = random.choice(template_list)
+			if template_entry['Kapwing Template Link'] == '':
+				print(f'template has no kapwing link: {template_entry['Discord Message ID']}')
+			else:
+				print(f'template found: {template_entry['Kapwing Template Link']}')
+				if not (member1.id == int(template_entry['Provider ID']) or member2.id == int(template_entry['Provider ID'])):
+					print('valid template found')
+					break
 
-				# if the template author is neither of the match members, break out of the loop
-				if not (member1.mention == template_author.mention or member2.mention == template_author.mention):
-					found_template = True
-
-		# trigger this if there are no templates
+		# break if there are no templates
 		else:
 			# build startmatch error (no templates)
 			embed_title = 'Match Error'
@@ -1764,7 +1749,7 @@ async def startmatch(ctx, member1:discord.Member=None, member2:discord.Member=No
 
 	# add match info to postgresql
 	query = 'INSERT INTO matches (u1_id, u2_id, channel_id, template_message_id, creation_time, is_final) VALUES (%s, %s, %s, %s, %s, %s)'
-	q_args = [member1.id, member2.id, channel_id, template_message.id, time.time(), match_is_final]
+	q_args = [member1.id, member2.id, channel_id, int(template_entry['Discord Message ID']), time.time(), match_is_final]
 	await execute_sql(query, q_args)
 	connect.conn.commit()
 	print('match added to database')
@@ -1779,8 +1764,8 @@ async def startmatch(ctx, member1:discord.Member=None, member2:discord.Member=No
 
 	# build random template embed
 	embed_title = f'Template for #{ctx.channel.name}'
-	embed_description = f'Here\'s a random template! This template was submitted by {template_author.display_name}'
-	embed = await generate_embed('green', embed_title, embed_description, attachment=template_url)
+	embed_description = f'Here\'s a random template! This template was submitted by {template_entry['Provider Username']}\n##{template_entry['Discord Message ID']}##'
+	embed = await generate_embed('green', embed_title, embed_description, attachment=template_entry['Raw Template Link'])
 	nonce = f'tempcon{channel_id}'
 	await duelmods_chan.send(ctx.author.mention)
 	tempcon_message = await duelmods_chan.send(embed=embed, nonce=nonce)
