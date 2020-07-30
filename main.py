@@ -2836,13 +2836,13 @@ async def on_raw_reaction_add(payload):
 	if len(message.embeds) == 1:
 
 		remove_reaction = True
-		if message.embeds[0].title == 'Voluntary Template Submission':
+		if isinstance(channel, discord.DMChannel):
 			# don't remove the reaction
 			remove_reaction = False
-
-		if channel.category.id == config.MOD_CATEGORY_ID:
-			# don't remove the reaction
-			remove_reaction = False
+		else:
+			if channel.category.id == config.MOD_CATEGORY_ID:
+				# don't remove the reaction
+				remove_reaction = False
 
 		if remove_reaction:
 			try:
