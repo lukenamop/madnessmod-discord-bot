@@ -1767,8 +1767,7 @@ async def startmatch(ctx, member1:discord.Member=None, member2:discord.Member=No
 	# build random template embed
 	embed_title = f'Template for #{ctx.channel.name}'
 	template_author = template_entry['Provider Username']
-	template_message_id = template_entry['Discord Message ID']
-	embed_description = f'Here\'s a random template! This template was submitted by {template_author}\n##{template_message_id}##'
+	embed_description = f'Here\'s a random template! This template was submitted by {template_author}'
 	embed = await generate_embed('green', embed_title, embed_description, attachment=template_entry['Raw Template Link'])
 	nonce = f'tempcon{channel_id}'
 	await duelmods_chan.send(ctx.author.mention)
@@ -3294,10 +3293,31 @@ async def on_reaction_add(reaction, user):
 					print('ERROR IN TEMPLATE RANDOMIZATION -- EMOJI NOT FOUND')
 					return
 
-				# get url information from the base message
-				template_url = message.embeds[0].image.url
+				# establish a google connection
+				connect.g_connect()
+
+				# find all templates in document
+				template_worksheet = connect.template_sheet.worksheet('Templates')
+				template_list = template_worksheet.get_all_records()
+
+				# get template info from google sheet
+				match_template_entry = None
+				template_num = 1
+				for template_entry in template_list:
+					template_num += 1
+					if template_entry['Discord Message ID'] == template_message_id:
+						match_template_entry = template_entry
+						break
+
+				# throw an error if the template wasn't found in the google sheet
+				if match_template_entry is None:
+					print('ERROR IN TEMPLATE CONFIRMATION -- TEMPLATE NOT IN GOOGLE SHEET')
+					return
+
+				template_url = match_template_entry['Raw Template Link']
+				template_kapwing_link = match_template_entry['Kapwing Template Link']
+				template_author = message.guild.get_member(int(match_template_entry['Provider ID']))
 				template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
-				template_author = message.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').lstrip('!').rstrip('>')))
 
 				#  find which reaction was added
 				if reaction.emoji == check_emoji:
@@ -3319,7 +3339,7 @@ async def on_reaction_add(reaction, user):
 
 					# send notifying DMs to participants
 					embed_title = 'Match Started'
-					embed_description = 'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.** Here is your template:'
+					embed_description = f'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.**\n\nNot sure where to get started? [Use this link on any platform to quickly edit captions: {template_kapwing_link}]({template_kapwing_link})'
 					embed = await generate_embed('yellow', embed_title, embed_description, attachment=template_url)
 					# discord.errors.Forbidden triggers if u_channel.send() is stopped
 					try:
