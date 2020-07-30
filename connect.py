@@ -28,9 +28,8 @@ def db_connect():
 	result = crsr.fetchone()
 	print('participants: ' + str(result[0]))
 
-	# reset leaderboard points and related stats for all users
-	# crsr.execute("""UPDATE participants SET match_votes = 0, lb_points = 0, longest_vote_streak = 0, vote_streak = 0, last_vote_streak_time = 0, unvoted_match_start_time = NULL""")
-	# conn.commit()
+	crsr.execute("""ALTER TABLE matches ADD COLUMN template_kapwing_link VARCHAR(200) DEFAULT NULL""")
+	conn.commit()
 
 	crsr.execute("""SELECT COUNT(*) FROM matches""")
 	result = crsr.fetchone()
@@ -101,6 +100,7 @@ def g_connect():
 # template_message_id NUMERIC(18) DEFAULT NULL
 # template_url VARCHAR(200) DEFAULT NULL
 # template_author_id NUMERIC(18) DEFAULT NULL
+# template_kapwing_link VARCHAR(200) DEFAULT NULL
 # poll_start_time NUMERIC(10) DEFAULT NULL
 # poll_extensions NUMERIC(1) DEFAULT 0
 # is_final BOOLEAN DEFAULT False

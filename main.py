@@ -1594,37 +1594,40 @@ async def splitmatch(ctx, member1:discord.Member=None, member2:discord.Member=No
 	embed = await generate_embed('yellow', embed_title, embed_description)
 	await ctx.send(embed=embed)
 
-	template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).history(limit=200).flatten()
-	print(f'list of {len(template_list)} templates compiled from #templates')
+	# establish a google connection
+	connect.g_connect()
+
+	# find all templates in document
+	template_worksheet = connect.template_sheet.worksheet('Templates')
+	template_list = template_worksheet.get_all_records()
+	print(f'list of {len(template_list)} templates compiled from google sheet')
 	duelmods_chan = client.get_channel(config.MOD_SPAM_CHAN_ID)
 
 	# loop through until a valid template is found
-	found_template = False
 	iteration = 0
-	while (not found_template) and iteration >= 0:
+	while iteration >= 0:
 		iteration = iteration + 1
 		# don't allow an infinite loop
-		if iteration >= 50:
+		if iteration >= 250:
 			embed_title = 'No Valid Template'
-			embed_description = 'Template search stopped after iterating through 50 templates. Please try again.'
+			embed_description = 'Template search stopped after iterating through 250 templates. Please try again.'
 			embed = await generate_embed('red', embed_title, embed_description)
 			await ctx.send(embed=embed)
-			print('50 templates searched, no valid template found, stopping while loop')
+			print('250 templates searched, no valid template found, stopping while loop')
 			return
 
 		# check to make sure there is at least one template in the list
 		if len(template_list) >= 1:
-			template_message = random.choice(template_list)
-			if len(template_message.embeds) == 1:
-				template_url = template_message.embeds[0].image.url
-				template_author = ctx.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').lstrip('!').rstrip('>')))
+			template_entry = random.choice(template_list)
+			if template_entry['Kapwing Template Link'] == '':
+				template_message_id = template_entry['Discord Message ID']
+				print(f'template has no kapwing link: {template_message_id}')
 			else:
-				template_url = template_message.attachments[0].url
-				template_author = template_message.author
-
-			# if the template author is neither of the match members, break out of the loop
-			if not (member1 == template_author or member2 == template_author):
-				found_template = True
+				template_kapwing_link = template_entry['Kapwing Template Link']
+				print(f'template found: {template_kapwing_link}')
+				if not (member1.id == int(template_entry['Provider ID']) or member2.id == int(template_entry['Provider ID'])):
+					print('valid template found')
+					break
 
 		# trigger this if there are no templates
 		else:
@@ -1645,7 +1648,7 @@ async def splitmatch(ctx, member1:discord.Member=None, member2:discord.Member=No
 
 	# add match info to postgresql
 	query = 'INSERT INTO matches (u1_id, u2_id, channel_id, creation_time, template_message_id, is_final) VALUES (%s, %s, %s, %s, %s, %s)'
-	q_args = [member1.id, member2.id, channel_id, time.time(), template_message.id, match_is_final]
+	q_args = [member1.id, member2.id, channel_id, time.time(), template_message_id, match_is_final]
 	await execute_sql(query, q_args)
 	connect.conn.commit()
 	print('match added to database')
@@ -1794,11 +1797,12 @@ async def startsolo(ctx, match_user:discord.Member=None):
 	match_channel = ctx.channel
 	channel_id = ctx.channel.id
 
-	query = 'SELECT creation_time, u1_id, u2_id, u1_submitted, u2_submitted, template_url, start_time FROM matches WHERE channel_id = %s ORDER BY db_id DESC'
+	query = 'SELECT creation_time, u1_id, u2_id, u1_submitted, u2_submitted, template_url, template_kapwing_link, start_time FROM matches WHERE channel_id = %s ORDER BY db_id DESC'
 	q_args = [channel_id]
 	await execute_sql(query, q_args)
 	result = connect.crsr.fetchone()
 
+	# this looks sloppy but it's necessary, even if this doesn't fail it can fail later
 	if result is not None:
 		failed = False
 	else:
@@ -1820,7 +1824,7 @@ async def startsolo(ctx, match_user:discord.Member=None):
 			submitted = 'u1_submitted'
 			print('match and participant found')
 			# return if there is a start_time but the other user has not yet submitted
-			if result[6] is not None and not result[4]:
+			if result[7] is not None and not result[4]:
 				embed_title = 'Match In Progress...'
 				embed_description = 'Please wait for the other participant to finish their part of the match!'
 				embed = await generate_embed('red', embed_title, embed_description)
@@ -1842,7 +1846,7 @@ async def startsolo(ctx, match_user:discord.Member=None):
 			submitted = 'u2_submitted'
 			print('match and participant found')
 			# return if there is a start_time but the other user has not yet submitted
-			if result[6] is not None and not result[3]:
+			if result[7] is not None and not result[3]:
 				embed_title = 'Match In Progress...'
 				embed_description = 'Please wait for the other participant to finish their part of the match!'
 				embed = await generate_embed('red', embed_title, embed_description)
@@ -1864,6 +1868,7 @@ async def startsolo(ctx, match_user:discord.Member=None):
 		return
 
 	template_url = result[5]
+	template_kapwing_link = result[6]
 	u_channel = await match_user.create_dm()
 
 	if template_url is not None:
@@ -1876,7 +1881,7 @@ async def startsolo(ctx, match_user:discord.Member=None):
 
 		# send notifying DMs to participant
 		embed_title = 'Match Started'
-		embed_description = 'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.** Here is your template:'
+		embed_description = f'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.**\n\nNot sure where to get started? [Use this link on any platform to quickly edit captions: {template_kapwing_link}]({template_kapwing_link})'
 		embed = await generate_embed('yellow', embed_title, embed_description, attachment=template_url)
 		# discord.errors.Forbidden triggers if u_channel.send() is stopped
 		try:
@@ -2032,273 +2037,7 @@ async def submit(ctx):
 	embed_description = 'It looks like you\'ve already submitted for your current match! If this is incorrect, contact a moderator.'
 	embed = await generate_embed('red', embed_title, embed_description)
 
-	if result is not None:
-		u1_id = result[0]
-		u2_id = result[1]
-		u1_submitted = result[2]
-		u2_submitted = result[3]
-		match_channel = client.get_channel(result[4])
-		start_time = result[5]
-		template_url = result[6]
-		match_db_id = result[8]
-		template_author_id = result[9]
-		cancelled = result[10]
-		try:
-			template_author = client.get_guild(config.MM_GUILD_ID).get_member(template_author_id)
-		except:
-			print('template_author was not a valid member')
-
-		# check to see if the match has been cancelled
-		if cancelled:
-			# build submission error embed (match cancelled)
-			embed_title = 'Match Cancelled'
-			embed_description = 'Your match has been cancelled, please check the match channel for more info.'
-			embed = await generate_embed('red', embed_title, embed_description)
-			await ctx.send(embed=embed)
-			print(f'cancelled submission by {ctx.author.display_name}')
-			return
-
-		# check for duplicate submissions
-		if ctx.author.id == u1_id:
-			if u1_submitted:
-				await ctx.send(embed=embed)
-				print(f'duplicate submission by {ctx.author.display_name}')
-				return
-			u_order = 1
-		elif ctx.author.id == u2_id:
-			if u2_submitted:
-				await ctx.send(embed=embed)
-				print(f'duplicate submission by {ctx.author.display_name}')
-				return
-			u_order = 2
-
-		use_ctx_message = True	
-		# check for an attachment
-		if len(ctx.message.attachments) != 1:
-			# build submission embed
-			embed_title = 'Submission Started'
-			embed_description = 'Please send me your final meme to confirm your submission! This submission attempt will expire in 120 seconds.'
-			embed = await generate_embed('yellow', embed_title, embed_description)
-			await ctx.send(embed=embed)
-			print(f'submission attempted without attachment by {ctx.author.display_name}')
-
-			# asyncio.TimeoutError triggers if client.wait_for(message) times out
-			try:
-				# define message requirements (DM message from specified user)
-				def check(m):
-					return m.channel.type == ctx.channel.type and m.author.id == ctx.author.id and len(m.attachments) == 1
-				# wait for a message
-				attachment_message = await client.wait_for('message', check=check, timeout=120)
-				use_ctx_message = False
-				print(f'submission attachment received from {ctx.author.display_name}')
-			except asyncio.TimeoutError:
-				# build submission error embed (timed out)
-				embed_title = 'Submission Timed Out'
-				embed_description = f'If you\'d like to submit your final meme, send me another message with `{config.CMD_PREFIX}submit`!'
-				embed = await generate_embed('red', embed_title, embed_description)
-				await ctx.send(embed=embed)
-				print(f'submission timed out by {ctx.author.display_name}')
-				return
-		else:
-			print(f'submission attachment received from {ctx.author.display_name}')
-
-		# build submission confirmation embed
-		embed_title = 'Submission Confirmation'
-		embed_description = f'Thank you for submitting your final meme {ctx.author.mention}! If there are any issues with your submission you will be contacted.'
-		embed = await generate_embed('green', embed_title, embed_description)
-		await ctx.send(embed=embed)
-		print(f'final meme attachment sent in by {ctx.author.display_name}')
-
-		# get the submission_url
-		if use_ctx_message:
-			# pull attachment url from original message
-			submission_url = ctx.message.attachments[0].url
-		else:
-			# pull attachment url from follow-up message
-			submission_url = attachment_message.attachments[0].url
-
-		if template_url is not None:
-			# build submission confirmation for match channel
-			embed_title = 'Solo Match Complete'
-			embed_description = f'{ctx.author.mention} has completed their part of the match!'
-			embed = await generate_embed('green', embed_title, embed_description)
-			await match_channel.send(embed=embed)
-			print('match channel notified about splitmatch completion')
-
-		# add submission info to postgresql database
-		if u_order == 1:
-			query = 'UPDATE matches SET u1_submitted = true, u1_image_url = %s WHERE db_id = %s'
-			q_args = [submission_url, match_db_id]
-			await execute_sql(query, q_args)
-			connect.conn.commit()
-			print('match info updated in postgresql')
-		if u_order == 2:
-			query = 'UPDATE matches SET u2_submitted = true, u2_image_url = %s WHERE db_id = %s'
-			q_args = [submission_url, match_db_id]
-			await execute_sql(query, q_args)
-			connect.conn.commit()
-			print('match info updated in postgresql')
-
-		if not config.TESTING:
-			# pull participant info from database
-			query = 'SELECT avg_final_meme_time, total_matches FROM participants WHERE user_id = %s'
-			q_args = [ctx.author.id]
-			await execute_sql(query, q_args)
-			results = connect.crsr.fetchone()
-			# check to see if avg_final_meme_time exists
-			if results[0] is None:
-				new_avg_final_meme_time = time.time() - float(start_time)
-			else:
-				new_avg_final_meme_time = ((float(results[0] * results[1]) + (time.time() - float(start_time))) / float(results[1] + 1))
-			# update participant stats in database
-			query = 'UPDATE participants SET avg_final_meme_time = %s WHERE user_id = %s'
-			q_args = [new_avg_final_meme_time, ctx.author.id]
-			await execute_sql(query, q_args)
-			connect.conn.commit()
-			print('participant stats updated')
-
-		# pull match info from database
-		query = 'SELECT u1_id, u2_id, u1_submitted, u2_submitted, u1_image_url, u2_image_url, channel_id, is_final FROM matches WHERE db_id = %s'
-		q_args = [match_db_id]
-		await execute_sql(query, q_args)
-		result = connect.crsr.fetchone()
-		match_is_final = result[7]
-		# find match_channel and submissions_channel from discord
-		match_channel = client.get_channel(result[6])
-		submissions_channel = client.get_channel(config.SUBMISSION_CHAN_ID)
-
-		# if it's a split match, reset start_time
-		if template_url is not None:
-			query = 'UPDATE matches SET start_time = NULL WHERE db_id = %s'
-			q_args = [match_db_id]
-			await execute_sql(query, q_args)
-			connect.conn.commit()
-
-		# only execute if both users have submitted final memes
-		if result[2] and result[3]:
-			# reset start_time
-			query = 'UPDATE matches SET start_time = NULL WHERE db_id = %s'
-			q_args = [match_db_id]
-			await execute_sql(query, q_args)
-			connect.conn.commit()
-			# if it's a split match, send the template to the channel
-			if template_url is not None:
-				try:
-					embed_title = 'Match Template'
-					embed_description = f'Thanks to {template_author.mention} for the template!'
-					embed = await generate_embed('green', embed_title, '', template_url)
-					await match_channel.send(embed=embed)
-					print('template sent to split match channel')
-				except:
-					print('template failed to send to channel')
-
-			if u_order == 1:
-				try:
-					# set user order
-					u1 = match_channel.guild.get_member(result[0])
-					u1_mention = u1.mention
-					u1_link = result[4]
-					u2 = match_channel.guild.get_member(result[1])
-					u2_mention = u2.mention
-					u2_link = result[5]
-				except AttributeError:
-					print('final meme submission stopped due to an AttributeError')
-					return
-				# update match info in database
-				query = 'UPDATE matches SET a_meme = 1 WHERE db_id = %s'
-				q_args = [match_db_id]
-				await execute_sql(query, q_args)
-				connect.conn.commit()
-			if u_order == 2:
-				try:
-					# ser user order
-					u1 = match_channel.guild.get_member(result[1])
-					u1_mention = u1.mention
-					u1_link = result[5]
-					u2 = match_channel.guild.get_member(result[0])
-					u2_mention = u2.mention
-					u2_link = result[4]
-				except AttributeError:
-					print('final meme submission stopped due to an AttributeError')
-					return
-				# update match info in database
-				query = 'UPDATE matches SET a_meme = 2 WHERE db_id = %s'
-				q_args = [match_db_id]
-				await execute_sql(query, q_args)
-				connect.conn.commit()
-
-			# send final memes to #submissions channel
-			# submission embed for user 1
-			embed_title = 'Final Meme Submission'
-			embed_description = f'{u1_mention} ({escape_underscores(u1.display_name)}, {result[0]})'
-			embed_link = u1_link
-			embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
-			await submissions_channel.send(embed=embed)
-			# submission embed for user 2
-			embed_description = f'{u2_mention} ({escape_underscores(u2.display_name)}, {result[1]})'
-			embed_link = u2_link
-			embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
-			await submissions_channel.send(embed=embed)
-			print('final memes sent to #submissions')
-
-			# send final memes to match channel
-			# submission embed for image A
-			embed_description = 'Image A'
-			embed_link = u1_link
-			embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
-			await match_channel.send(embed=embed)
-			# submission embed for image B
-			embed_description = 'Image B'
-			embed_link = u2_link
-			embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
-			await match_channel.send(embed=embed)
-
-			if match_is_final:
-				verified_role = match_channel.guild.get_role(599354132771504128)
-				await match_channel.send(f'Vote in the final! @everyone {verified_role.mention}')
-			else:
-				if not config.TESTING:
-					# await match_channel.send('-mrole 705420253957718098 voting has started in a new match, come vote!')
-					duel_mod_role = match_channel.guild.get_role(config.DUEL_MOD_ROLE_ID)
-					await match_channel.send(f'Voting has started, please mention `Vote Pings` to let them know! {duel_mod_role.mention}')
-				else:
-					await match_channel.send('This is just a test match, not pinging `Vote Pings` or `here`.')
-
-			# build voting embed
-			embed_title = 'Match Voting'
-			embed_description = '**Vote for your favorite!** Results will be sent to this channel when voting ends in 2 hours.\n🇦 First image\n🇧 Second image'
-			embed = await generate_embed('pink', embed_title, embed_description)
-			poll_message = await match_channel.send(embed=embed)
-
-			# add reactions to poll message
-			await poll_message.add_reaction('🇦')
-			await poll_message.add_reaction('🇧')
-
-			# pull the match data
-			query = 'SELECT db_id, u1_id, u2_id FROM matches WHERE channel_id = %s ORDER BY db_id DESC'
-			q_args = [poll_message.channel.id]
-			await execute_sql(query, q_args)
-			result = connect.crsr.fetchone()
-			# initialize important variables
-			db_id, u1_id, u2_id = result
-			time_now = int(time.time())
-
-			# set poll start time in the match database
-			query = 'UPDATE matches SET poll_start_time = %s, poll_message_id = %s WHERE db_id = %s'
-			q_args = [time_now, poll_message.id, db_id]
-			await execute_sql(query, q_args)
-			connect.conn.commit()
-			print(f'poll_start_time set in database ({time_now})')
-
-			if not config.TESTING:
-				# set participants' unvoted_match_start_time to the current time (if not already set)
-				query = 'UPDATE participants SET unvoted_match_start_time = %s WHERE unvoted_match_start_time IS NULL AND user_id != %s AND user_id != %s'
-				q_args = [time_now, u1_id, u2_id]
-				await execute_sql(query, q_args)
-				connect.conn.commit()
-				print('unvoted_match_start_time set for valid participants')
-		return
-	else:
+	if result is None:
 		# build submission error embed (no active match)
 		embed_title = 'No Active Match'
 		embed_description = 'You don\'t appear to have an active match to submit to right now.'
@@ -2306,6 +2045,272 @@ async def submit(ctx):
 		await ctx.send(embed=embed)
 		print(f'submission attempt without match by {ctx.author.display_name}')
 		return
+
+	u1_id = result[0]
+	u2_id = result[1]
+	u1_submitted = result[2]
+	u2_submitted = result[3]
+	match_channel = client.get_channel(result[4])
+	start_time = result[5]
+	template_url = result[6]
+	match_db_id = result[8]
+	template_author_id = int(result[9])
+	cancelled = result[10]
+	try:
+		template_author = client.get_guild(config.MM_GUILD_ID).get_member(template_author_id)
+	except:
+		print('template_author was not a valid member')
+
+	# check to see if the match has been cancelled
+	if cancelled:
+		# build submission error embed (match cancelled)
+		embed_title = 'Match Cancelled'
+		embed_description = 'Your match has been cancelled, please check the match channel for more info.'
+		embed = await generate_embed('red', embed_title, embed_description)
+		await ctx.send(embed=embed)
+		print(f'cancelled submission by {ctx.author.display_name}')
+		return
+
+	# check for duplicate submissions
+	if ctx.author.id == u1_id:
+		if u1_submitted:
+			await ctx.send(embed=embed)
+			print(f'duplicate submission by {ctx.author.display_name}')
+			return
+		u_order = 1
+	elif ctx.author.id == u2_id:
+		if u2_submitted:
+			await ctx.send(embed=embed)
+			print(f'duplicate submission by {ctx.author.display_name}')
+			return
+		u_order = 2
+
+	use_ctx_message = True	
+	# check for an attachment
+	if len(ctx.message.attachments) != 1:
+		# build submission embed
+		embed_title = 'Submission Started'
+		embed_description = 'Please send me your final meme to confirm your submission! This submission attempt will expire in 120 seconds.'
+		embed = await generate_embed('yellow', embed_title, embed_description)
+		await ctx.send(embed=embed)
+		print(f'submission attempted without attachment by {ctx.author.display_name}')
+
+		# asyncio.TimeoutError triggers if client.wait_for(message) times out
+		try:
+			# define message requirements (DM message from specified user)
+			def check(m):
+				return m.channel.type == ctx.channel.type and m.author.id == ctx.author.id and len(m.attachments) == 1
+			# wait for a message
+			attachment_message = await client.wait_for('message', check=check, timeout=120)
+			use_ctx_message = False
+			print(f'submission attachment received from {ctx.author.display_name}')
+		except asyncio.TimeoutError:
+			# build submission error embed (timed out)
+			embed_title = 'Submission Timed Out'
+			embed_description = f'If you\'d like to submit your final meme, send me another message with `{config.CMD_PREFIX}submit`!'
+			embed = await generate_embed('red', embed_title, embed_description)
+			await ctx.send(embed=embed)
+			print(f'submission timed out by {ctx.author.display_name}')
+			return
+	else:
+		print(f'submission attachment received from {ctx.author.display_name}')
+
+	# build submission confirmation embed
+	embed_title = 'Submission Confirmation'
+	embed_description = f'Thank you for submitting your final meme {ctx.author.mention}! If there are any issues with your submission you will be contacted.'
+	embed = await generate_embed('green', embed_title, embed_description)
+	await ctx.send(embed=embed)
+	print(f'final meme attachment sent in by {ctx.author.display_name}')
+
+	# get the submission_url
+	if use_ctx_message:
+		# pull attachment url from original message
+		submission_url = ctx.message.attachments[0].url
+	else:
+		# pull attachment url from follow-up message
+		submission_url = attachment_message.attachments[0].url
+
+	if template_url is not None:
+		# build submission confirmation for match channel
+		embed_title = 'Solo Match Complete'
+		embed_description = f'{ctx.author.mention} has completed their part of the match!'
+		embed = await generate_embed('green', embed_title, embed_description)
+		await match_channel.send(embed=embed)
+		print('match channel notified about splitmatch completion')
+
+	# add submission info to postgresql database
+	if u_order == 1:
+		query = 'UPDATE matches SET u1_submitted = true, u1_image_url = %s WHERE db_id = %s'
+		q_args = [submission_url, match_db_id]
+		await execute_sql(query, q_args)
+		connect.conn.commit()
+		print('match info updated in postgresql')
+	if u_order == 2:
+		query = 'UPDATE matches SET u2_submitted = true, u2_image_url = %s WHERE db_id = %s'
+		q_args = [submission_url, match_db_id]
+		await execute_sql(query, q_args)
+		connect.conn.commit()
+		print('match info updated in postgresql')
+
+	if not config.TESTING:
+		# pull participant info from database
+		query = 'SELECT avg_final_meme_time, total_matches FROM participants WHERE user_id = %s'
+		q_args = [ctx.author.id]
+		await execute_sql(query, q_args)
+		results = connect.crsr.fetchone()
+		# check to see if avg_final_meme_time exists
+		if results[0] is None:
+			new_avg_final_meme_time = time.time() - float(start_time)
+		else:
+			new_avg_final_meme_time = ((float(results[0] * results[1]) + (time.time() - float(start_time))) / float(results[1] + 1))
+		# update participant stats in database
+		query = 'UPDATE participants SET avg_final_meme_time = %s WHERE user_id = %s'
+		q_args = [new_avg_final_meme_time, ctx.author.id]
+		await execute_sql(query, q_args)
+		connect.conn.commit()
+		print('participant stats updated')
+
+	# pull match info from database
+	query = 'SELECT u1_id, u2_id, u1_submitted, u2_submitted, u1_image_url, u2_image_url, channel_id, is_final FROM matches WHERE db_id = %s'
+	q_args = [match_db_id]
+	await execute_sql(query, q_args)
+	result = connect.crsr.fetchone()
+	match_is_final = result[7]
+	# find match_channel and submissions_channel from discord
+	match_channel = client.get_channel(result[6])
+	submissions_channel = client.get_channel(config.SUBMISSION_CHAN_ID)
+
+	# if it's a split match, reset start_time
+	if template_url is not None:
+		query = 'UPDATE matches SET start_time = NULL WHERE db_id = %s'
+		q_args = [match_db_id]
+		await execute_sql(query, q_args)
+		connect.conn.commit()
+
+	# only execute if both users have submitted final memes
+	if result[2] and result[3]:
+		# reset start_time
+		query = 'UPDATE matches SET start_time = NULL WHERE db_id = %s'
+		q_args = [match_db_id]
+		await execute_sql(query, q_args)
+		connect.conn.commit()
+		# if it's a split match, send the template to the channel
+		if template_url is not None:
+			try:
+				embed_title = 'Match Template'
+				embed_description = f'Thanks to {template_author.mention} for the template!'
+				embed = await generate_embed('green', embed_title, embed_description, template_url)
+				await match_channel.send(embed=embed)
+				print('template sent to split match channel')
+			except:
+				print('template failed to send to channel')
+
+		if u_order == 1:
+			try:
+				# set user order
+				u1 = match_channel.guild.get_member(result[0])
+				u1_mention = u1.mention
+				u1_link = result[4]
+				u2 = match_channel.guild.get_member(result[1])
+				u2_mention = u2.mention
+				u2_link = result[5]
+			except AttributeError:
+				print('final meme submission stopped due to an AttributeError')
+				return
+			# update match info in database
+			query = 'UPDATE matches SET a_meme = 1 WHERE db_id = %s'
+			q_args = [match_db_id]
+			await execute_sql(query, q_args)
+			connect.conn.commit()
+		if u_order == 2:
+			try:
+				# ser user order
+				u1 = match_channel.guild.get_member(result[1])
+				u1_mention = u1.mention
+				u1_link = result[5]
+				u2 = match_channel.guild.get_member(result[0])
+				u2_mention = u2.mention
+				u2_link = result[4]
+			except AttributeError:
+				print('final meme submission stopped due to an AttributeError')
+				return
+			# update match info in database
+			query = 'UPDATE matches SET a_meme = 2 WHERE db_id = %s'
+			q_args = [match_db_id]
+			await execute_sql(query, q_args)
+			connect.conn.commit()
+
+		# send final memes to #submissions channel
+		# submission embed for user 1
+		embed_title = 'Final Meme Submission'
+		embed_description = f'{u1_mention} ({escape_underscores(u1.display_name)}, {result[0]})'
+		embed_link = u1_link
+		embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
+		await submissions_channel.send(embed=embed)
+		# submission embed for user 2
+		embed_description = f'{u2_mention} ({escape_underscores(u2.display_name)}, {result[1]})'
+		embed_link = u2_link
+		embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
+		await submissions_channel.send(embed=embed)
+		print('final memes sent to #submissions')
+
+		# send final memes to match channel
+		# submission embed for image A
+		embed_description = 'Image A'
+		embed_link = u1_link
+		embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
+		await match_channel.send(embed=embed)
+		# submission embed for image B
+		embed_description = 'Image B'
+		embed_link = u2_link
+		embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
+		await match_channel.send(embed=embed)
+
+		if match_is_final:
+			verified_role = match_channel.guild.get_role(599354132771504128)
+			await match_channel.send(f'Vote in the final! @everyone {verified_role.mention}')
+		else:
+			if not config.TESTING:
+				# await match_channel.send('-mrole 705420253957718098 voting has started in a new match, come vote!')
+				duel_mod_role = match_channel.guild.get_role(config.DUEL_MOD_ROLE_ID)
+				await match_channel.send(f'Voting has started, please mention `Vote Pings` to let them know! {duel_mod_role.mention}')
+			else:
+				await match_channel.send('This is just a test match, not pinging `Vote Pings` or `here`.')
+
+		# build voting embed
+		embed_title = 'Match Voting'
+		embed_description = '**Vote for your favorite!** Results will be sent to this channel when voting ends in 2 hours.\n🇦 First image\n🇧 Second image'
+		embed = await generate_embed('pink', embed_title, embed_description)
+		poll_message = await match_channel.send(embed=embed)
+
+		# add reactions to poll message
+		await poll_message.add_reaction('🇦')
+		await poll_message.add_reaction('🇧')
+
+		# pull the match data
+		query = 'SELECT db_id, u1_id, u2_id FROM matches WHERE channel_id = %s ORDER BY db_id DESC'
+		q_args = [poll_message.channel.id]
+		await execute_sql(query, q_args)
+		result = connect.crsr.fetchone()
+		# initialize important variables
+		db_id, u1_id, u2_id = result
+		time_now = int(time.time())
+
+		# set poll start time in the match database
+		query = 'UPDATE matches SET poll_start_time = %s, poll_message_id = %s WHERE db_id = %s'
+		q_args = [time_now, poll_message.id, db_id]
+		await execute_sql(query, q_args)
+		connect.conn.commit()
+		print(f'poll_start_time set in database ({time_now})')
+
+		if not config.TESTING:
+			# set participants' unvoted_match_start_time to the current time (if not already set)
+			query = 'UPDATE participants SET unvoted_match_start_time = %s WHERE unvoted_match_start_time IS NULL AND user_id != %s AND user_id != %s'
+			q_args = [time_now, u1_id, u2_id]
+			await execute_sql(query, q_args)
+			connect.conn.commit()
+			print('unvoted_match_start_time set for valid participants')
+	return
 
 # 'template' command (DM only)
 @client.command(name='template')
@@ -3214,10 +3219,31 @@ async def on_reaction_add(reaction, user):
 					print('ERROR IN TEMPLATE RANDOMIZATION -- EMOJI NOT FOUND')
 					return
 
-				# get url information from the base message
-				template_url = message.embeds[0].image.url
+				# establish a google connection
+				connect.g_connect()
+
+				# find all templates in document
+				template_worksheet = connect.template_sheet.worksheet('Templates')
+				template_list = template_worksheet.get_all_records()
+
+				# get template info from google sheet
+				match_template_entry = None
+				template_num = 1
+				for template_entry in template_list:
+					template_num += 1
+					if template_entry['Discord Message ID'] == template_message_id:
+						match_template_entry = template_entry
+						break
+
+				# throw an error if the template wasn't found in the google sheet
+				if match_template_entry is None:
+					print('ERROR IN TEMPLATE CONFIRMATION -- TEMPLATE NOT IN GOOGLE SHEET')
+					return
+
+				template_url = match_template_entry['Raw Template Link']
+				template_kapwing_link = match_template_entry['Kapwing Template Link']
+				template_author = message.guild.get_member(int(match_template_entry['Provider ID']))
 				template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
-				template_author = message.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').lstrip('!').rstrip('>')))
 
 				#  find which reaction was added
 				if reaction.emoji == check_emoji:
@@ -3239,11 +3265,21 @@ async def on_reaction_add(reaction, user):
 					await match_channel.send(embed=embed)
 
 					# update match start_time and template_url in database
-					query = 'UPDATE matches SET template_message_id = NULL, template_url = %s, template_author_id = %s WHERE channel_id = %s AND start_time IS NULL AND template_message_id IS NOT NULL'
-					q_args = [template_url, template_author.id, match_channel.id]
+					query = 'UPDATE matches SET template_message_id = NULL, template_url = %s, template_author_id = %s, template_kapwing_link = %s WHERE channel_id = %s AND start_time IS NULL AND template_message_id IS NOT NULL'
+					q_args = [template_url, template_author.id, template_kapwing_link, match_channel.id]
 					await execute_sql(query, q_args)
 					connect.conn.commit()
 					print('match template updated in database')
+
+					if not config.TESTING:
+						# delete template from #templates channel, move to #temp-archive
+						await client.get_channel(config.TEMP_ARCHIVE_CHAN_ID).send(embed=template_message.embeds[0])
+						await template_message.delete()
+						print('template deleted from templates channel')
+						# delete template entry from google sheet
+						template_worksheet.delete_row(template_num)
+						print('template deleted from google sheet')
+
 				elif reaction.emoji == x_emoji:
 					# delete original message
 					await message.delete()
