@@ -2908,7 +2908,10 @@ async def on_raw_reaction_add(payload):
 						embed_title = 'Invalid Vote'
 						embed_description = 'You cannot vote in your own match.'
 						embed = await generate_embed('red', embed_title, embed_description)
-						await dm_channel.send(embed=embed)
+						try:
+							await dm_channel.send(embed=embed)
+						except discord.errors.Forbidden:
+							print(f'failed to send DM to {user.display_name}')
 						print(f'attempted self-vote in match by {user.display_name}')
 						return
 
@@ -2930,7 +2933,10 @@ async def on_raw_reaction_add(payload):
 							embed_description = 'You have previously voted for the other image, please remove your vote before attempting to vote again.'
 							embed = await generate_embed('red', embed_title, embed_description)
 							# send embed to the user via dm
-							await dm_channel.send(embed=embed)
+							try:
+								await dm_channel.send(embed=embed)
+							except discord.errors.Forbidden:
+								print(f'failed to send DM to {user.display_name}')
 							print(f'invalid vote in match by {user.display_name}')
 							return
 						else:
@@ -2939,7 +2945,10 @@ async def on_raw_reaction_add(payload):
 							embed_description = 'You attempted to react to a match poll with an invalid emoji.'
 							embed = await generate_embed('red', embed_title, embed_description)
 							# send embed to the user via dm
-							await dm_channel.send(embed=embed)
+							try:
+								await dm_channel.send(embed=embed)
+							except discord.errors.Forbidden:
+								print(f'failed to send DM to {user.display_name}')
 							print(f'invalid vote in match by {user.display_name}')
 							return
 						# generate vote removal embed
@@ -2960,7 +2969,10 @@ async def on_raw_reaction_add(payload):
 							connect.conn.commit()
 							print('participant stats updated')
 						# send embed to the user via dm
-						await dm_channel.send(embed=embed)
+						try:
+							await dm_channel.send(embed=embed)
+						except discord.errors.Forbidden:
+							print(f'failed to send DM to {user.display_name}')
 						return
 					return
 				# find which image the user voted for
@@ -3049,7 +3061,10 @@ async def on_raw_reaction_add(payload):
 
 					embed_description += f'\nYour current voting streak is `{vote_streak_string}`, next streak available in `{next_streak_string}`.'
 				embed = await generate_embed('green', embed_title, embed_description)
-				await dm_channel.send(embed=embed)
+				try:
+					await dm_channel.send(embed=embed)
+				except discord.errors.Forbidden:
+					print(f'failed to send DM to {user.display_name}')
 				print('vote confirmation sent to user')
 			return
 
