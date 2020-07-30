@@ -3190,9 +3190,11 @@ async def on_raw_reaction_add(payload):
 					# if the template was found, remove it from the document
 					if template_found:
 						template_worksheet.delete_row(template_num)
+						print('template has been removed from the google sheet')
 
 					# remove the template from #templates
 					await message.delete()
+					print('template has been removed from #templates')
 			return
 	return
 
