@@ -2757,6 +2757,12 @@ async def on_raw_reaction_add(payload):
 	# act on signup emojis
 	if emoji == '✍️':
 		if message.channel.id == config.ANNOUNCEMENTS_CHAN_ID and message.content.startswith('__**Meme Madness'):
+			# remove the reaction
+			try:
+				await message.remove_reaction(emoji, user)
+			except:
+				print('unable to remove reaction')
+
 			# verify member exists
 			if member is None or dm_channel is None:
 				return
