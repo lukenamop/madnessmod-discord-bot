@@ -3425,7 +3425,9 @@ async def on_reaction_add(reaction, user):
 					q_args = [member1.id, member2.id]
 					await execute_sql(query, q_args)
 					result = connect.crsr.fetchone()
-					if result is not None:
+					if result is None:
+						return
+					else:
 						if result[2]:
 							return
 						if result[0] and result[1]:
