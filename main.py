@@ -2706,6 +2706,11 @@ async def on_message(message):
 	if config.DISABLE_BOT and message.author.id != config.ADMIN_IDS[0]:
 		return
 	else:
+		# add reactions to specific announcements
+		if message.channel.id == config.ANNOUNCEMENTS_CHAN_ID:
+			# add a signup emoji
+			if message.content.startswith('__**Meme Madness'):
+				await message.add_reaction('✍️')
 		await client.process_commands(message)
 		return
 
@@ -2738,6 +2743,9 @@ async def on_raw_reaction_add(payload):
 	if channel is None:
 		channel = dm_channel
 	message = await channel.fetch_message(payload.message_id)
+	
+	# create variable for the reaction emoji
+	emoji = payload.emoji.name
 
 	# act on signup emojis
 	if emoji == '✍️':
@@ -2806,9 +2814,6 @@ async def on_raw_reaction_add(payload):
 	# generally, only act on reactions to the bot
 	if message.author.id != client.user.id:
 		return
-
-	# create variable for the reaction emoji
-	emoji = payload.emoji.name
 
 	# make sure there is an embed before accessing embed fields
 	if len(message.embeds) == 1:
