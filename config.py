@@ -63,6 +63,7 @@ SUBMISSION_CHAN_ID = 599758863700328459 # channel ID for submitting final memes
 SIGNUP_CHAN_ID = 638796625573183488 # channel ID for signup confirmations
 MOD_SPAM_CHAN_ID = 600397545050734612 # channel ID for #mod-spam
 MATCH_CATEGORY_ID = 639599353526485034 # category ID for #matches
+MOD_CATEGORY_ID = 581875571609305092 # category ID for #moderation
 ANNOUNCEMENTS_CHAN_ID = 581696676344102957 # channel ID for #announcements
 INFO_CHAN_ID = 599299817608314880 # channel ID for #info
 RULES_CHAN_ID = 581706416486744067 # channel ID for #rules

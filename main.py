@@ -2840,10 +2840,9 @@ async def on_raw_reaction_add(payload):
 			# don't remove the reaction
 			remove_reaction = False
 
-		if message.embeds[0].image is not None:
-			if message.embeds[0].image.url is not None:
-				# don't remove the reaction
-				remove_reaction = False
+		if channel.category.id == config.MOD_CATEGORY_ID:
+			# don't remove the reaction
+			remove_reaction = False
 
 		if remove_reaction:
 			try:
