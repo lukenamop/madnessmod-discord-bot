@@ -1403,14 +1403,6 @@ async def signup(ctx):
 	if member is None:
 		return
 
-	# check tournament settings via database (template requirement)
-	query = 'SELECT template_required, signups_open FROM settings WHERE guild_id = %s'
-	q_args = [config.MM_GUILD_ID]
-	await execute_sql(query, q_args)
-	results = connect.crsr.fetchone()
-	template_required = results[0]
-	signups_open = results[1]
-
 	# check to see if signups are open
 	if not signups_open:
 		embed_title = 'Signups Closed'
@@ -1419,114 +1411,41 @@ async def signup(ctx):
 		await ctx.send(embed=embed)
 		print(f'signups closed, signup rejected from {ctx.author.display_name}')
 		return
-	# check to see if templates are required for signups
-	if template_required:
-		# signup process when a template is required
-		# check message for an attachment
-		if len(ctx.message.attachments) != 1:
-			# build signup embed
-			embed_title = 'Signup Started'
-			embed_description = 'Please send me a blank template to confirm your signup! This signup attempt will expire in 120 seconds.'
-			embed = await generate_embed('yellow', embed_title, embed_description)
-			await ctx.send(embed=embed)
-			print(f'signup attempted without attachment by {ctx.author.display_name}')
 
-			# asyncio.TimeoutError triggers if client.wait_for('message') times out
-			try:
-				# define message requirements (DM message from specified user)
-				def check(m):
-					return m.channel.type == ctx.channel.type and m.author.id == ctx.author.id and len(m.attachments) == 1
-				# wait for a message
-				message = await client.wait_for('message', check=check, timeout=120)
-				print(f'signup attachment received from {ctx.author.display_name}')
-			except asyncio.TimeoutError:
-				# build signup error embed (timed out)
-				embed_title = 'Signup Timed Out'
-				embed_description = 'If you\'d like to signup for this week\'s competition, send me another message with `.signup`!'
-				embed = await generate_embed('red', embed_title, embed_description)
-				await ctx.send(embed=embed)
-				print(f'signup timed out by {ctx.author.display_name}')
-				return
-		else:
-			print(f'signup attachment received from {ctx.author.display_name}')
-
-			# check to see if user has signed up in the last 7 days (config.CYCLE seconds)
-			query = 'SELECT * FROM signups WHERE user_id = %s AND submission_time >= %s'
-			q_args = [ctx.author.id, time.time() - config.CYCLE]
-			await execute_sql(query, q_args)
-			result = connect.crsr.fetchone()
-			# don't create a new signup for previously signed up users
-			if result is not None:
-				# build signup error embed (already signed up)
-				embed_title = 'Error: Already Signed Up'
-				embed_description = 'It looks like you\'ve already signed up for this cycle of Meme Madness! Contact a moderator if this is incorrect.'
-				embed = await generate_embed('red', embed_title, embed_description)
-				await ctx.send(embed=embed)
-				print(f'already signed up from {ctx.author.display_name}')
-				return
-
-			# build confirmation embed
-			embed_title = 'Template Confirmation'
-			embed_description = f'Thank you for submitting your template {ctx.author.mention}! If there are any issues with your entry you will be contacted.'
-			embed = await generate_embed('green', embed_title, embed_description)
-			await ctx.send(embed=embed)
-
-			# send template to #templates
-			embed_title = 'Template Submission'
-			embed_description = f'{member.mention} ({escape_underscores(member.display_name)}, {member.id})'
-			embed_link = ctx.message.attachments[0].url
-			embed = await generate_embed('green', embed_title, embed_description, attachment=embed_link)
-			template_chan = client.get_channel(config.TEMPLATE_CHAN_ID)
-			template_message = await template_chan.send(embed=embed)
-			print(f'signup attachment sent to #templates by {ctx.author.display_name}')
-
-			# add reactions to messages in the #templates channel
-			await template_message.add_reaction('👍')
-			await template_message.add_reaction('🤷')
-			await template_message.add_reaction('👎')
-
-			# add signup info to postgresql
-			query = 'INSERT INTO signups (user_id, message_id, submission_time) VALUES (%s, %s, %s)'
-			q_args = [ctx.author.id, template_message.id, time.time()]
-			await execute_sql(query, q_args)
-			connect.conn.commit()
-			print('signup info added to postgresql')
-	else:
-		# signup process when no template is required
-		# check to see if user has signed up in the last 7 days (config.CYCLE seconds)
-		query = 'SELECT * FROM signups WHERE user_id = %s AND submission_time >= %s'
-		q_args = [ctx.author.id, time.time() - config.CYCLE]
-		await execute_sql(query, q_args)
-		result = connect.crsr.fetchone()
-		# don't create a new signup for previously signed up users
-		if result is not None:
-			# build signup error embed (already signed up)
-			embed_title = 'Error: Already Signed Up'
-			embed_description = 'It looks like you\'ve already signed up for this cycle of Meme Madness! Contact a moderator if this is incorrect.'
-			embed = await generate_embed('red', embed_title, embed_description)
-			await ctx.send(embed=embed)
-			print(f'already signed up from {ctx.author.display_name}')
-			return
-
-		embed_title = 'Signup Confirmation'
-		embed_description = f'Thank you for signing up {ctx.author.mention}! If there are any issues with your entry you will be contacted.'
-		embed = await generate_embed('green', embed_title, embed_description)
+	# check to see if user has signed up in the last 7 days (config.CYCLE seconds)
+	query = 'SELECT * FROM signups WHERE user_id = %s AND submission_time >= %s'
+	q_args = [ctx.author.id, time.time() - config.CYCLE]
+	await execute_sql(query, q_args)
+	result = connect.crsr.fetchone()
+	# don't create a new signup for previously signed up users
+	if result is not None:
+		# build signup error embed (already signed up)
+		embed_title = 'Error: Already Signed Up'
+		embed_description = 'It looks like you\'ve already signed up for this cycle of Meme Madness! Contact a moderator if this is incorrect.'
+		embed = await generate_embed('red', embed_title, embed_description)
 		await ctx.send(embed=embed)
+		print(f'already signed up from {ctx.author.display_name}')
+		return
 
-		# send signup to #templates
-		embed_title = 'Signup Confirmed'
-		embed_description = f'{member.mention} ({escape_underscores(member.display_name)}, {member.id})'
-		embed = await generate_embed('green', embed_title, embed_description)
-		template_chan = client.get_channel(config.SIGNUP_CHAN_ID)
-		template_message = await template_chan.send(embed=embed)
-		print(f'signup sent to #templates by {ctx.author.display_name}')
+	# add signup info to postgresql
+	query = 'INSERT INTO signups (user_id, message_id, submission_time) VALUES (%s, 0, %s)'
+	q_args = [ctx.author.id, time.time()]
+	await execute_sql(query, q_args)
+	connect.conn.commit()
+	print('signup info added to postgresql')
 
-		# add signup info to postgresql
-		query = 'INSERT INTO signups (user_id, message_id, submission_time) VALUES (%s, 0, %s)'
-		q_args = [ctx.author.id, time.time()]
-		await execute_sql(query, q_args)
-		connect.conn.commit()
-		print('signup info added to postgresql')
+	embed_title = 'Signup Confirmation'
+	embed_description = f'Thank you for signing up {ctx.author.mention}! If there are any issues with your entry you will be contacted.'
+	embed = await generate_embed('green', embed_title, embed_description)
+	await ctx.send(embed=embed)
+
+	# send signup to #signups
+	embed_title = 'Signup Confirmed'
+	embed_description = f'{member.mention} ({escape_underscores(member.display_name)}, {member.id})'
+	embed = await generate_embed('green', embed_title, embed_description)
+	template_chan = client.get_channel(config.SIGNUP_CHAN_ID)
+	template_message = await template_chan.send(embed=embed)
+	print(f'signup sent to #signups by {ctx.author.display_name}')
 
 	# check for existing participant in database
 	query = 'SELECT * FROM participants WHERE user_id = %s'
@@ -2797,6 +2716,7 @@ async def on_raw_reaction_add(payload):
 	guild = client.get_guild(config.MM_GUILD_ID)
 	try:
 		user = guild.get_member(payload.user_id)
+		member = user
 	except:
 		user = client.get_user(payload.user_id)
 
@@ -2825,6 +2745,70 @@ async def on_raw_reaction_add(payload):
 
 	# create variable for the reaction emoji
 	emoji = payload.emoji.name
+
+	# respond to signup emojis
+	if emoji == '✍️':
+		if message.channel.id == config.ANNOUNCEMENTS_CHAN_ID and message.content.startswith('__**Meme Madness'):
+			# verify member exists
+			if member is None or dm_channel is None:
+				return
+
+			# check to see if signups are open
+			if not signups_open:
+				embed_title = 'Signups Closed'
+				embed_description = f'Signups are closed for the current tournament! Please try again when signups have opened again. To receive a notification when signups open, head to {client.get_channel(600355436033736714).mention} and give yourself the `Sign-Up Pings` role.'
+				embed = await generate_embed('red', embed_title, embed_description)
+				await dm_channel.send(embed=embed)
+				print(f'signups closed, signup rejected from {member.display_name}')
+				return
+
+			# check to see if user has signed up in the last 7 days (config.CYCLE seconds)
+			query = 'SELECT * FROM signups WHERE user_id = %s AND submission_time >= %s'
+			q_args = [ctx.author.id, time.time() - config.CYCLE]
+			await execute_sql(query, q_args)
+			result = connect.crsr.fetchone()
+			# don't create a new signup for previously signed up users
+			if result is not None:
+				# build signup error embed (already signed up)
+				embed_title = 'Error: Already Signed Up'
+				embed_description = 'It looks like you\'ve already signed up for this cycle of Meme Madness! Contact a moderator if this is incorrect.'
+				embed = await generate_embed('red', embed_title, embed_description)
+				await dm_channel.send(embed=embed)
+				print(f'already signed up from {member.display_name}')
+				return
+
+			# add signup info to postgresql
+			query = 'INSERT INTO signups (user_id, message_id, submission_time) VALUES (%s, 0, %s)'
+			q_args = [member.id, time.time()]
+			await execute_sql(query, q_args)
+			connect.conn.commit()
+			print('signup info added to postgresql')
+
+			embed_title = 'Signup Confirmation'
+			embed_description = f'Thank you for signing up {user.mention}! If there are any issues with your entry you will be contacted.'
+			embed = await generate_embed('green', embed_title, embed_description)
+			await dm_channel.send(embed=embed)
+
+			# send signup to #signups
+			embed_title = 'Signup Confirmed'
+			embed_description = f'{member.mention} ({escape_underscores(member.display_name)}, {member.id})'
+			embed = await generate_embed('green', embed_title, embed_description)
+			signup_chan = client.get_channel(config.SIGNUP_CHAN_ID)
+			template_message = await signup_chan.send(embed=embed)
+			print(f'signup sent to #signups by {member.display_name}')
+
+			# check for existing participant in database
+			query = 'SELECT * FROM participants WHERE user_id = %s'
+			q_args = [member.id]
+			await execute_sql(query, q_args)
+			if connect.crsr.fetchone() is None:
+				# create participant if none exists
+				query = 'INSERT INTO participants (user_id) VALUES (%s)'
+				q_args = [member.id]
+				await execute_sql(query, q_args)
+				connect.conn.commit()
+				print('user added to participants table in postgresql')
+			return
 
 	# make sure there is an embed before accessing embed fields
 	if len(message.embeds) == 1:
