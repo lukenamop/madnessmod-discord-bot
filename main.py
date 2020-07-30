@@ -2834,8 +2834,18 @@ async def on_raw_reaction_add(payload):
 
 	# make sure there is an embed before accessing embed fields
 	if len(message.embeds) == 1:
-		if message.embeds[0].title != 'Voluntary Template Submission':
-			# remove the reaction
+
+		remove_reaction = True
+		if message.embeds[0].title == 'Voluntary Template Submission':
+			# don't remove the reaction
+			remove_reaction = False
+
+		if message.embeds[0].image is not None:
+			if message.embeds[0].image.url is not None:
+				# don't remove the reaction
+				remove_reaction = False
+
+		if remove_reaction:
 			try:
 				await message.remove_reaction(emoji, user)
 			except:
