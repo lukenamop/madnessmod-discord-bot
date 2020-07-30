@@ -1723,9 +1723,11 @@ async def startmatch(ctx, member1:discord.Member=None, member2:discord.Member=No
 		if len(template_list) >= 1:
 			template_entry = random.choice(template_list)
 			if template_entry['Kapwing Template Link'] == '':
-				print(f'template has no kapwing link: {template_entry['Discord Message ID']}')
+				template_message_id = template_entry['Discord Message ID']
+				print(f'template has no kapwing link: {template_message_id}')
 			else:
-				print(f'template found: {template_entry['Kapwing Template Link']}')
+				template_kapwing_link = template_entry['Kapwing Template Link']
+				print(f'template found: {template_kapwing_link}')
 				if not (member1.id == int(template_entry['Provider ID']) or member2.id == int(template_entry['Provider ID'])):
 					print('valid template found')
 					break
@@ -1764,7 +1766,9 @@ async def startmatch(ctx, member1:discord.Member=None, member2:discord.Member=No
 
 	# build random template embed
 	embed_title = f'Template for #{ctx.channel.name}'
-	embed_description = f'Here\'s a random template! This template was submitted by {template_entry['Provider Username']}\n##{template_entry['Discord Message ID']}##'
+	template_author = template_entry['Provider Username']
+	template_message_id = template_entry['Discord Message ID']
+	embed_description = f'Here\'s a random template! This template was submitted by {template_author}\n##{template_message_id}##'
 	embed = await generate_embed('green', embed_title, embed_description, attachment=template_entry['Raw Template Link'])
 	nonce = f'tempcon{channel_id}'
 	await duelmods_chan.send(ctx.author.mention)
