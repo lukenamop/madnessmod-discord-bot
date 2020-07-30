@@ -1648,14 +1648,15 @@ async def splitmatch(ctx, member1:discord.Member=None, member2:discord.Member=No
 
 	# add match info to postgresql
 	query = 'INSERT INTO matches (u1_id, u2_id, channel_id, creation_time, template_message_id, is_final) VALUES (%s, %s, %s, %s, %s, %s)'
-	q_args = [member1.id, member2.id, channel_id, time.time(), template_message_id, match_is_final]
+	q_args = [member1.id, member2.id, channel_id, time.time(), int(template_entry['Discord Message ID']), match_is_final]
 	await execute_sql(query, q_args)
 	connect.conn.commit()
 	print('match added to database')
 
 	# build random template embed
 	embed_title = f'Template for #{ctx.channel.name}'
-	embed_description = f'Here\'s a random template! This template was submitted by {template_author.display_name}'
+	template_author = template_entry['Provider Username']
+	embed_description = f'Here\'s a random template! This template was submitted by {template_author}'
 	embed = await generate_embed('green', embed_title, embed_description, attachment=template_url)
 	nonce = f'spltemp{channel_id}'
 	spltemp_message = await duelmods_chan.send(embed=embed, nonce=nonce)
