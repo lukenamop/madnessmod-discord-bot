@@ -1524,7 +1524,7 @@ async def splitmatch(ctx, member1:discord.Member=None, member2:discord.Member=No
 	connect.g_connect()
 
 	# find all templates in document
-	template_worksheet = connect.template_sheet.worksheet('Templates')
+	template_worksheet = connect.template_sheet.worksheet(config.G_TEMPLATE_SHEET)
 	template_list = template_worksheet.get_all_records()
 	print(f'list of {len(template_list)} templates compiled from google sheet')
 	duelmods_chan = client.get_channel(config.MOD_SPAM_CHAN_ID)
@@ -1631,7 +1631,7 @@ async def startmatch(ctx, member1:discord.Member=None, member2:discord.Member=No
 	connect.g_connect()
 
 	# find all templates in document
-	template_worksheet = connect.template_sheet.worksheet('Templates')
+	template_worksheet = connect.template_sheet.worksheet(config.G_TEMPLATE_SHEET)
 	template_list = template_worksheet.get_all_records()
 	print(f'list of {len(template_list)} templates compiled from google sheet')
 	duelmods_chan = client.get_channel(config.MOD_SPAM_CHAN_ID)
@@ -2301,7 +2301,7 @@ async def template(ctx):
 	connect.g_connect()
 
 	# find all templates in document
-	template_worksheet = connect.template_sheet.worksheet('Templates')
+	template_worksheet = connect.template_sheet.worksheet(config.G_TEMPLATE_SHEET)
 	template_sheet_list = template_worksheet.get_all_records()
 	# find how many rows there currently are
 	template_sheet_num = len(template_sheet_list)
@@ -2646,7 +2646,7 @@ async def justtesting(ctx, *args):
 	# connect.g_connect()
 
 	# # find all templates in document
-	# template_worksheet = connect.template_sheet.worksheet('Templates')
+	# template_worksheet = connect.template_sheet.worksheet(config.G_TEMPLATE_SHEET)
 	# template_sheet_list = template_worksheet.get_all_records()
 	# # find how many rows there currently are
 	# template_sheet_num = len(template_sheet_list)
@@ -2766,6 +2766,8 @@ async def on_raw_reaction_add(payload):
 			# verify member exists
 			if member is None or dm_channel is None:
 				return
+
+			print(f'signup attempted via reaction from {member.display_name}')
 
 			# check tournament settings via database
 			query = 'SELECT signups_open FROM settings WHERE guild_id = %s'
@@ -3178,7 +3180,7 @@ async def on_raw_reaction_add(payload):
 					connect.g_connect()
 
 					# find all templates in document
-					template_worksheet = connect.template_sheet.worksheet('Templates')
+					template_worksheet = connect.template_sheet.worksheet(config.G_TEMPLATE_SHEET)
 					template_list = template_worksheet.get_all_records()
 					# find the entry for the template
 					template_num = 1
@@ -3233,7 +3235,7 @@ async def on_reaction_add(reaction, user):
 				connect.g_connect()
 
 				# find all templates in document
-				template_worksheet = connect.template_sheet.worksheet('Templates')
+				template_worksheet = connect.template_sheet.worksheet(config.G_TEMPLATE_SHEET)
 				template_list = template_worksheet.get_all_records()
 
 				# get template info from google sheet
@@ -3343,7 +3345,7 @@ async def on_reaction_add(reaction, user):
 				connect.g_connect()
 
 				# find all templates in document
-				template_worksheet = connect.template_sheet.worksheet('Templates')
+				template_worksheet = connect.template_sheet.worksheet(config.G_TEMPLATE_SHEET)
 				template_list = template_worksheet.get_all_records()
 
 				# get template info from google sheet

@@ -26,6 +26,13 @@ G_SCOPE = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/a
 # Google API creds
 G_CREDS = ServiceAccountCredentials.from_json_keyfile_dict(keyfile_dict=google_key_dict, scopes=G_SCOPE)
 
+# Google Sheet with template links inside
+G_TEMPLATE_SHEET_DEFAULT = 'Templates'
+G_TEMPLATE_SHEET = G_TEMPLATE_SHEET_DEFAULT
+G_TEMPLATE_SHEET_OVERRIDE = None
+if G_TEMPLATE_SHEET_OVERRIDE is not None:
+	G_TEMPLATE_SHEET = G_TEMPLATE_SHEET_OVERRIDE
+
 
 ##### main.py stuff #####
 
