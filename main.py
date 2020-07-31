@@ -3500,14 +3500,14 @@ async def on_reaction_add(reaction, user):
 					connect.conn.commit()
 					print('match template updated in database')
 
-					if not config.TESTING:
-						# delete template from #templates channel, move to #temp-archive
-						await client.get_channel(config.TEMP_ARCHIVE_CHAN_ID).send(embed=template_message.embeds[0])
-						await template_message.delete()
-						print('template deleted from templates channel')
-						# delete template entry from google sheet
-						template_worksheet.delete_row(template_num)
-						print('template deleted from google sheet')
+					# if not config.TESTING:
+					# 	# delete template from #templates channel, move to #temp-archive
+					# 	await client.get_channel(config.TEMP_ARCHIVE_CHAN_ID).send(embed=template_message.embeds[0])
+					# 	await template_message.delete()
+					# 	print('template deleted from templates channel')
+					# 	# delete template entry from google sheet
+					# 	template_worksheet.delete_row(template_num)
+					# 	print('template deleted from google sheet')
 
 				elif reaction.emoji == x_emoji:
 					# delete original message
