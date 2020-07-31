@@ -2656,7 +2656,7 @@ async def justtesting(ctx, member1:discord.Member=None, member2:discord.Member=N
 
 	if member1 is not None and member2 is not None:
 		match_frame_image = await create_match_frame_image(member1, member2)
-		await match_channel.send(file=match_frame_image)
+		await ctx.send(file=match_frame_image)
 	return
 
 # # '.help' command (duel-mods)
