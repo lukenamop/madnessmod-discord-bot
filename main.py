@@ -2121,7 +2121,7 @@ async def submit(ctx):
 			else:
 				next_competitor = client.get_guild(config.MM_GUILD_ID).get_member(result[0])
 			# add a reaction that the next competitor can use to start their half
-			next_competitor_message = await match_channel.send(f'To complete your part of this split match, use the 🖍️ emoji!\n{next_competitor.mention}')
+			next_competitor_message = await match_channel.send(f'It\'s your turn to make a meme {next_competitor.mention}! When you have 30 minutes free, use the 🖍️ emoji to start your match.')
 			await next_competitor_message.add_reaction('🖍️')
 			print('set up reaction message for next competitor in split match')
 			return
