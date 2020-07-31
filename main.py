@@ -2113,6 +2113,15 @@ async def submit(ctx):
 		q_args = [match_db_id]
 		await execute_sql(query, q_args)
 		connect.conn.commit()
+		# TODO
+		# # if only one person in the split match has submitted, send a message to the channel
+		# if (result[2] and not result[3]) or (result[3] and not result[2]):
+		# 	# figure out which user has not yet submitted
+		# 	if result[2]:
+		# 		next_competitor = client.get_guild(config.MM_GUILD_ID).get_member(result[1])
+		# 	else:
+		# 		next_competitor = client.get_guild(config.MM_GUILD_ID).get_member(result[0])
+		# 	await match_channel.send(f'To complete your part of this split match, use the ')
 
 	# only execute if both users have submitted final memes
 	if result[2] and result[3]:
@@ -2752,10 +2761,11 @@ async def on_raw_reaction_add(payload):
 	message = await channel.fetch_message(payload.message_id)
 
 	# create variable for the reaction emoji
-	emoji = payload.emoji.name
+	emoji = payload.emoji
+	emoji_name = payload.emoji.name
 
 	# act on signup emojis
-	if emoji == '✍️':
+	if emoji_name == '✍️':
 		if message.channel.id == config.ANNOUNCEMENTS_CHAN_ID and message.content.startswith('__**Meme Madness'):
 			# remove the reaction
 			try:
@@ -2923,11 +2933,11 @@ async def on_raw_reaction_add(payload):
 				if result is not None:
 					if result[0] or result[1]:
 						# find which image the user originally voted for
-						if result[0] and emoji == '🇦':
+						if result[0] and emoji_name == '🇦':
 							vote_position = 'A'
-						elif result[1] and emoji == '🇧':
+						elif result[1] and emoji_name == '🇧':
 							vote_position = 'B'
-						elif (result[0] and emoji == '🇧') or (result[1] and emoji == '🇦'):
+						elif (result[0] and emoji_name == '🇧') or (result[1] and emoji_name == '🇦'):
 							# send the user a warning if their vote was for the wrong image
 							embed_title = 'Invalid Vote'
 							embed_description = 'You have previously voted for the other image, please remove your vote before attempting to vote again.'
@@ -2976,11 +2986,11 @@ async def on_raw_reaction_add(payload):
 						return
 					return
 				# find which image the user voted for
-				if emoji == '🇦':
+				if emoji_name == '🇦':
 					vote_position = 'A'
 					query = 'INSERT INTO votes (user_id, match_id, a_vote) VALUES (%s, %s, True)'
 					q_args = [user.id, match_id]
-				elif emoji == '🇧':
+				elif emoji_name == '🇧':
 					vote_position = 'B'
 					query = 'INSERT INTO votes (user_id, match_id, b_vote) VALUES (%s, %s, True)'
 					q_args = [user.id, match_id]
@@ -3072,7 +3082,7 @@ async def on_raw_reaction_add(payload):
 		# if message.embeds[0].title == 'Mod Help Guide':
 		# 	embed_title = 'Mod Help Guide'
 		# 	# check to see which emoji was used
-		# 	if emoji == '⚔️':
+		# 	if emoji_name == '⚔️':
 		# 		# match commands
 		# 		embed_description = """**⚔️ Match Commands**
 		# 			\n`.cancelmatch` - cancels the match in a given match channel
@@ -3082,7 +3092,7 @@ async def on_raw_reaction_add(payload):
 		# 			\n`.splitmatch @<user> @<user>` - splits a match between two users so they can compete separately
 		# 			\n`.startmatch @<user> @<user>` - starts a match between two users
 		# 			\n`.startsolo @<user>` - starts a user's solo match (use after `.splitmatch`)"""
-		# 	elif emoji == '🏆':
+		# 	elif emoji_name == '🏆':
 		# 		# tournament commands
 		# 		embed_description = """**🏆 Tournament Commands**
 		# 			\n`.remindparticipants` - alerts all participants of unfinished matches
@@ -3094,7 +3104,7 @@ async def on_raw_reaction_add(payload):
 		# 			\n`.resignup <user ID> <reason>` - deletes a user's template and DMs them with `<reason>`, prompting them to re-signup
 		# 			\n`.settournamentroles` - removes all past tournament roles and initializes the tournament's participants' round roles (sets them to Round 1)
 		# 			\n`.signuplist` - displays a full list of signups for the current tournament"""
-		# 	elif emoji == '📎':
+		# 	elif emoji_name == '📎':
 		# 		# admin commands
 		# 		embed_description = """**📎 Admin Commands**
 		# 			\n`.activematches` - displays all currently active matches
@@ -3106,7 +3116,7 @@ async def on_raw_reaction_add(payload):
 		# 			\n`.restartpolls` - fixes any match polls that are no longer counting votes
 		# 			\n`.togglesignups` - open or close tournament signups
 		# 			\n`.toggletemplates` - enable or disable template requirements with `.signup`"""
-		# 	elif emoji == '↩️':
+		# 	elif emoji_name == '↩️':
 		# 		# back to main help menu
 		# 		embed_description = """Use the emojis to navigate this help guide:
 		# 			\n⚔️ Match Commands
@@ -3132,12 +3142,12 @@ async def on_raw_reaction_add(payload):
 				lb_page = 1
 
 			# check to see which emoji was used
-			if emoji == '⬅️':
+			if emoji_name == '⬅️':
 				# previous page
 				if lb_page == 1:
 					return
 				lb_page -= 1
-			elif emoji == '🔅':
+			elif emoji_name == '🔅':
 				# jump to self
 				query = 'WITH cte_lb_rank AS (SELECT user_id, RANK () OVER (ORDER BY lb_points DESC) lb_rank FROM participants) SELECT lb_rank FROM cte_lb_rank WHERE user_id = %s'
 				q_args = [user.id]
@@ -3146,7 +3156,7 @@ async def on_raw_reaction_add(payload):
 				if result is not None:
 					user_rank = result[0]
 					lb_page = ceil(user_rank / 10)
-			elif emoji == '➡️':
+			elif emoji_name == '➡️':
 				lb_page += 1
 
 			# update the embed description
@@ -3198,7 +3208,7 @@ async def on_raw_reaction_add(payload):
 		# voluntary template submissions
 		if message.embeds[0].title == 'Voluntary Template Submission':
 			# check to see which emoji was used
-			if emoji == '👎':
+			if emoji_name == '👎':
 				if user.id == config.ADMIN_IDS[0]:
 					# establish a google connection
 					connect.g_connect()
