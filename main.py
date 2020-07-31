@@ -2650,51 +2650,13 @@ async def verify(ctx):
 @client.command(name='justtesting')
 @commands.has_any_role('Admin')
 @only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
-async def justtesting(ctx, *args):
+async def justtesting(ctx, member1:discord.Member=None, member2:discord.Member=None):
 	if ctx.author.id != config.ADMIN_IDS[0]:
 		return
 
-	# # establish a google connection
-	# connect.g_connect()
-
-	# # find all templates in document
-	# template_worksheet = connect.template_sheet.worksheet(config.G_TEMPLATE_SHEET)
-	# template_sheet_list = template_worksheet.get_all_records()
-	# # find how many rows there currently are
-	# template_sheet_num = len(template_sheet_list)
-	# template_sheet_write_row = template_sheet_num + 2
-
-	# # # pick a random template
-	# # active_sheet_template = random.choice(template_sheet_list)
-	# # # find the template's discord message ID
-	# # active_sheet_template['Discord Message ID']
-
-	# # gather list of all valid templates
-	# template_list = await client.get_channel(config.TEMPLATE_CHAN_ID).history(limit=500).flatten()
-	# print(f'list of {len(template_list)} templates compiled from #templates')
-	# template_list = template_list[int(args[0]):]
-
-	# # loop through until a valid template is found
-	# temps_written = 0
-	# for template_message in template_list:
-	# 	try:
-	# 		template_provider = ctx.guild.get_member(int(template_message.embeds[0].description.split(' (')[0].lstrip('<@').lstrip('!').rstrip('>')))
-	# 		if template_provider is not None:
-	# 			# write the template information to google sheets
-	# 			template_worksheet.update_cell(template_sheet_write_row, 1, str(template_message.id)) # discord message ID
-	# 			template_worksheet.update_cell(template_sheet_write_row, 2, str(template_message.embeds[0].image.url)) # raw template link
-	# 			# template_worksheet.update_cell(template_sheet_write_row, 3, val) # kapwing template link
-	# 			template_worksheet.update_cell(template_sheet_write_row, 4, str(template_provider.display_name)) # provider username
-	# 			template_worksheet.update_cell(template_sheet_write_row, 5, str(template_provider.id)) # provider ID
-	# 		temps_written += 1
-	# 	except gspread.exceptions.APIError:
-	# 		await ctx.send(f'done ({temps_written})')
-	# 		return
-
-	# 	template_sheet_write_row += 1
-
-	# print('done!')
-	# await ctx.send('all the way done!')
+	if member1 is not None and member2 is not None:
+		match_frame_image = await create_match_frame_image(member1, member2)
+		await match_channel.send(file=match_frame_image)
 	return
 
 # # '.help' command (duel-mods)
