@@ -3044,6 +3044,9 @@ async def on_raw_reaction_add(payload):
 			# don't remove the reaction
 			remove_reaction = False
 		else:
+			if channel.id == config.ARCHIVE_CHAN_ID:
+				# don't remove the reaction
+				remove_reaction = False
 			if channel.category.id == config.MOD_CATEGORY_ID:
 				# don't remove the reaction
 				remove_reaction = False
