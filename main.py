@@ -2861,7 +2861,7 @@ async def on_raw_reaction_add(payload):
 
 	# act on next competitor split match emojis
 	if emoji_name == '🖍️':
-		if channel.category.id == config.MATCH_CATEGORY_ID and message.content.startswith('To complete your part of this split match, use the 🖍️ emoji!'):
+		if channel.category.id == config.MATCH_CATEGORY_ID and message.content.startswith('It\'s your turn to make a meme'):
 			# remove the reaction
 			try:
 				await message.remove_reaction(emoji, user)
