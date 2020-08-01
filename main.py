@@ -1981,7 +1981,9 @@ async def submit(ctx):
 	start_time = result[5]
 	template_url = result[6]
 	match_db_id = result[8]
-	template_author_id = int(result[9])
+	template_author_id = result[9]
+	if template_author_id is not None:
+		template_author_id = int(template_author_id)
 	cancelled = result[10]
 	try:
 		template_author = client.get_guild(config.MM_GUILD_ID).get_member(template_author_id)
