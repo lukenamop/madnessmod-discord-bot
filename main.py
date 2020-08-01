@@ -659,7 +659,7 @@ async def creatematchchannels(ctx, *args):
 					match_start_string = f'**MATCH {match_number} - {member1.mention} VS {member2.mention}**'
 					match_frame_image = await create_match_frame_image(member1, member2)
 					await match_channel.send(file=match_frame_image)
-				match_start_string += f'\nWorthy competitors! Now is the time to duel and find the *true meme master*! DM each other to find a 30 minute window to complete your match. When you\'re both available, @ Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention}. May the best meme win!'
+				match_start_string += f'\nWorthy competitors! Now is the time to duel and find the *true meme master*! DM each other to find a 30 minute window to complete your match. When you\'re both available, @ Duel Mods in {ctx.guild.get_channel(config.GENERAL_CHAN_ID).mention}. May the best meme win!'
 				await match_channel.send(match_start_string)
 				total_created += 1
 				if config.TESTING:
