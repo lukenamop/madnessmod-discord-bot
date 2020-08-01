@@ -579,7 +579,7 @@ async def createbracket(ctx, *args):
 				return
 			# iterate through all valid signups
 			for entry in results:
-				member = message.guild.get_member(entry[0])
+				member = ctx.guild.get_member(entry[0])
 				if member is not None:
 					tourney_manager.add_participant(tournament_shortcut, member.display_name)
 			# shuffle the participants
