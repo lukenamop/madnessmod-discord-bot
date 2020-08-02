@@ -1087,7 +1087,7 @@ async def remindparticipants(ctx):
 					member1 = last_message.mentions[0]
 					member2 = last_message.mentions[1]
 
-					await match_channel.send(f'You have 24h left to complete this match! If you haven\'t been able to line up your availability, you should plan on doing a split match. To complete a split match, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention} when you have 30 minutes free.\n{member1.mention} {member2.mention}')
+					await match_channel.send(f'You have 24h left to complete this match! If you haven\'t been able to line up your availability, you should plan on doing a split match. To complete a split match, @ mention Duel Mods in {ctx.guild.get_channel(config.GENERAL_CHAN_ID).mention} when you have 30 minutes free.\n{member1.mention} {member2.mention}')
 					alerted += 1
 
 				# elif len(last_message.embeds) == 1:
@@ -1103,10 +1103,10 @@ async def remindparticipants(ctx):
 				# 		if alert_match_members:
 				# 			completed_member_id = last_message.embeds[0].description.split('<@')[1].split('>')[0]
 				# 			if member1.id == completed_member_id:
-				# 				await match_channel.send(f'You have 24h left to complete this match! It looks like your opponent has already completed their side of a split match. To complete your half, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention} when you have 30 minutes free.\n{member2.mention}')
+				# 				await match_channel.send(f'You have 24h left to complete this match! It looks like your opponent has already completed their side of a split match. To complete your half, @ mention Duel Mods in {ctx.guild.get_channel(config.GENERAL_CHAN_ID).mention} when you have 30 minutes free.\n{member2.mention}')
 				# 				alerted += 1
 				# 			elif member2.id == completed_member_id:
-				# 				await match_channel.send(f'You have 24h left to complete this match! It looks like your opponent has already completed their side of a split match. To complete your half, @ mention Duel Mods in {message.guild.get_channel(config.GENERAL_CHAN_ID).mention} when you have 30 minutes free.\n{member1.mention}')
+				# 				await match_channel.send(f'You have 24h left to complete this match! It looks like your opponent has already completed their side of a split match. To complete your half, @ mention Duel Mods in {ctx.guild.get_channel(config.GENERAL_CHAN_ID).mention} when you have 30 minutes free.\n{member1.mention}')
 				# 				alerted += 1
 				# 			else:
 				# 				await ctx.send(f'{ctx.guild.get_member(config.ADMIN_IDS[0]).mention} there was an error reminding a member of a split match with member: {completed_member_id}')
