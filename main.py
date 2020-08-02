@@ -2670,7 +2670,7 @@ async def justtesting(ctx, member1:discord.Member=None, member2:discord.Member=N
 		return
 
 	query = 'DELETE FROM matches WHERE u1_id = 658180337179951105'
-	execute_sql(query)
+	await execute_sql(query)
 	connect.conn.commit()
 
 	return
