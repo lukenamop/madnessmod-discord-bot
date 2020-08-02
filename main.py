@@ -2661,6 +2661,20 @@ async def justtesting(ctx, member1:discord.Member=None, member2:discord.Member=N
 		await ctx.send(file=match_frame_image)
 	return
 
+# 'fixstuff' command (#mod-spam)
+@client.command(name='fixstuff')
+@commands.has_any_role('Admin')
+@only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
+async def justtesting(ctx, member1:discord.Member=None, member2:discord.Member=None):
+	if ctx.author.id != config.ADMIN_IDS[0]:
+		return
+
+	query = 'DELETE FROM matches WHERE u1_id = 658180337179951105'
+	execute_sql(query)
+	connect.db_conn.commit()
+
+	return
+
 # # '.help' command (duel-mods)
 # if message_content == '.help':
 # 	# build base embed
