@@ -1,5 +1,4 @@
-dm_help = """`.donate` - shows MadnessMod donation info
-	\n`.help` - returns this help menu
+dm_help = """`.help` - returns this help menu
 	\n`.mymatches` - displays links to your active matches
 	\n`.signup` - signs you up for the next Meme Madness tournament
 	\n`.stats` - displays your Meme Madness stats

@@ -946,38 +946,6 @@ async def mymatches(ctx):
 	print(f'sent user matches to {ctx.author.display_name}')
 	return
 
-		# # '.help' command (DM)
-		# if message_content == '.help':
-		# 	# build help embed
-		# 	embed_title = 'Help: Commands'
-		# 	embed_description = help_cmd.dm_help
-		# 	embed = await generate_embed('yellow', embed_title, embed_description)
-		# 	await message.channel.send(embed=embed)
-		# 	print(f'help query sent to {message.author.display_name}')
-		# 	return
-
-		# # '.testmatch' command (DM)
-		# if message_content == '.testmatch':
-		# 	# build embed
-		# 	embed_title = 'Match Started'
-		# 	embed_description = 'Your Meme Madness match has started, here\'s your template! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.**\n\nNot sure where to get started? [Use this link on any platform to quickly edit captions: https://kapwi.ng/c/k7OEL0gK](https://kapwi.ng/c/k7OEL0gK)'
-		# 	embed = await generate_embed('yellow', embed_title, embed_description, 'https://cdn.discordapp.com/attachments/622187852121243648/731718539446059068/unknown.png')
-		# 	await message.channel.send(embed=embed)
-		# return
-
-	# # stats-flex specific commands
-	# if message.channel.id == config.STATS_CHAN_ID:
-	# 	# '.help' command (stats-flex)
-	# 	if message_content == '.help':
-	# 		# build help embed
-	# 		embed_title = 'Help: Commands'
-	# 		embed_description = help_cmd.stats_help
-	# 		embed = await generate_embed('yellow', embed_title, embed_description)
-	# 		await message.channel.send(embed=embed)
-	# 		print(f'help query sent to {message.author.display_name} in stats-flex')
-	# 		return
-	# 	return
-
 # 'points' command (#stats-flex)
 @client.command(name='points')
 @only_these_channels(allowed_channel_ids=[config.STATS_CHAN_ID, config.GENERAL_CHAN_ID], allowed_in_dms=True)
@@ -2648,17 +2616,38 @@ async def verify(ctx):
 		print('meme madness suggestion sent to verified user')
 	return
 
-# 'justtesting' command (#mod-spam)
-@client.command(name='justtesting')
-@commands.has_any_role('Admin')
-@only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
-async def justtesting(ctx, member1:discord.Member=None, member2:discord.Member=None):
-	if ctx.author.id != config.ADMIN_IDS[0]:
-		return
+# 'help' command
+@client.command(name='help')
+async def help(ctx):
+	# specific response for mod channels
+	if ctx.channel.category.id == config.MOD_CATEGORY_ID:
+		# build base embed
+		embed_title = 'Mod Help Guide'
+		embed_description = """Use the emojis to navigate this help guide:
+			\n⚔️ Match Commands
+			\n🏆 Tournament Commands
+			\n📎 Admin Commands
+			\n↩️ Return Here"""
+		embed = await generate_embed('yellow', embed_title, embed_description)
+		help_message = await ctx.send(embed=embed)
+		await help_message.add_reaction('⚔️')
+		await help_message.add_reaction('🏆')
+		await help_message.add_reaction('📎')
+		await help_message.add_reaction('↩️')
 
-	if member1 is not None and member2 is not None:
-		match_frame_image = await create_match_frame_image(member1, member2)
-		await ctx.send(file=match_frame_image)
+	# general response for all other channels
+	else:
+		# build base embed
+		embed_title = 'Help Guide'
+		embed_description = """Use the emojis to navigate this help guide:
+			\n🏆 Tournament Commands
+			\n⚖️ Stat Commands
+			\n↩️ Return Here"""
+		embed = await generate_embed('yellow', embed_title, embed_description)
+		help_message = await ctx.send(embed=embed)
+		await help_message.add_reaction('🏆')
+		await help_message.add_reaction('⚖️')
+		await help_message.add_reaction('↩️')
 	return
 
 # 'fixstuff' command (#mod-spam)
@@ -2668,30 +2657,7 @@ async def justtesting(ctx, member1:discord.Member=None, member2:discord.Member=N
 async def justtesting(ctx, member1:discord.Member=None, member2:discord.Member=None):
 	if ctx.author.id != config.ADMIN_IDS[0]:
 		return
-
-	query = 'DELETE FROM matches WHERE u1_id = 658180337179951105'
-	await execute_sql(query)
-	connect.conn.commit()
-
 	return
-
-# # '.help' command (duel-mods)
-# if message_content == '.help':
-# 	# build base embed
-# 	embed_title = 'Mod Help Guide'
-# 	embed_description = """Use the emojis to navigate this help guide:
-# 		\n⚔️ Match Commands
-# 		\n🏆 Tournament Commands
-# 		\n📎 Admin Commands
-# 		\n↩️ Return Here"""
-# 	embed = await generate_embed('yellow', embed_title, embed_description)
-# 	help_message = await message.channel.send(embed=embed)
-# 	await help_message.add_reaction('⚔️')
-# 	await help_message.add_reaction('🏆')
-# 	await help_message.add_reaction('📎')
-# 	await help_message.add_reaction('↩️')
-# 	print('mod help guide sent to #duel-mods')
-# 	return
 
 
 ##### CLIENT EVENTS #####
@@ -2876,10 +2842,6 @@ async def on_raw_reaction_add(payload):
 					user_num = '1'
 					submitted = 'u1_submitted'
 					print('match and participant found')
-					# return if there is a start_time but the other user has not yet submitted
-					if result[7] is not None and not result[4]:
-						print('split match already in progress')
-						return
 				# check to see if the mentioned user is "u2" in the database
 				elif match_user.id == result[2]:
 					# check to see if the user has submitted
@@ -2891,13 +2853,13 @@ async def on_raw_reaction_add(payload):
 					user_num = '2'
 					submitted = 'u2_submitted'
 					print('match and participant found')
-					# return if there is a start_time but the other user has not yet submitted
-					if result[7] is not None and not result[3]:
-						print('split match already in progress')
-						return
 				else:
 					# failed is true if the mentioned user is not "u1" or "u2"
 					failed = True
+				# return if there is a start_time (match in progress)
+				if result[7] is not None:
+					print('split match already in progress')
+					return
 
 			# check to see if an existing match was found
 			if failed:
