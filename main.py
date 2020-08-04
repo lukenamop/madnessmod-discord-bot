@@ -3303,6 +3303,7 @@ async def on_raw_reaction_add(payload):
 
 		# mod help guide
 		if message.embeds[0].title == 'Mod Help Guide':
+			embed_title = 'Mod Help Guide'
 			if emoji_name == '⚔️':
 				# match commands
 				embed_description = """**⚔️ Match Commands**
