@@ -2621,6 +2621,13 @@ async def help(ctx):
 async def justtesting(ctx, member1:discord.Member=None, member2:discord.Member=None):
 	if ctx.author.id != config.ADMIN_IDS[0]:
 		return
+
+	query = 'DELETE FROM matches WHERE u1_id = 594912770760114196'
+	await execute_sql(query)
+	query = 'DELETE FROM matches WHERE u2_id = 594912770760114196'
+	await execute_sql(query)
+	connect.conn.commit()
+
 	return
 
 
