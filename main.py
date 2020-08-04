@@ -2092,7 +2092,7 @@ async def submit(ctx):
 				next_competitor = client.get_guild(config.MM_GUILD_ID).get_member(result[0])
 			# add a reaction that the next competitor can use to start their half
 			next_competitor_message = await match_channel.send(f'It\'s your turn to make a meme {next_competitor.mention}! When you have 30 minutes free, use the 🖍️ emoji to start your match.')
-			await next_competitor_message.add_reaction('🖍️')
+			await next_competitor_message.add_reaction(random.choice(['🖍️','✏️','🖌️','🖊️','🖋️']))
 			print('set up reaction message for next competitor in split match')
 			return
 
@@ -2812,7 +2812,7 @@ async def on_raw_reaction_add(payload):
 		return
 
 	# act on next competitor split match emojis
-	if emoji_name in ['🖍️','✏️']:
+	if emoji_name in ['🖍️','✏️','🖌️','🖊️','🖋️']:
 		if channel.category.id == config.MATCH_CATEGORY_ID and message.content.startswith('It\'s your turn to make a meme'):
 			# remove the reaction
 			try:
