@@ -2619,6 +2619,12 @@ async def verify(ctx):
 # 'help' command
 @client.command(name='help')
 async def help(ctx):
+	generic_response = False
+
+	# send a generic response to DMs
+	if isinstance(ctx.channel, discord.DMChannel):
+		generic_response = True
+
 	# specific response for mod channels
 	if ctx.channel.category.id == config.MOD_CATEGORY_ID:
 		# build base embed
@@ -2634,9 +2640,11 @@ async def help(ctx):
 		await help_message.add_reaction('🏆')
 		await help_message.add_reaction('📎')
 		await help_message.add_reaction('↩️')
+	else:
+		generic_response = True
 
 	# general response for all other channels
-	else:
+	if generic_response:
 		# build base embed
 		embed_title = 'Help Guide'
 		embed_description = """Use the emojis to navigate this help guide:
@@ -2804,7 +2812,7 @@ async def on_raw_reaction_add(payload):
 		return
 
 	# act on next competitor split match emojis
-	if emoji_name == '🖍️':
+	if emoji_name in ['🖍️','✏️']:
 		if channel.category.id == config.MATCH_CATEGORY_ID and message.content.startswith('It\'s your turn to make a meme'):
 			# remove the reaction
 			try:
