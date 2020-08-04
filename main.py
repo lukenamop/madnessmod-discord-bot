@@ -3295,6 +3295,12 @@ async def on_raw_reaction_add(payload):
 				# invalid emoji, do nothing
 				return
 
+			# update the help guide
+			embed = await generate_embed('yellow', embed_title, embed_description)
+			await message.edit(embed=embed)
+			print('help guide edited')
+			return
+
 		# mod help guide
 		if message.embeds[0].title == 'Mod Help Guide':
 			if emoji_name == '⚔️':
