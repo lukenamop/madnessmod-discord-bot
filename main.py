@@ -3303,6 +3303,12 @@ async def on_raw_reaction_add(payload):
 
 		# mod help guide
 		if message.embeds[0].title == 'Mod Help Guide':
+			# remove the reaction
+			try:
+				await message.remove_reaction(emoji, user)
+			except:
+				print('unable to remove reaction')
+				
 			embed_title = 'Mod Help Guide'
 			if emoji_name == '⚔️':
 				# match commands
