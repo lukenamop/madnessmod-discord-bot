@@ -2625,24 +2625,24 @@ async def help(ctx):
 	# send a generic response to DMs
 	if isinstance(ctx.channel, discord.DMChannel):
 		generic_response = True
-
-	# specific response for mod channels
-	if ctx.channel.category.id == config.MOD_CATEGORY_ID:
-		# build base embed
-		embed_title = 'Mod Help Guide'
-		embed_description = """Use the emojis to navigate this help guide:
-			\n⚔️ Match Commands
-			\n🏆 Tournament Commands
-			\n📎 Admin Commands
-			\n↩️ Return Here"""
-		embed = await generate_embed('yellow', embed_title, embed_description)
-		help_message = await ctx.send(embed=embed)
-		await help_message.add_reaction('⚔️')
-		await help_message.add_reaction('🏆')
-		await help_message.add_reaction('📎')
-		await help_message.add_reaction('↩️')
 	else:
-		generic_response = True
+		# specific response for mod channels
+		if ctx.channel.category.id == config.MOD_CATEGORY_ID:
+			# build base embed
+			embed_title = 'Mod Help Guide'
+			embed_description = """Use the emojis to navigate this help guide:
+				\n⚔️ Match Commands
+				\n🏆 Tournament Commands
+				\n📎 Admin Commands
+				\n↩️ Return Here"""
+			embed = await generate_embed('yellow', embed_title, embed_description)
+			help_message = await ctx.send(embed=embed)
+			await help_message.add_reaction('⚔️')
+			await help_message.add_reaction('🏆')
+			await help_message.add_reaction('📎')
+			await help_message.add_reaction('↩️')
+		else:
+			generic_response = True
 
 	# general response for all other channels
 	if generic_response:
