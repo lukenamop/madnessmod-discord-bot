@@ -957,62 +957,62 @@ async def points(ctx):
 	print('points command used in stats-flex')
 	return
 
-# 'prelim' command (#mod-spam)
-@client.command(name='prelim')
-@commands.has_any_role('Admin')
-@only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
-# TODO: rewrite "*args" into specific arg
-async def prelim(ctx, *args):
-	# check to be sure only admin user uses command
-	if ctx.author.id in config.ADMIN_IDS:
-		print('prelim command in #duel-mods')
-		# ValueError triggers if a string is used instead of a number
-		try:
-			# split message apart and find user from ID
-			user_id = int(args[0])
-			member = client.get_guild(config.MM_GUILD_ID).get_member(user_id)
+# # 'prelim' command (#mod-spam)
+# @client.command(name='prelim')
+# @commands.has_any_role('Admin')
+# @only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
+# # TODO: rewrite "*args" into specific arg
+# async def prelim(ctx, *args):
+# 	# check to be sure only admin user uses command
+# 	if ctx.author.id in config.ADMIN_IDS:
+# 		print('prelim command in #duel-mods')
+# 		# ValueError triggers if a string is used instead of a number
+# 		try:
+# 			# split message apart and find user from ID
+# 			user_id = int(args[0])
+# 			member = client.get_guild(config.MM_GUILD_ID).get_member(user_id)
 
-			passed = False
-			if member is not None:
-				for role in member.roles:
-					if role.id == config.ROUND_ROLE_IDS[1]:
-						# remove round 1 role
-						await member.remove_roles(role)
-						# add prelim role
-						await member.add_roles(ctx.guild.get_role(config.ROUND_ROLE_IDS[0]))
-						passed = True
-				if passed:
-					# build prelim success embed
-					embed_title = 'Role Set to Prelim'
-					embed_description = f'The tournament role for {member.mention} has been set to `Preliminary`.'
-					embed = await generate_embed('green', embed_title, embed_description)
-					await ctx.send(embed=embed)
-					print(f'prelim set for {member.display_name}')
-				else:
-					# build prelim error embed (user did not have tournament role)
-					embed_title = 'Error: Specified User Not Valid'
-					embed_description = 'The specified user did not have a `Round 1` role.'
-					embed = await generate_embed('red', embed_title, embed_description)
-					await ctx.send(embed=embed)
-					print('user not valid')
-				return
-			else:
-				# build prelim error embed (no matching signup)
-				embed_title = 'Error: No Matching Signup'
-				embed_description = 'Double check that you\'ve copied the user\'s exact 18 digit ID (e.g. `client.user.id`).'
-				embed = await generate_embed('red', embed_title, embed_description)
-				await ctx.send(embed=embed)
-				print('no matching submission error with prelim')
-				return
-		except ValueError:
-			# build prelim error embed (no matching signup)
-			embed_title = 'Error: No Matching Signup'
-			embed_description = 'Double check that you\'ve copied the user\'s exact 18 digit ID (e.g. `client.user.id`).'
-			embed = await generate_embed('red', embed_title, embed_description)
-			await ctx.send(embed=embed)
-			print('non-int passed to prelim')
-			return
-	return
+# 			passed = False
+# 			if member is not None:
+# 				for role in member.roles:
+# 					if role.id == config.ROUND_ROLE_IDS[1]:
+# 						# remove round 1 role
+# 						await member.remove_roles(role)
+# 						# add prelim role
+# 						await member.add_roles(ctx.guild.get_role(config.ROUND_ROLE_IDS[0]))
+# 						passed = True
+# 				if passed:
+# 					# build prelim success embed
+# 					embed_title = 'Role Set to Prelim'
+# 					embed_description = f'The tournament role for {member.mention} has been set to `Preliminary`.'
+# 					embed = await generate_embed('green', embed_title, embed_description)
+# 					await ctx.send(embed=embed)
+# 					print(f'prelim set for {member.display_name}')
+# 				else:
+# 					# build prelim error embed (user did not have tournament role)
+# 					embed_title = 'Error: Specified User Not Valid'
+# 					embed_description = 'The specified user did not have a `Round 1` role.'
+# 					embed = await generate_embed('red', embed_title, embed_description)
+# 					await ctx.send(embed=embed)
+# 					print('user not valid')
+# 				return
+# 			else:
+# 				# build prelim error embed (no matching signup)
+# 				embed_title = 'Error: No Matching Signup'
+# 				embed_description = 'Double check that you\'ve copied the user\'s exact 18 digit ID (e.g. `client.user.id`).'
+# 				embed = await generate_embed('red', embed_title, embed_description)
+# 				await ctx.send(embed=embed)
+# 				print('no matching submission error with prelim')
+# 				return
+# 		except ValueError:
+# 			# build prelim error embed (no matching signup)
+# 			embed_title = 'Error: No Matching Signup'
+# 			embed_description = 'Double check that you\'ve copied the user\'s exact 18 digit ID (e.g. `client.user.id`).'
+# 			embed = await generate_embed('red', embed_title, embed_description)
+# 			await ctx.send(embed=embed)
+# 			print('non-int passed to prelim')
+# 			return
+# 	return
 
 # 'reconnect' command (#mod-spam)
 @client.command(name='reconnect')
@@ -1084,67 +1084,67 @@ async def remindparticipants(ctx):
 	print(f'alerted unfinished match participants')
 	return
 
-# 'removeinvalidparticipants' command (#mod-spam)
-@client.command(name='removeinvalidparticipants')
-@commands.has_any_role('Admin')
-@only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
-async def removeinvalidparticipants(ctx):
-	# check to be sure only admin user uses command
-	if ctx.author.id in config.ADMIN_IDS:
-		query = 'SELECT user_id FROM participants'
-		await execute_sql(query)
-		results = connect.crsr.fetchall()
-		total = 0
-		for result in results:
-			user = ctx.guild.get_member(result[0])
-			if user is None:
-				query = f'DELETE FROM participants WHERE user_id = %s'
-				q_args = [result[0]]
-				await execute_sql(query, q_args)
-				connect.conn.commit()
-				total += 1
-		if total == 0:
-			embed_title = 'No Invalid Participants'
-			embed_description = 'There were no invalid participants to remove.'
-		else:
-			embed_title = 'Participants Removed'
-			embed_description = f'{total} users in the database are no longer in this server. They have been removed from the database.'
-		embed = await generate_embed('green', embed_title, embed_description)
-		await ctx.send(embed=embed)
-		print(f'{total} invalid participants removed from the participants table')
-		return
-	return
+# # 'removeinvalidparticipants' command (#mod-spam)
+# @client.command(name='removeinvalidparticipants')
+# @commands.has_any_role('Admin')
+# @only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
+# async def removeinvalidparticipants(ctx):
+# 	# check to be sure only admin user uses command
+# 	if ctx.author.id in config.ADMIN_IDS:
+# 		query = 'SELECT user_id FROM participants'
+# 		await execute_sql(query)
+# 		results = connect.crsr.fetchall()
+# 		total = 0
+# 		for result in results:
+# 			user = ctx.guild.get_member(result[0])
+# 			if user is None:
+# 				query = f'DELETE FROM participants WHERE user_id = %s'
+# 				q_args = [result[0]]
+# 				await execute_sql(query, q_args)
+# 				connect.conn.commit()
+# 				total += 1
+# 		if total == 0:
+# 			embed_title = 'No Invalid Participants'
+# 			embed_description = 'There were no invalid participants to remove.'
+# 		else:
+# 			embed_title = 'Participants Removed'
+# 			embed_description = f'{total} users in the database are no longer in this server. They have been removed from the database.'
+# 		embed = await generate_embed('green', embed_title, embed_description)
+# 		await ctx.send(embed=embed)
+# 		print(f'{total} invalid participants removed from the participants table')
+# 		return
+# 	return
 
-# 'removetournamentroles' command (#mod-spam)
-@client.command(name='removetournamentroles')
-@commands.has_any_role('Admin')
-@only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
-async def removetournamentroles(ctx):
-	# check to be sure only admin user uses command
-	if ctx.author.id in config.ADMIN_IDS:
-		# build processing embed
-		embed_title = 'Processing...'
-		embed_description = 'Removing tournament roles... This could take a few minutes...'
-		embed = await generate_embed('yellow', embed_title, embed_description)
-		await ctx.send(embed=embed)
+# # 'removetournamentroles' command (#mod-spam)
+# @client.command(name='removetournamentroles')
+# @commands.has_any_role('Admin')
+# @only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
+# async def removetournamentroles(ctx):
+# 	# check to be sure only admin user uses command
+# 	if ctx.author.id in config.ADMIN_IDS:
+# 		# build processing embed
+# 		embed_title = 'Processing...'
+# 		embed_description = 'Removing tournament roles... This could take a few minutes...'
+# 		embed = await generate_embed('yellow', embed_title, embed_description)
+# 		await ctx.send(embed=embed)
 
-		total_removed = 0;
-		# iterate through all members
-		for member in ctx.guild.members:
-			for role in member.roles:
-				if role.id in config.ROUND_ROLE_IDS:
-					# remove round roles
-					await member.remove_roles(role)
-					# count up
-					total_removed += 1
-		embed_title = 'Tournament Roles Removed'
-		embed_description = f'Success! {total_removed} previous tournament roles removed.'
-		embed = await generate_embed('green', embed_title, embed_description)
-		await ctx.send(embed=embed)
-		print(f'{total_removed} roles removed')
-		print('removetournamentroles complete')
-		return
-	return
+# 		total_removed = 0;
+# 		# iterate through all members
+# 		for member in ctx.guild.members:
+# 			for role in member.roles:
+# 				if role.id in config.ROUND_ROLE_IDS:
+# 					# remove round roles
+# 					await member.remove_roles(role)
+# 					# count up
+# 					total_removed += 1
+# 		embed_title = 'Tournament Roles Removed'
+# 		embed_description = f'Success! {total_removed} previous tournament roles removed.'
+# 		embed = await generate_embed('green', embed_title, embed_description)
+# 		await ctx.send(embed=embed)
+# 		print(f'{total_removed} roles removed')
+# 		print('removetournamentroles complete')
+# 		return
+# 	return
 
 # # 'resignup' command (#mod-spam)
 # @client.command(name='resignup')
@@ -1227,61 +1227,61 @@ async def removetournamentroles(ctx):
 # 		print('non-int passed to resignup')
 # 		return
 
-# 'settournamentroles' command (#mod-spam)
-@client.command(name='settournamentroles')
-@commands.has_any_role('Admin')
-@only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
-async def settournamentroles(ctx):
-	# check to be sure only admin user uses command
-	if ctx.author.id in config.ADMIN_IDS:
-		# build processing embed
-		embed_title = 'Processing...'
-		embed_description = 'Setting tournament roles... This could take a few minutes...'
-		embed = await generate_embed('yellow', embed_title, embed_description)
-		processing_message = await ctx.send(embed=embed)
-		await ctx.trigger_typing()
+# # 'settournamentroles' command (#mod-spam)
+# @client.command(name='settournamentroles')
+# @commands.has_any_role('Admin')
+# @only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
+# async def settournamentroles(ctx):
+# 	# check to be sure only admin user uses command
+# 	if ctx.author.id in config.ADMIN_IDS:
+# 		# build processing embed
+# 		embed_title = 'Processing...'
+# 		embed_description = 'Setting tournament roles... This could take a few minutes...'
+# 		embed = await generate_embed('yellow', embed_title, embed_description)
+# 		processing_message = await ctx.send(embed=embed)
+# 		await ctx.trigger_typing()
 
-		total_removed = 0
-		# iterate through all members
-		for member in ctx.guild.members:
-			for role in member.roles:
-				if role.id in config.ROUND_ROLE_IDS:
-					# remove round roles
-					await member.remove_roles(role)
-					# count up
-					total_removed += 1
-		print(f'{total_removed} roles removed')
+# 		total_removed = 0
+# 		# iterate through all members
+# 		for member in ctx.guild.members:
+# 			for role in member.roles:
+# 				if role.id in config.ROUND_ROLE_IDS:
+# 					# remove round roles
+# 					await member.remove_roles(role)
+# 					# count up
+# 					total_removed += 1
+# 		print(f'{total_removed} roles removed')
 
-		# pull all signups from database
-		query = 'SELECT user_id FROM signups WHERE submission_time >= %s'
-		q_args = [time.time() - config.CYCLE]
-		await execute_sql(query, q_args)
-		results = connect.crsr.fetchall()
-		# check to make sure there are signups
-		if results is not None:
-			total_added = 0
-			# assign every user to the Round 1 role
-			for entry in results:
-				member = ctx.guild.get_member(entry[0])
-				if member is not None:
-					await member.add_roles(ctx.guild.get_role(config.ROUND_ROLE_IDS[1]))
-					# count up
-					total_added += 1
-			await processing_message.delete()
-			embed_title = 'Tournament Roles Set'
-			embed_description = f'Success! {total_removed} previous tournament roles removed, {total_added} new tournament roles added.'
-			embed = await generate_embed('green', embed_title, embed_description)
-			print(str(total_added) + ' roles added')
-		else:
-			embed_title = 'Start Error'
-			embed_description = 'There aren\'t any signups for this cycle in the database yet.'
-			embed = await generate_embed('red', embed_title, embed_description)
-			print('start error')
-		# send signuplist embed
-		await ctx.send(embed=embed)
-		print('settournamentroles complete')
-		return
-	return
+# 		# pull all signups from database
+# 		query = 'SELECT user_id FROM signups WHERE submission_time >= %s'
+# 		q_args = [time.time() - config.CYCLE]
+# 		await execute_sql(query, q_args)
+# 		results = connect.crsr.fetchall()
+# 		# check to make sure there are signups
+# 		if results is not None:
+# 			total_added = 0
+# 			# assign every user to the Round 1 role
+# 			for entry in results:
+# 				member = ctx.guild.get_member(entry[0])
+# 				if member is not None:
+# 					await member.add_roles(ctx.guild.get_role(config.ROUND_ROLE_IDS[1]))
+# 					# count up
+# 					total_added += 1
+# 			await processing_message.delete()
+# 			embed_title = 'Tournament Roles Set'
+# 			embed_description = f'Success! {total_removed} previous tournament roles removed, {total_added} new tournament roles added.'
+# 			embed = await generate_embed('green', embed_title, embed_description)
+# 			print(str(total_added) + ' roles added')
+# 		else:
+# 			embed_title = 'Start Error'
+# 			embed_description = 'There aren\'t any signups for this cycle in the database yet.'
+# 			embed = await generate_embed('red', embed_title, embed_description)
+# 			print('start error')
+# 		# send signuplist embed
+# 		await ctx.send(embed=embed)
+# 		print('settournamentroles complete')
+# 		return
+# 	return
 
 # 'showresults' command (contest category)
 @client.command(name='showresults')
@@ -2356,7 +2356,7 @@ async def togglesignups(ctx):
 			connect.conn.commit()
 			print('signups no longer open')
 
-			# build toggletemplates confirmation embed
+			# build confirmation embed
 			embed_title = 'Signups Closed'
 			embed_description = 'Signups are now closed. To re-open, type `.togglesignups`.'
 			embed = await generate_embed('green', embed_title, embed_description)
@@ -2371,57 +2371,12 @@ async def togglesignups(ctx):
 			connect.conn.commit()
 			print('signups now open')
 
-			# build toggletemplates confirmation embed
+			# build confirmation embed
 			embed_title = 'Signups Open'
 			embed_description = 'Signups are now open. To close, type `.togglesignups`.'
 			embed = await generate_embed('green', embed_title, embed_description)
 			await ctx.send(embed=embed)
 			print('signups toggle confirmation')
-			return
-
-# 'toggletemplates' command (#mod-spam)
-@client.command(name='toggletemplates')
-@commands.has_any_role('Admin')
-@only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
-async def toggletemplates(ctx):
-	# check to be sure only admin user uses command
-	if ctx.author.id in config.ADMIN_IDS:
-		print('signup templates toggled')
-		# check to see if templates are required
-		query = 'SELECT template_required FROM settings WHERE guild_id = %s'
-		q_args = [config.MM_GUILD_ID]
-		await execute_sql(query, q_args)
-		results = connect.crsr.fetchone()
-		template_required = results[0]
-		if template_required:
-			# set templates to no longer be required
-			query = 'UPDATE settings SET template_required = False WHERE guild_id = %s'
-			q_args = [config.MM_GUILD_ID]
-			await execute_sql(query, q_args)
-			connect.conn.commit()
-			print('templates no longer required')
-
-			# build toggletemplates confirmation embed
-			embed_title = 'Templates Disabled'
-			embed_description = 'Templates are no longer required with `.signup`'
-			embed = await generate_embed('green', embed_title, embed_description)
-			await ctx.send(embed=embed)
-			print('template toggle confirmation')
-			return
-		else:
-			# set templates to now be required
-			query = 'UPDATE settings SET template_required = True WHERE guild_id = %s'
-			q_args = [config.MM_GUILD_ID]
-			await execute_sql(query, q_args)
-			connect.conn.commit()
-			print('templates now required')
-
-			# build toggletemplates confirmation embed
-			embed_title = 'Templates Enabled'
-			embed_description = 'Templates are now required with `.signup`'
-			embed = await generate_embed('green', embed_title, embed_description)
-			await ctx.send(embed=embed)
-			print('template toggle confirmation')
 			return
 
 # 'verify' command (#verification)
@@ -3210,61 +3165,6 @@ async def on_raw_reaction_add(payload):
 				print('vote confirmation sent to user')
 			return
 
-		# # mod help guide
-		# if message.embeds[0].title == 'Mod Help Guide':
-		# 	embed_title = 'Mod Help Guide'
-		# 	# check to see which emoji was used
-		# 	if emoji_name == '⚔️':
-		# 		# match commands
-		# 		embed_description = """**⚔️ Match Commands**
-		# 			\n`.cancelmatch` - cancels the match in a given match channel
-		# 			\n`.forcewin` - ends a match by forcing one of the participants to win (use in matches when one participant hasn't submitted)
-		# 			\n`.matchisfinal` - sets the next match as a final match which will ping `Verified` and `everyone`
-		# 			\n`.showresults` - shows the results of the most recent match in the match channel it's called in
-		# 			\n`.splitmatch @<user> @<user>` - splits a match between two users so they can compete separately
-		# 			\n`.startmatch @<user> @<user>` - starts a match between two users
-		# 			\n`.startsolo @<user>` - starts a user's solo match (use after `.splitmatch`)"""
-		# 	elif emoji_name == '🏆':
-		# 		# tournament commands
-		# 		embed_description = """**🏆 Tournament Commands**
-		# 			\n`.remindparticipants` - alerts all participants of unfinished matches
-		# 			\n`.createbracket <tournament reference>` - creates a Challonge bracket with the given tournament reference (for example, use `10` to get Meme Madness 10) and populates all participants
-		# 			\n`.creatematchchannels <tournament reference>` - creates a match channel for every "open" match from the specified Challonge bracket
-		# 			\n`.deletematchchannels` - deletes existing match channels from the matches category
-		# 			\n`.prelim <user ID>` - sets a user's tournament role to `Preliminary` (deprecated)
-		# 			\n`.removetournamentroles` - remove past participants' round roles (deprecated)
-		# 			\n`.resignup <user ID> <reason>` - deletes a user's template and DMs them with `<reason>`, prompting them to re-signup
-		# 			\n`.settournamentroles` - removes all past tournament roles and initializes the tournament's participants' round roles (sets them to Round 1)
-		# 			\n`.signuplist` - displays a full list of signups for the current tournament"""
-		# 	elif emoji_name == '📎':
-		# 		# admin commands
-		# 		embed_description = """**📎 Admin Commands**
-		# 			\n`.activematches` - displays all currently active matches
-		# 			\n`.activepolls` - displays all currently active polls
-		# 			\n`.clearmatches` - clears all matches and votes from the database
-		# 			\n`.clearsignups` - clears all signups from the database
-		# 			\n`.reconnect` - forces the bot to reconnect to its database
-		# 			\n`.removeinvalidparticipants` - removes users who have left the server from the database
-		# 			\n`.restartpolls` - fixes any match polls that are no longer counting votes
-		# 			\n`.togglesignups` - open or close tournament signups
-		# 			\n`.toggletemplates` - enable or disable template requirements with `.signup`"""
-		# 	elif emoji_name == '↩️':
-		# 		# back to main help menu
-		# 		embed_description = """Use the emojis to navigate this help guide:
-		# 			\n⚔️ Match Commands
-		# 			\n🏆 Tournament Commands
-		# 			\n📎 Admin Commands
-		# 			\n↩️ Return Here"""
-		# 	else:
-		# 		# invalid emoji, do nothing
-		# 		return
-
-		# 	# update the help guide
-		# 	embed = await generate_embed('yellow', embed_title, embed_description)
-		# 	await message.edit(embed=embed)
-		# 	print('mod help guide edited')
-		# 	return
-
 		# points leaderboard (overall)
 		if message.embeds[0].title == 'Overall Points Leaderboard':
 			try:
@@ -3366,6 +3266,84 @@ async def on_raw_reaction_add(payload):
 					# remove the template from #templates
 					await message.delete()
 					print('template has been removed from #templates')
+			return
+	
+		# generic help guide
+		if message.embeds[0].title == 'Help Guide':
+			embed_title = 'Help Guide'
+			# check to see which emoji was used
+			if emoji_name == '🏆':
+				# tournament commands
+				embed_description = f"""**🏆 Tournament Commands**
+					\n`{config.CMD_PREFIX}mymatches` - display links to your active matches
+					\n`{config.CMD_PREFIX}signup` - signup for the upcoming tournament (DM only)
+					\n`{config.CMD_PREFIX}submit` - submit your final meme to your active match (DM only)
+					\n`{config.CMD_PREFIX}template` - submit a template to be used in an upcoming match (DM only)"""
+			elif emoji_name == '⚖️':
+				# stat commands
+				embed_description = f"""**⚖️ Stat Commands**
+					\n`{config.CMD_PREFIX}leaderboard` - display a leaderboard ranking users by their total points
+					\n`{config.CMD_PREFIX}points` - display an overview of the Meme Madness point system
+					\n`{config.CMD_PREFIX}stats` - check your match and voting stats or look at another user's"""
+			elif emoji_name == '↩️':
+				# back to the main help menu
+				embed_description = """Use the emojis to navigate this help guide:
+					\n🏆 Tournament Commands
+					\n⚖️ Stat Commands
+					\n↩️ Return Here"""
+			else:
+				# invalid emoji, do nothing
+				return
+
+		# mod help guide
+		if message.embeds[0].title == 'Mod Help Guide':
+			if emoji_name == '⚔️':
+				# match commands
+				embed_description = """**⚔️ Match Commands**
+					\n`.cancelmatch` - cancels the match in a given match channel (can be glitchy)
+					\n`.forcewin` - ends a match by forcing one of the participants to win (use in matches when one participant hasn't submitted)
+					\n`.matchisfinal` - sets the next match as a final match which will ping `Verified` and `everyone`
+					\n`.showresults` - shows the results of the most recent match in the match channel it's called in
+					\n`.splitmatch @<user> @<user>` - splits a match between two users so they can compete separately
+					\n`.startmatch @<user> @<user>` - starts a match between two users
+					\n`.startsolo @<user>` - starts a user's solo match (use after `.splitmatch`)"""
+			elif emoji_name == '🏆':
+				# tournament commands
+				embed_description = """**🏆 Tournament Commands**
+					\n`.remindparticipants` - alerts all participants of unfinished matches that they have 24h left
+					\n`.createbracket <tournament reference>` - creates a Challonge bracket with the given tournament reference (for example, use `10` to get Meme Madness 10) and populates all participants
+					\n`.creatematchchannels <tournament reference>` - creates a match channel for every "open" match from the specified Challonge bracket
+					\n`.deletematchchannels` - deletes existing match channels from the matches category
+					\n`.signuplist` - displays a full list of signups for the current tournament"""
+					# \n`.prelim <user ID>` - sets a user's tournament role to `Preliminary` (deprecated)
+					# \n`.removetournamentroles` - remove past participants' round roles (deprecated)
+					# \n`.resignup <user ID> <reason>` - deletes a user's template and DMs them with `<reason>`, prompting them to re-signup
+					# \n`.settournamentroles` - removes all past tournament roles and initializes the tournament's participants' round roles (sets them to Round 1)
+			elif emoji_name == '📎':
+				# admin commands
+				embed_description = """**📎 Admin Commands**
+					\n`.activematches` - displays all currently active matches
+					\n`.activepolls` - displays all currently active polls
+					\n`.clearmatches` - clears all matches and votes from the database
+					\n`.clearsignups` - clears all signups from the database
+					\n`.reconnect` - forces the bot to reconnect to its database
+					\n`.togglesignups` - open or close tournament signups"""
+					# \n`.removeinvalidparticipants` - removes users who have left the server from the database
+			elif emoji_name == '↩️':
+				# back to main help menu
+				embed_description = """Use the emojis to navigate this help guide:
+					\n⚔️ Match Commands
+					\n🏆 Tournament Commands
+					\n📎 Admin Commands
+					\n↩️ Return Here"""
+			else:
+				# invalid emoji, do nothing
+				return
+
+			# update the help guide
+			embed = await generate_embed('yellow', embed_title, embed_description)
+			await message.edit(embed=embed)
+			print('help guide edited')
 			return
 	return
 
