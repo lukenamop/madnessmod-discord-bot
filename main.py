@@ -632,6 +632,14 @@ async def creatematchchannels(ctx, *args):
 		embed = await generate_embed('yellow', embed_title, embed_description)
 		conf_message = await ctx.send(embed=embed)
 
+		# find all timezone roles
+		tz_na_role = member.guild.get_role(config.TZ_NA_ROLE_ID)
+		tz_sa_role = member.guild.get_role(config.TZ_SA_ROLE_ID)
+		tz_we_a_role = member.guild.get_role(config.TZ_WE_A_ROLE_ID)
+		tz_ee_me_role = member.guild.get_role(config.TZ_EE_ME_ROLE_ID)
+		tz_a_p_role = member.guild.get_role(config.TZ_A_P_ROLE_ID)
+		tz_roles = [tz_na_role, tz_sa_role, tz_we_a_role, tz_ee_me_role, tz_a_p_role]
+
 		# iterate through all matches
 		total_created = 0
 		for match in tournament_index:
@@ -660,6 +668,34 @@ async def creatematchchannels(ctx, *args):
 					await match_channel.send(file=match_frame_image)
 				match_start_string += f'\nWorthy competitors! Now is the time to duel and find the *true meme master*! DM each other to find a 30 minute window to complete your match. When you\'re both available, @ Duel Mods in {ctx.guild.get_channel(config.GENERAL_CHAN_ID).mention}. May the best meme win!'
 				await match_channel.send(match_start_string)
+				try:
+					# find the members' timezone roles
+					member1_tz_role = None
+					member2_tz_role = None
+					for tz_role in tz_roles:
+						if tz_role in member1.roles and member1_tz_role is None:
+							member1_tz_role = tz_role
+						if tz_role in member2.roles and member2_tz_role is None:
+							member2_tz_role = tz_role
+
+					embed_title = 'New Meme Madness Match'
+					# build timezone embed for member1
+					dm_channel_1 = await member1.create_dm()
+					embed_description = f"""You have a new Meme Madness match in {match_channel.mention}!
+						\nYour listed timezone is `{member1_tz_role.name}` and your opponent {member2.mention}'s listed timezone is `{member2_tz_role.name}`.
+						\nPlease contact your opponent as soon as possible to find a 30 minute window you're both available to complete your match. Good luck!"""
+					embed = await generate_embed('green', embed_title, embed_description)
+					await dm_channel_1.send(embed=embed)
+					# build timezone embed for member2
+					dm_channel_2 = await member2.create_dm()
+					embed_description = f"""You have a new Meme Madness match in {match_channel.mention}!
+						\nYour listed timezone is `{member2_tz_role.name}` and your opponent {member1.mention}'s listed timezone is `{member1_tz_role.name}`.
+						\nPlease contact your opponent as soon as possible to find a 30 minute window you're both available to complete your match. Good luck!"""
+					embed = await generate_embed('green', embed_title, embed_description)
+					await dm_channel_2.send(embed=embed)
+					print(f'sent match participants their timezones in channel: {match_channel.name}')
+				except:
+					print(f'issue sending match participants their timezones in channel: {match_channel.name}')
 				total_created += 1
 				if config.TESTING:
 					break
