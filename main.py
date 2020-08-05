@@ -1447,7 +1447,7 @@ async def signup(ctx):
 	try:
 		# define reaction requirements (emoji reaction from specified user)
 		def check(r, u):
-			return r.message.id == timezone_selection_message.id and u.id == ctx.author.id and r.emoji.name in ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣']
+			return r.message.id == timezone_selection_message.id and u.id == ctx.author.id and r.emoji in ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣']
 		# wait for a reaction
 		timezone_reaction, timezone_user = await client.wait_for('reaction_add', check=check, timeout=120)
 		print(f'signup timezone reaction received from {ctx.author.display_name}')
@@ -1461,19 +1461,19 @@ async def signup(ctx):
 		return
 
 	# assign Timezone: North America role
-	if timezone_reaction.emoji.name == '1️⃣':
+	if timezone_reaction.emoji == '1️⃣':
 		await member.add_roles(member.guild.get_role(config.TZ_NA_ROLE_ID))
 		print(f'added Timezone: North America role to {member.display_name}')
-	elif timezone_reaction.emoji.name == '2️⃣':
+	elif timezone_reaction.emoji == '2️⃣':
 		await member.add_roles(member.guild.get_role(config.TZ_SA_ROLE_ID))
 		print(f'added Timezone: South America role to {member.display_name}')
-	elif timezone_reaction.emoji.name == '3️⃣':
+	elif timezone_reaction.emoji == '3️⃣':
 		await member.add_roles(member.guild.get_role(config.TZ_WE_A_ROLE_ID))
 		print(f'added Timezone: Western Europe/Africa role to {member.display_name}')
-	elif timezone_reaction.emoji.name == '4️⃣':
+	elif timezone_reaction.emoji == '4️⃣':
 		await member.add_roles(member.guild.get_role(config.TZ_EE_ME_ROLE_ID))
 		print(f'added Timezone: Eastern Europe/Middle East role to {member.display_name}')
-	elif timezone_reaction.emoji.name == '5️⃣':
+	elif timezone_reaction.emoji == '5️⃣':
 		await member.add_roles(member.guild.get_role(config.TZ_A_P_ROLE_ID))
 		print(f'added Timezone: Asia/Pacific role to {member.display_name}')
 
@@ -2739,10 +2739,9 @@ async def on_raw_reaction_add(payload):
 
 	# create variable for the reaction emoji
 	emoji = payload.emoji
-	emoji_name = payload.emoji.name
 
 	# act on signup emojis
-	if emoji_name == '✍️':
+	if emoji == '✍️':
 		if channel.id == config.ANNOUNCEMENTS_CHAN_ID and message.content.startswith('__**Meme Madness'):
 			# remove the reaction
 			try:
@@ -2834,7 +2833,7 @@ async def on_raw_reaction_add(payload):
 		return
 
 	# act on next competitor split match emojis
-	if emoji_name in ['🖍️','✏️','🖌️','🖊️','🖋️']:
+	if emoji in ['🖍️','✏️','🖌️','🖊️','🖋️']:
 		if channel.category.id == config.MATCH_CATEGORY_ID and message.content.startswith('It\'s your turn to make a meme'):
 			# remove the reaction
 			try:
@@ -3086,11 +3085,11 @@ async def on_raw_reaction_add(payload):
 				if result is not None:
 					if result[0] or result[1]:
 						# find which image the user originally voted for
-						if result[0] and emoji_name == '🇦':
+						if result[0] and emoji == '🇦':
 							vote_position = 'A'
-						elif result[1] and emoji_name == '🇧':
+						elif result[1] and emoji == '🇧':
 							vote_position = 'B'
-						elif (result[0] and emoji_name == '🇧') or (result[1] and emoji_name == '🇦'):
+						elif (result[0] and emoji == '🇧') or (result[1] and emoji == '🇦'):
 							# send the user a warning if their vote was for the wrong image
 							embed_title = 'Invalid Vote'
 							embed_description = 'You have previously voted for the other image, please remove your vote before attempting to vote again.'
@@ -3139,11 +3138,11 @@ async def on_raw_reaction_add(payload):
 						return
 					return
 				# find which image the user voted for
-				if emoji_name == '🇦':
+				if emoji == '🇦':
 					vote_position = 'A'
 					query = 'INSERT INTO votes (user_id, match_id, a_vote) VALUES (%s, %s, True)'
 					q_args = [user.id, match_id]
-				elif emoji_name == '🇧':
+				elif emoji == '🇧':
 					vote_position = 'B'
 					query = 'INSERT INTO votes (user_id, match_id, b_vote) VALUES (%s, %s, True)'
 					q_args = [user.id, match_id]
@@ -3240,12 +3239,12 @@ async def on_raw_reaction_add(payload):
 				lb_page = 1
 
 			# check to see which emoji was used
-			if emoji_name == '⬅️':
+			if emoji == '⬅️':
 				# previous page
 				if lb_page == 1:
 					return
 				lb_page -= 1
-			elif emoji_name == '🔅':
+			elif emoji == '🔅':
 				# jump to self
 				query = 'WITH cte_lb_rank AS (SELECT user_id, RANK () OVER (ORDER BY lb_points DESC) lb_rank FROM participants) SELECT lb_rank FROM cte_lb_rank WHERE user_id = %s'
 				q_args = [user.id]
@@ -3254,7 +3253,7 @@ async def on_raw_reaction_add(payload):
 				if result is not None:
 					user_rank = result[0]
 					lb_page = ceil(user_rank / 10)
-			elif emoji_name == '➡️':
+			elif emoji == '➡️':
 				lb_page += 1
 
 			# update the embed description
@@ -3306,7 +3305,7 @@ async def on_raw_reaction_add(payload):
 		# voluntary template submissions
 		if message.embeds[0].title == 'Voluntary Template Submission':
 			# check to see which emoji was used
-			if emoji_name == '👎':
+			if emoji == '👎':
 				if user.id == config.ADMIN_IDS[0]:
 					# establish a google connection
 					connect.g_connect()
@@ -3338,20 +3337,20 @@ async def on_raw_reaction_add(payload):
 		if message.embeds[0].title == 'Help Guide':
 			embed_title = 'Help Guide'
 			# check to see which emoji was used
-			if emoji_name == '🏆':
+			if emoji == '🏆':
 				# tournament commands
 				embed_description = f"""**🏆 Tournament Commands**
 					\n`{config.CMD_PREFIX}mymatches` - display links to your active matches
 					\n`{config.CMD_PREFIX}signup` - signup for the upcoming tournament (DM only)
 					\n`{config.CMD_PREFIX}submit` - submit your final meme to your active match (DM only)
 					\n`{config.CMD_PREFIX}template` - submit a template to be used in an upcoming match (DM only)"""
-			elif emoji_name == '⚖️':
+			elif emoji == '⚖️':
 				# stat commands
 				embed_description = f"""**⚖️ Stat Commands**
 					\n`{config.CMD_PREFIX}leaderboard` - display a leaderboard ranking users by their total points
 					\n`{config.CMD_PREFIX}points` - display an overview of the Meme Madness point system
 					\n`{config.CMD_PREFIX}stats` - check your match and voting stats or look at another user's"""
-			elif emoji_name == '↩️':
+			elif emoji == '↩️':
 				# back to the main help menu
 				embed_description = """Use the emojis to navigate this help guide:
 					\n🏆 Tournament Commands
@@ -3376,7 +3375,7 @@ async def on_raw_reaction_add(payload):
 				print('unable to remove reaction')
 
 			embed_title = 'Mod Help Guide'
-			if emoji_name == '⚔️':
+			if emoji == '⚔️':
 				# match commands
 				embed_description = """**⚔️ Match Commands**
 					\n`.cancelmatch` - cancel the match in a given match channel (can be glitchy)
@@ -3387,7 +3386,7 @@ async def on_raw_reaction_add(payload):
 					\n`.splitmatch @<user> @<user>` - split a match between two users so they can compete separately
 					\n`.startmatch @<user> @<user>` - start a match between two users
 					\n`.startsolo @<user>` - start a user's solo match (use after `.splitmatch`)"""
-			elif emoji_name == '🏆':
+			elif emoji == '🏆':
 				# tournament commands
 				embed_description = """**🏆 Tournament Commands**
 					\n`.remindparticipants` - alert all participants of unfinished matches that they have 24h left
@@ -3399,7 +3398,7 @@ async def on_raw_reaction_add(payload):
 					# \n`.removetournamentroles` - remove past participants' round roles (deprecated)
 					# \n`.resignup <user ID> <reason>` - delete a user's template and DMs them with `<reason>`, prompting them to re-signup
 					# \n`.settournamentroles` - remove all past tournament roles and initializes the tournament's participants' round roles (sets them to Round 1)
-			elif emoji_name == '📎':
+			elif emoji == '📎':
 				# admin commands
 				embed_description = """**📎 Admin Commands**
 					\n`.activematches` - display all currently active matches
@@ -3409,7 +3408,7 @@ async def on_raw_reaction_add(payload):
 					\n`.reconnect` - force the bot to reconnect to its database
 					\n`.togglesignups` - open or close tournament signups"""
 					# \n`.removeinvalidparticipants` - remove users who have left the server from the database
-			elif emoji_name == '↩️':
+			elif emoji == '↩️':
 				# back to main help menu
 				embed_description = """Use the emojis to navigate this help guide:
 					\n⚔️ Match Commands
