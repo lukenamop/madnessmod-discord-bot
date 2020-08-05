@@ -684,14 +684,14 @@ async def creatematchchannels(ctx, *args):
 					embed_description = f"""You have a new Meme Madness match in {match_channel.mention}!
 						\nYour listed timezone is `{member1_tz_role.name}` and your opponent {member2.mention}'s listed timezone is `{member2_tz_role.name}`.
 						\nPlease contact your opponent as soon as possible to find a 30 minute window you're both available to complete your match. Good luck!"""
-					embed = await generate_embed('green', embed_title, embed_description)
+					embed = await generate_embed('yellow', embed_title, embed_description)
 					await dm_channel_1.send(embed=embed)
 					# build timezone embed for member2
 					dm_channel_2 = await member2.create_dm()
 					embed_description = f"""You have a new Meme Madness match in {match_channel.mention}!
 						\nYour listed timezone is `{member2_tz_role.name}` and your opponent {member1.mention}'s listed timezone is `{member1_tz_role.name}`.
 						\nPlease contact your opponent as soon as possible to find a 30 minute window you're both available to complete your match. Good luck!"""
-					embed = await generate_embed('green', embed_title, embed_description)
+					embed = await generate_embed('yellow', embed_title, embed_description)
 					await dm_channel_2.send(embed=embed)
 					print(f'sent match participants their timezones in channel: {match_channel.name}')
 				except:
