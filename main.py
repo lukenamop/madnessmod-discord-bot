@@ -3419,7 +3419,10 @@ async def on_reaction_add(reaction, user):
 				template_url = match_template_entry['Raw Template Link']
 				template_kapwing_link = match_template_entry['Kapwing Template Link']
 				template_author = message.guild.get_member(int(match_template_entry['Provider ID']))
-				template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
+				try:
+					template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
+				except discord.errors.NotFound:
+					print('template message was not found')
 
 				#  find which reaction was added
 				if reaction.emoji == check_emoji:
@@ -3447,14 +3450,17 @@ async def on_reaction_add(reaction, user):
 					connect.conn.commit()
 					print('match template updated in database')
 
-					# if not config.TESTING:
-					# 	# delete template from #templates channel, move to #temp-archive
-					# 	await client.get_channel(config.TEMP_ARCHIVE_CHAN_ID).send(embed=template_message.embeds[0])
-					# 	await template_message.delete()
-					# 	print('template deleted from templates channel')
-					# 	# delete template entry from google sheet
-					# 	template_worksheet.delete_row(template_num)
-					# 	print('template deleted from google sheet')
+					if not config.TESTING:
+						try:
+							# delete template from #templates channel, move to #temp-archive
+							await client.get_channel(config.TEMP_ARCHIVE_CHAN_ID).send(embed=template_message.embeds[0])
+							await template_message.delete()
+							print('template deleted from templates channel')
+						except:
+							print('template not deleted from template channel')
+						# delete template entry from google sheet
+						template_worksheet.delete_row(template_num)
+						print('template deleted from google sheet')
 
 				elif reaction.emoji == x_emoji:
 					# delete original message
@@ -3529,7 +3535,10 @@ async def on_reaction_add(reaction, user):
 				template_url = match_template_entry['Raw Template Link']
 				template_kapwing_link = match_template_entry['Kapwing Template Link']
 				template_author = message.guild.get_member(int(match_template_entry['Provider ID']))
-				template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
+				try:
+					template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
+				except discord.errors.NotFound:
+					print('template message was not found')
 
 				#  find which reaction was added
 				if reaction.emoji == check_emoji:
@@ -3584,10 +3593,13 @@ async def on_reaction_add(reaction, user):
 					print(f'match started between {member1.display_name} and {member2.display_name}')
 
 					if not config.TESTING:
-						# delete template from #templates channel, move to #temp-archive
-						await client.get_channel(config.TEMP_ARCHIVE_CHAN_ID).send(embed=template_message.embeds[0])
-						await template_message.delete()
-						print('template deleted from templates channel')
+						try:
+							# delete template from #templates channel, move to #temp-archive
+							await client.get_channel(config.TEMP_ARCHIVE_CHAN_ID).send(embed=template_message.embeds[0])
+							await template_message.delete()
+							print('template deleted from templates channel')
+						except:
+							print('template not deleted from template channel')
 						# delete template entry from google sheet
 						template_worksheet.delete_row(template_num)
 						print('template deleted from google sheet')
