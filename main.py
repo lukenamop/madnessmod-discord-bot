@@ -29,7 +29,6 @@ from discord.ext import tasks
 import config
 import connect
 import reddit_verify
-import help_cmd
 import tourney_manager
 from sql_functions import execute_sql
 from functions import create_match_frame_image, escape_underscores, format_lb_entry, generate_embed, time_string
@@ -1430,6 +1429,48 @@ async def signup(ctx):
 		await ctx.send(embed=embed)
 		print(f'already signed up from {ctx.author.display_name}')
 		return
+
+	# build timezone embed
+	embed_title = 'Select Your Timezone'
+	embed_description = """This information will be shared with your match opponents to help you find times to complete your matches.
+		\n1️⃣ North America\n2️⃣ South America\n3️⃣ Western Europe/Africa\n4️⃣ Eastern Europe/Middle East\n5️⃣ Asia/Pacific"""
+	embed = await generate_embed('yellow', embed_title, embed_description)
+	await ctx.send(embed=embed)
+	print(f'sent {ctx.author.display_name} a timezone selection embed')
+
+	# asyncio.TimeoutError triggers if client.wait_for(reaction_add) times out
+	try:
+		# define reaction requirements (emoji reaction from specified user)
+		def check(r, u):
+			return r.message.id == TODO and u.id == ctx.author.id and r.emoji.name in ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣']
+		# wait for a reaction
+		timezone_reaction, timezone_user = await client.wait_for('reaction_add', check=check, timeout=120)
+		print(f'signup timezone reaction received from {ctx.author.display_name}')
+	except asyncio.TimeoutError:
+		# build signup error embed (timed out)
+		embed_title = 'Signup Timed Out'
+		embed_description = f'If you\'d like to sign up for the upcoming tournament, send me another message with `{config.CMD_PREFIX}signup`!'
+		embed = await generate_embed('red', embed_title, embed_description)
+		await ctx.send(embed=embed)
+		print(f'signup timed out by {ctx.author.display_name}')
+		return
+
+	# assign Timezone: North America role
+	if timezone_reaction.emoji.name == '1️⃣':
+		await member.add_roles(member.guild.get_role(config.TZ_NA_ROLE_ID))
+		print(f'added Timezone: North America role to {member.display_name}')
+	elif timezone_reaction.emoji.name == '2️⃣':
+		await member.add_roles(member.guild.get_role(config.TZ_SA_ROLE_ID))
+		print(f'added Timezone: South America role to {member.display_name}')
+	elif timezone_reaction.emoji.name == '3️⃣':
+		await member.add_roles(member.guild.get_role(config.TZ_WE_A_ROLE_ID))
+		print(f'added Timezone: Western Europe/Africa role to {member.display_name}')
+	elif timezone_reaction.emoji.name == '4️⃣':
+		await member.add_roles(member.guild.get_role(config.TZ_EE_ME_ROLE_ID))
+		print(f'added Timezone: Eastern Europe/Middle East role to {member.display_name}')
+	elif timezone_reaction.emoji.name == '5️⃣':
+		await member.add_roles(member.guild.get_role(config.TZ_A_P_ROLE_ID))
+		print(f'added Timezone: Asia/Pacific role to {member.display_name}')
 
 	# add signup info to postgresql
 	query = 'INSERT INTO signups (user_id, message_id, submission_time) VALUES (%s, 0, %s)'
