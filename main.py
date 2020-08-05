@@ -727,6 +727,35 @@ async def deletematchchannels(ctx):
 			await conf_message.delete()
 	return
 
+# 'forceclear' command (#mod-spam)
+@client.command(name='forceclear')
+@commands.has_any_role('Admin')
+@only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID], allowed_category_ids=[config.MATCH_CATEGORY_ID])
+async def forceclear(ctx, member:discord.Member=None):
+	try:
+		query = 'DELETE FROM matches WHERE u1_id = %s'
+		q_args = [member.id]
+		await execute_sql(query, q_args)
+		query = 'DELETE FROM matches WHERE u2_id = %s'
+		q_args = [member.id]
+		await execute_sql(query, q_args)
+		connect.conn.commit()
+	except:
+		# build error embed
+		embed_title = 'Error'
+		embed_description = 'There was an error clearing this user\'s match info from the database.'
+		embed = await generate_embed('red', embed_title, embed_description)
+		await ctx.send(embed=embed)
+		print('failed to clear match info')
+
+	# build confirmation embed
+	embed_title = 'Force Cleared'
+	embed_description = f'All match info for {member.mention} has been force cleared from the database.'
+	embed = await generate_embed('green', embed_title, embed_description)
+	await ctx.send(embed=embed)
+	print(f'cleared match info for {member.display_name}')
+	return
+
 # 'forcewin' command (contest category)
 @client.command(name='forcewin')
 @commands.has_any_role('Duel Mod', 'Admin')
@@ -2614,22 +2643,6 @@ async def help(ctx):
 		await help_message.add_reaction('↩️')
 	return
 
-# 'fixstuff' command (#mod-spam)
-@client.command(name='fixstuff')
-@commands.has_any_role('Admin')
-@only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
-async def justtesting(ctx, member1:discord.Member=None, member2:discord.Member=None):
-	if ctx.author.id != config.ADMIN_IDS[0]:
-		return
-
-	query = 'DELETE FROM matches WHERE u1_id = 594912770760114196'
-	await execute_sql(query)
-	query = 'DELETE FROM matches WHERE u2_id = 594912770760114196'
-	await execute_sql(query)
-	connect.conn.commit()
-
-	return
-
 
 ##### CLIENT EVENTS #####
 
@@ -3321,6 +3334,7 @@ async def on_raw_reaction_add(payload):
 				# match commands
 				embed_description = """**⚔️ Match Commands**
 					\n`.cancelmatch` - cancel the match in a given match channel (can be glitchy)
+					\n`.forceclear @<user>` - clear all match data for a user (use this if there are errors starting somebody's match)
 					\n`.forcewin` - end a match by forcing one of the participants to win (use in matches when one participant hasn't submitted)
 					\n`.matchisfinal` - set the next match as a final match which will ping `Verified` and `everyone`
 					\n`.showresults` - show the results of the most recent match in the match channel it's called in
