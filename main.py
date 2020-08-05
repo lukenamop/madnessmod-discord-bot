@@ -633,11 +633,11 @@ async def creatematchchannels(ctx, *args):
 		conf_message = await ctx.send(embed=embed)
 
 		# find all timezone roles
-		tz_na_role = member.guild.get_role(config.TZ_NA_ROLE_ID)
-		tz_sa_role = member.guild.get_role(config.TZ_SA_ROLE_ID)
-		tz_we_a_role = member.guild.get_role(config.TZ_WE_A_ROLE_ID)
-		tz_ee_me_role = member.guild.get_role(config.TZ_EE_ME_ROLE_ID)
-		tz_a_p_role = member.guild.get_role(config.TZ_A_P_ROLE_ID)
+		tz_na_role = ctx.guild.get_role(config.TZ_NA_ROLE_ID)
+		tz_sa_role = ctx.guild.get_role(config.TZ_SA_ROLE_ID)
+		tz_we_a_role = ctx.guild.get_role(config.TZ_WE_A_ROLE_ID)
+		tz_ee_me_role = ctx.guild.get_role(config.TZ_EE_ME_ROLE_ID)
+		tz_a_p_role = ctx.guild.get_role(config.TZ_A_P_ROLE_ID)
 		tz_roles = [tz_na_role, tz_sa_role, tz_we_a_role, tz_ee_me_role, tz_a_p_role]
 
 		# iterate through all matches
