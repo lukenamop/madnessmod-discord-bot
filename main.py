@@ -1412,12 +1412,12 @@ async def signup(ctx):
 		embed_description = f'Signups are closed for the current tournament! Please try again when signups have opened again. To receive a notification when signups open, head to {client.get_channel(600355436033736714).mention} and give yourself the `Sign-Up Pings` role.'
 		embed = await generate_embed('red', embed_title, embed_description)
 		await ctx.send(embed=embed)
-		print(f'signups closed, signup rejected from {ctx.author.display_name}')
+		print(f'signups closed, signup rejected from {member.display_name}')
 		return
 
 	# check to see if user has signed up in the last 7 days (config.CYCLE seconds)
 	query = 'SELECT * FROM signups WHERE user_id = %s AND submission_time >= %s'
-	q_args = [ctx.author.id, time.time() - config.CYCLE]
+	q_args = [member.id, time.time() - config.CYCLE]
 	await execute_sql(query, q_args)
 	result = connect.crsr.fetchone()
 	# don't create a new signup for previously signed up users
@@ -1427,7 +1427,7 @@ async def signup(ctx):
 		embed_description = 'It looks like you\'ve already signed up for this cycle of Meme Madness! Contact a moderator if this is incorrect.'
 		embed = await generate_embed('red', embed_title, embed_description)
 		await ctx.send(embed=embed)
-		print(f'already signed up from {ctx.author.display_name}')
+		print(f'already signed up from {member.display_name}')
 		return
 
 	# find all timezone roles
@@ -1456,13 +1456,13 @@ async def signup(ctx):
 		await timezone_selection_message.add_reaction('3️⃣')
 		await timezone_selection_message.add_reaction('4️⃣')
 		await timezone_selection_message.add_reaction('5️⃣')
-		print(f'sent {ctx.author.display_name} a timezone selection embed')
+		print(f'sent {member.display_name} a timezone selection embed')
 
 		# asyncio.TimeoutError triggers if client.wait_for(reaction_add) times out
 		try:
 			# define reaction requirements (emoji reaction from specified user)
 			def check(r, u):
-				return r.message.id == timezone_selection_message.id and u.id == ctx.author.id and r.emoji in ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣']
+				return r.message.id == timezone_selection_message.id and u.id == member.id and r.emoji in ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣']
 			# wait for a reaction
 			timezone_reaction, timezone_user = await client.wait_for('reaction_add', check=check, timeout=120)
 			print(f'signup timezone reaction received from {ctx.author.display_name}')
@@ -1472,7 +1472,7 @@ async def signup(ctx):
 			embed_description = f'If you\'d like to sign up for the upcoming tournament, send me another message with `{config.CMD_PREFIX}signup`!'
 			embed = await generate_embed('red', embed_title, embed_description)
 			await ctx.send(embed=embed)
-			print(f'signup timed out by {ctx.author.display_name}')
+			print(f'signup timed out by {member.display_name}')
 			return
 
 		# assign Timezone: North America role
@@ -1499,13 +1499,13 @@ async def signup(ctx):
 
 	# add signup info to postgresql
 	query = 'INSERT INTO signups (user_id, message_id, submission_time) VALUES (%s, 0, %s)'
-	q_args = [ctx.author.id, time.time()]
+	q_args = [member.id, time.time()]
 	await execute_sql(query, q_args)
 	connect.conn.commit()
 	print('signup info added to postgresql')
 
 	embed_title = 'Signup Confirmation'
-	embed_description = f"""Thank you for signing up {ctx.author.mention}! If there are any issues with your entry you will be contacted.
+	embed_description = f"""Thank you for signing up {member.mention}! If there are any issues with your entry you will be contacted.
 		\nYour listed timezone is `{assigned_timezone_role.name}`, if that is incorrect please contact an Admin."""
 	embed = await generate_embed('green', embed_title, embed_description)
 	await ctx.send(embed=embed)
@@ -1516,16 +1516,16 @@ async def signup(ctx):
 	embed = await generate_embed('green', embed_title, embed_description)
 	signup_chan = client.get_channel(config.SIGNUP_CHAN_ID)
 	template_message = await signup_chan.send(embed=embed)
-	print(f'signup sent to #signups by {ctx.author.display_name}')
+	print(f'signup sent to #signups by {member.display_name}')
 
 	# check for existing participant in database
 	query = 'SELECT * FROM participants WHERE user_id = %s'
-	q_args = [ctx.author.id]
+	q_args = [member.id]
 	await execute_sql(query, q_args)
 	if connect.crsr.fetchone() is None:
 		# create participant if none exists
 		query = 'INSERT INTO participants (user_id) VALUES (%s)'
-		q_args = [ctx.author.id]
+		q_args = [member.id]
 		await execute_sql(query, q_args)
 		connect.conn.commit()
 		print('user added to participants table in postgresql')
@@ -2814,6 +2814,73 @@ async def on_raw_reaction_add(payload):
 				print(f'already signed up from {member.display_name}')
 				return
 
+			# find all timezone roles
+			tz_na_role = member.guild.get_role(config.TZ_NA_ROLE_ID)
+			tz_sa_role = member.guild.get_role(config.TZ_SA_ROLE_ID)
+			tz_we_a_role = member.guild.get_role(config.TZ_WE_A_ROLE_ID)
+			tz_ee_me_role = member.guild.get_role(config.TZ_EE_ME_ROLE_ID)
+			tz_a_p_role = member.guild.get_role(config.TZ_A_P_ROLE_ID)
+			# check to see if the user already has a timezone role
+			timezone_role_assigned = False
+			assigned_timezone_role = None
+			for role in [tz_na_role, tz_sa_role, tz_we_a_role, tz_ee_me_role, tz_a_p_role]:
+				if not timezone_role_assigned:
+					if role in member.roles:
+						timezone_role_assigned = True
+						assigned_timezone_role = role
+			if not timezone_role_assigned:
+				# build timezone selection embed
+				embed_title = 'Select Your Timezone'
+				embed_description = """This information will be shared with your match opponents to help you find times to complete your matches.
+					\n1️⃣ North America\n2️⃣ South America\n3️⃣ Western Europe/Africa\n4️⃣ Eastern Europe/Middle East\n5️⃣ Asia/Pacific"""
+				embed = await generate_embed('yellow', embed_title, embed_description)
+				timezone_selection_message = await dm_channel.send(embed=embed)
+				await timezone_selection_message.add_reaction('1️⃣')
+				await timezone_selection_message.add_reaction('2️⃣')
+				await timezone_selection_message.add_reaction('3️⃣')
+				await timezone_selection_message.add_reaction('4️⃣')
+				await timezone_selection_message.add_reaction('5️⃣')
+				print(f'sent {member.display_name} a timezone selection embed')
+
+				# asyncio.TimeoutError triggers if client.wait_for(reaction_add) times out
+				try:
+					# define reaction requirements (emoji reaction from specified user)
+					def check(r, u):
+						return r.message.id == timezone_selection_message.id and u.id == member.id and r.emoji in ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣']
+					# wait for a reaction
+					timezone_reaction, timezone_user = await client.wait_for('reaction_add', check=check, timeout=120)
+					print(f'signup timezone reaction received from {member.display_name}')
+				except asyncio.TimeoutError:
+					# build signup error embed (timed out)
+					embed_title = 'Signup Timed Out'
+					embed_description = f'If you\'d like to sign up for the upcoming tournament, send me another message with `{config.CMD_PREFIX}signup`!'
+					embed = await generate_embed('red', embed_title, embed_description)
+					await dm_channel.send(embed=embed)
+					print(f'signup timed out by {member.display_name}')
+					return
+
+				# assign Timezone: North America role
+				if timezone_reaction.emoji == '1️⃣':
+					await member.add_roles(tz_na_role)
+					assigned_timezone_role = tz_na_role
+					print(f'added Timezone: North America role to {member.display_name}')
+				elif timezone_reaction.emoji == '2️⃣':
+					await member.add_roles(tz_sa_role)
+					assigned_timezone_role = tz_sa_role
+					print(f'added Timezone: South America role to {member.display_name}')
+				elif timezone_reaction.emoji == '3️⃣':
+					await member.add_roles(tz_we_a_role)
+					assigned_timezone_role = tz_we_a_role
+					print(f'added Timezone: Western Europe/Africa role to {member.display_name}')
+				elif timezone_reaction.emoji == '4️⃣':
+					await member.add_roles(tz_ee_me_role)
+					assigned_timezone_role = tz_ee_me_role
+					print(f'added Timezone: Eastern Europe/Middle East role to {member.display_name}')
+				elif timezone_reaction.emoji == '5️⃣':
+					await member.add_roles(tz_a_p_role)
+					assigned_timezone_role = tz_a_p_role
+					print(f'added Timezone: Asia/Pacific role to {member.display_name}')
+
 			# add signup info to postgresql
 			query = 'INSERT INTO signups (user_id, message_id, submission_time) VALUES (%s, 0, %s)'
 			q_args = [member.id, time.time()]
@@ -2822,7 +2889,8 @@ async def on_raw_reaction_add(payload):
 			print('signup info added to postgresql')
 
 			embed_title = 'Signup Confirmation'
-			embed_description = f'Thank you for signing up {member.mention}! If there are any issues with your entry you will be contacted.'
+			embed_description = f"""Thank you for signing up {member.mention}! If there are any issues with your entry you will be contacted.
+				\nYour listed timezone is `{assigned_timezone_role.name}`, if that is incorrect please contact an Admin."""
 			embed = await generate_embed('green', embed_title, embed_description)
 			try:
 				await dm_channel.send(embed=embed)
