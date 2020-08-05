@@ -1435,14 +1435,19 @@ async def signup(ctx):
 	embed_description = """This information will be shared with your match opponents to help you find times to complete your matches.
 		\n1️⃣ North America\n2️⃣ South America\n3️⃣ Western Europe/Africa\n4️⃣ Eastern Europe/Middle East\n5️⃣ Asia/Pacific"""
 	embed = await generate_embed('yellow', embed_title, embed_description)
-	await ctx.send(embed=embed)
+	timezone_selection_message = await ctx.send(embed=embed)
+	await timezone_selection_message.add_reaction('1️⃣')
+	await timezone_selection_message.add_reaction('2️⃣')
+	await timezone_selection_message.add_reaction('3️⃣')
+	await timezone_selection_message.add_reaction('4️⃣')
+	await timezone_selection_message.add_reaction('5️⃣')
 	print(f'sent {ctx.author.display_name} a timezone selection embed')
 
 	# asyncio.TimeoutError triggers if client.wait_for(reaction_add) times out
 	try:
 		# define reaction requirements (emoji reaction from specified user)
 		def check(r, u):
-			return r.message.id == TODO and u.id == ctx.author.id and r.emoji.name in ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣']
+			return r.message.id == timezone_selection_message.id and u.id == ctx.author.id and r.emoji.name in ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣']
 		# wait for a reaction
 		timezone_reaction, timezone_user = await client.wait_for('reaction_add', check=check, timeout=120)
 		print(f'signup timezone reaction received from {ctx.author.display_name}')
