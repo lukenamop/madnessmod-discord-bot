@@ -689,7 +689,7 @@ async def creatematchchannels(ctx, *args):
 					# build timezone embed for member2
 					dm_channel_2 = await member2.create_dm()
 					embed_description = f"""You have a new Meme Madness match in {match_channel.mention}!
-						\nYour listed timezone is `{member2_tz_role.name}` and your opponent {member1.mention}'s listed timezone is `{member1_tz_role.name}`.
+						\nYou are listed as being in `{member2_tz_role.name}` and your opponent {member1.mention} is in `{member1_tz_role.name}`.
 						\nPlease contact your opponent as soon as possible to find a 30 minute window you're both available to complete your match. Good luck!"""
 					embed = await generate_embed('yellow', embed_title, embed_description)
 					await dm_channel_2.send(embed=embed)
@@ -1542,7 +1542,7 @@ async def signup(ctx):
 
 	embed_title = 'Signup Confirmation'
 	embed_description = f"""Thank you for signing up {member.mention}! If there are any issues with your entry you will be contacted.
-		\nYour listed timezone is `{assigned_timezone_role.name}`, if that is incorrect please contact an Admin."""
+		\nYou are listed as being in `{assigned_timezone_role.name}`, if that is incorrect please contact an Admin."""
 	embed = await generate_embed('green', embed_title, embed_description)
 	await ctx.send(embed=embed)
 
@@ -2926,7 +2926,7 @@ async def on_raw_reaction_add(payload):
 
 			embed_title = 'Signup Confirmation'
 			embed_description = f"""Thank you for signing up {member.mention}! If there are any issues with your entry you will be contacted.
-				\nYour listed timezone is `{assigned_timezone_role.name}`, if that is incorrect please contact an Admin."""
+				\nYou are listed as being in `{assigned_timezone_role.name}`, if that is incorrect please contact an Admin."""
 			embed = await generate_embed('green', embed_title, embed_description)
 			try:
 				await dm_channel.send(embed=embed)
