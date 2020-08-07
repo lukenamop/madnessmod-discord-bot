@@ -297,26 +297,29 @@ async def end_polls():
 
 			# check to see if challonge info is in the channel topic
 			if match_channel.topic is not None:
-				tournament_shortcut = match_channel.topic.split('/')[0]
-				match_id = match_channel.topic.split('/')[1]
-				player1_id = match_channel.topic.split('/')[2]
-				player2_id = match_channel.topic.split('/')[3]
+				try:
+					tournament_shortcut = match_channel.topic.split('/')[0]
+					match_id = match_channel.topic.split('/')[1]
+					player1_id = match_channel.topic.split('/')[2]
+					player2_id = match_channel.topic.split('/')[3]
 
-				# find player names from challonge
-				player1_name = tourney_manager.show_participant(tournament_shortcut, player1_id)['name']
-				player2_name = tourney_manager.show_participant(tournament_shortcut, player2_id)['name']
+					# find player names from challonge
+					player1_name = tourney_manager.show_participant(tournament_shortcut, player1_id)['name']
+					player2_name = tourney_manager.show_participant(tournament_shortcut, player2_id)['name']
 
-				# figure out which challonge player won
-				if player1_name == winner.display_name:
-					# player1 wins, 1-0
-					scores_csv = '1-0'
-					tourney_manager.set_match_winner(tournament_shortcut, int(match_id), scores_csv, int(player1_id))
-					print(f'{player1_name} set as match winner in challonge')
-				elif player2_name == winner.display_name:
-					# player2 wins, 0-1
-					scores_csv = '0-1'
-					tourney_manager.set_match_winner(tournament_shortcut, int(match_id), scores_csv, int(player2_id))
-					print(f'{player2_name} set as match winner in challonge')
+					# figure out which challonge player won
+					if player1_name == winner.display_name:
+						# player1 wins, 1-0
+						scores_csv = '1-0'
+						tourney_manager.set_match_winner(tournament_shortcut, int(match_id), scores_csv, int(player1_id))
+						print(f'{player1_name} set as match winner in challonge')
+					elif player2_name == winner.display_name:
+						# player2 wins, 0-1
+						scores_csv = '0-1'
+						tourney_manager.set_match_winner(tournament_shortcut, int(match_id), scores_csv, int(player2_id))
+						print(f'{player2_name} set as match winner in challonge')
+				except:
+					print('error setting challonge winners')
 
 			# build winner dm
 			winner_channel = await winner.create_dm()
