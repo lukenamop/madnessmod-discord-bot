@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# manually install the pychallonge dependency (otherwise: -e git+https://github.com/russ-/pychallonge#egg=pychallonge)
+# to get around a Heroku limitation, manually install the pychallonge dependency (otherwise, add to requirements.txt: -e git+https://github.com/russ-/pychallonge#egg=pychallonge)
 import os
 os_stream = os.popen('cd pychallonge071420 && python setup.py install')
 # os_output = os_stream.read()
