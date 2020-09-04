@@ -2358,7 +2358,7 @@ async def submit(ctx):
 	return
 
 # 'template' command (DM only)
-@client.command(name='template')
+@client.command(name='template', aliases=['temp', 't'])
 @only_these_channels(allowed_in_dms=True)
 async def template(ctx):
 	# assign base member
