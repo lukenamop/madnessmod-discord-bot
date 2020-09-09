@@ -3572,7 +3572,7 @@ async def on_reaction_add(reaction, user):
 				q_args = [match_channel.id]
 				await execute_sql(query, q_args)
 				result = connect.crsr.fetchone()
-				template_message_id = result[0]
+				template_message_id = int(result[0])
 				u1 = message.guild.get_member(result[1])
 				u2 = message.guild.get_member(result[2])
 
@@ -3690,7 +3690,7 @@ async def on_reaction_add(reaction, user):
 				u1_channel = await member1.create_dm()
 				member2 = message.guild.get_member(result[1])
 				u2_channel = await member2.create_dm()
-				template_message_id = result[2]
+				template_message_id = int(result[2])
 
 				# get custom emojis from discord
 				check_emoji = client.get_emoji(637394596472815636)
