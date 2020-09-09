@@ -140,7 +140,7 @@ async def end_polls():
 
 			try:
 				# fetch the poll message
-				poll_message = await match_channel.fetch_message(poll_message_id)
+				poll_message = await match_channel.fetch_message_fast(poll_message_id)
 				# clear poll messages from the channel
 				await poll_message.delete()
 				if extension_embed_message is not None:
@@ -996,7 +996,7 @@ async def mymatches(ctx):
 	for match_channel in match_category.text_channels:
 		if match_channel.last_message_id is not None:
 			try:
-				last_message = await match_channel.fetch_message(match_channel.last_message_id)
+				last_message = await match_channel.fetch_message_fast(match_channel.last_message_id)
 			except:
 				print('ERROR - last_message_id was invalid')
 				last_message = None
@@ -1112,7 +1112,7 @@ async def remindparticipants(ctx):
 	for match_channel in match_category.text_channels:
 		if match_channel.last_message_id is not None:
 			try:
-				last_message = await match_channel.fetch_message(match_channel.last_message_id)
+				last_message = await match_channel.fetch_message_fast(match_channel.last_message_id)
 			except:
 				print('last_message_id was invalid')
 				last_message = None
@@ -1249,7 +1249,7 @@ async def remindparticipants(ctx):
 # 			template_message_id = result[0]
 # 			# error triggers if template/signup message does not exist
 # 			try:
-# 				template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
+# 				template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message_fast(template_message_id)
 # 				print(template_message.content)
 # 				await template_message.delete()
 # 				print('template message deleted')
@@ -2795,7 +2795,7 @@ async def on_raw_reaction_add(payload):
 		dm_channel = None
 	if channel is None:
 		channel = dm_channel
-	message = await channel.fetch_message(payload.message_id)
+	message = await channel.fetch_message_fast(payload.message_id)
 
 	# create variable for the reaction emoji
 	emoji = payload.emoji
@@ -3608,7 +3608,7 @@ async def on_reaction_add(reaction, user):
 				template_kapwing_link = match_template_entry['Kapwing Template Link']
 				template_author = message.guild.get_member(int(match_template_entry['Provider ID']))
 				try:
-					template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
+					template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message_fast(template_message_id)
 				except discord.errors.NotFound:
 					print('template message was not found')
 
@@ -3724,7 +3724,7 @@ async def on_reaction_add(reaction, user):
 				template_kapwing_link = match_template_entry['Kapwing Template Link']
 				template_author = message.guild.get_member(int(match_template_entry['Provider ID']))
 				try:
-					template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
+					template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message_fast(template_message_id)
 				except discord.errors.NotFound:
 					print('template message was not found')
 
