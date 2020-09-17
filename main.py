@@ -2362,6 +2362,7 @@ async def submit(ctx):
 			ta_dm_channel = template_author.dm_channel
 			if ta_dm_channel is None:
 				ta_dm_channel = await template_author.create_dm()
+			print(f'direct message channel opened with template author')
 
 			# send the template author a message
 			await ta_dm_channel.send(f'One of your templates was just used in {match_channel.mention}!')
