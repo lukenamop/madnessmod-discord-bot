@@ -2355,6 +2355,19 @@ async def submit(ctx):
 			await execute_sql(query, q_args)
 			connect.conn.commit()
 			print('unvoted_match_start_time set for valid participants')
+
+		# inform template author that their template was used in a match
+		try:
+			# open a direct message channel with the template author
+			ta_dm_channel = template_author.dm_channel
+			if ta_dm_channel is None:
+				ta_dm_channel = await template_author.create_dm()
+
+			# send the template author a message
+			await ta_dm_channel.send(f'One of your templates was just used in {match_channel.mention}!')
+			print(f'informed template author that their template was used in a match')
+		except:
+			pass
 	return
 
 # 'template' command (DM only)
