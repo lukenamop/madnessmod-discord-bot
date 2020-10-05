@@ -1,3 +1,4 @@
+discord.py
 freetype-py
 gspread
 iso8601==0.1.11
@@ -7,5 +8,4 @@ praw
 prawcore
 psycopg2
 requests
-discord.py -U
 git+https://github.com/takluyver/Unidecode.git
