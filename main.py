@@ -33,8 +33,11 @@ import tourney_manager
 from sql_functions import execute_sql
 from functions import create_match_frame_image, escape_underscores, format_lb_entry, generate_embed, time_string
 
+# declare discord bot intents
+client_intents = discord.Intents(guilds=True,members=True,bans=False,emojis=True,integrations=False,webhooks=False,invites=False,voice_states=False,presences=False,messages=True,guild_messages=True,dm_messages=True,reactions=True,guild_reactions=True,dm_reactions=True,typing=True,guild_typing=True,dm_typing=True)
+
 # intitialize discord client
-client = commands.Bot(command_prefix=config.CMD_PREFIX, case_insensitive=True)
+client = commands.Bot(command_prefix=config.CMD_PREFIX, case_insensitive=True, intents=client_intents)
 client.remove_command('help')
 
 ##### COMMAND ERROR HANDLING #####
