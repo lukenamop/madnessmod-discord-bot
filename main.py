@@ -3621,7 +3621,7 @@ async def on_reaction_add(reaction, user):
 					return
 
 				template_url = match_template_entry['Raw Template Link']
-				template_kapwing_link = match_template_entry['Kapwing Template Link']
+				# template_kapwing_link = match_template_entry['Kapwing Template Link']
 				template_author = message.guild.get_member(int(match_template_entry['Provider ID']))
 				try:
 					template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
@@ -3649,7 +3649,7 @@ async def on_reaction_add(reaction, user):
 
 					# update match start_time and template_url in database
 					query = 'UPDATE matches SET template_message_id = NULL, template_url = %s, template_author_id = %s, template_kapwing_link = %s WHERE channel_id = %s AND start_time IS NULL AND template_message_id IS NOT NULL'
-					q_args = [template_url, template_author.id, template_kapwing_link, match_channel.id]
+					q_args = [template_url, template_author.id, None, match_channel.id]
 					await execute_sql(query, q_args)
 					connect.conn.commit()
 					print('match template updated in database')
@@ -3737,7 +3737,7 @@ async def on_reaction_add(reaction, user):
 					return
 
 				template_url = match_template_entry['Raw Template Link']
-				template_kapwing_link = match_template_entry['Kapwing Template Link']
+				# template_kapwing_link = match_template_entry['Kapwing Template Link']
 				template_author = message.guild.get_member(int(match_template_entry['Provider ID']))
 				try:
 					template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
