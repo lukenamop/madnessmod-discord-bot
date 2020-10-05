@@ -1648,15 +1648,15 @@ async def splitmatch(ctx, member1:discord.Member=None, member2:discord.Member=No
 		# check to make sure there is at least one template in the list
 		if len(template_list) >= 1:
 			template_entry = random.choice(template_list)
-			if template_entry['Kapwing Template Link'] == '':
-				template_message_id = template_entry['Discord Message ID']
-				print(f'template has no kapwing link: {template_message_id}')
-			else:
-				template_kapwing_link = template_entry['Kapwing Template Link']
-				print(f'template found: {template_kapwing_link}')
-				if not (member1.id == int(template_entry['Provider ID']) or member2.id == int(template_entry['Provider ID'])):
-					print('valid template found')
-					break
+			# if template_entry['Kapwing Template Link'] == '':
+			# 	template_message_id = template_entry['Discord Message ID']
+			# 	print(f'template has no kapwing link: {template_message_id}')
+			# else:
+			# 	template_kapwing_link = template_entry['Kapwing Template Link']
+			# 	print(f'template found: {template_kapwing_link}')
+			if not (member1.id == int(template_entry['Provider ID']) or member2.id == int(template_entry['Provider ID'])):
+				print('valid template found')
+				break
 
 		# trigger this if there are no templates
 		else:
@@ -1755,15 +1755,15 @@ async def startmatch(ctx, member1:discord.Member=None, member2:discord.Member=No
 		# check to make sure there is at least one template in the list
 		if len(template_list) >= 1:
 			template_entry = random.choice(template_list)
-			if template_entry['Kapwing Template Link'] == '':
-				template_message_id = template_entry['Discord Message ID']
-				print(f'template has no kapwing link: {template_message_id}')
-			else:
-				template_kapwing_link = template_entry['Kapwing Template Link']
-				print(f'template found: {template_kapwing_link}')
-				if not (member1.id == int(template_entry['Provider ID']) or member2.id == int(template_entry['Provider ID'])):
-					print('valid template found')
-					break
+			# if template_entry['Kapwing Template Link'] == '':
+			# 	template_message_id = template_entry['Discord Message ID']
+			# 	print(f'template has no kapwing link: {template_message_id}')
+			# else:
+			# 	template_kapwing_link = template_entry['Kapwing Template Link']
+			# 	print(f'template found: {template_kapwing_link}')
+			if not (member1.id == int(template_entry['Provider ID']) or member2.id == int(template_entry['Provider ID'])):
+				print('valid template found')
+				break
 
 		# break if there are no templates
 		else:
@@ -1911,7 +1911,8 @@ async def startsolo(ctx, match_user:discord.Member=None):
 
 		# send notifying DMs to participant
 		embed_title = 'Match Started'
-		embed_description = f'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.**\n\nNot sure where to get started? [Use this link on any platform to quickly edit captions: {template_kapwing_link}]({template_kapwing_link})'
+		# embed_description = f'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.**\n\nNot sure where to get started? [Use this link on any platform to quickly edit captions: {template_kapwing_link}]({template_kapwing_link})'
+		embed_description = f'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.**'
 		embed = await generate_embed('yellow', embed_title, embed_description, attachment=template_url)
 		# discord.errors.Forbidden triggers if u_channel.send() is stopped
 		try:
@@ -3053,7 +3054,8 @@ async def on_raw_reaction_add(payload):
 
 				# send notifying DMs to participant
 				embed_title = 'Match Started'
-				embed_description = f'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.**\n\nNot sure where to get started? [Use this link on any platform to quickly edit captions: {template_kapwing_link}]({template_kapwing_link})'
+				# embed_description = f'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.**\n\nNot sure where to get started? [Use this link on any platform to quickly edit captions: {template_kapwing_link}]({template_kapwing_link})'
+				embed_description = f'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.**'
 				embed = await generate_embed('yellow', embed_title, embed_description, attachment=template_url)
 				# discord.errors.Forbidden triggers if u_channel.send() is stopped
 				try:
@@ -3762,7 +3764,8 @@ async def on_reaction_add(reaction, user):
 
 					# send notifying DMs to participants
 					embed_title = 'Match Started'
-					embed_description = f'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.**\n\nNot sure where to get started? [Use this link on any platform to quickly edit captions: {template_kapwing_link}]({template_kapwing_link})'
+					# embed_description = f'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.**\n\nNot sure where to get started? [Use this link on any platform to quickly edit captions: {template_kapwing_link}]({template_kapwing_link})'
+					embed_description = f'Your Meme Madness match has started! You have 30 minutes from this message to complete the match. **Please DM me the `.submit` command when you\'re ready to hand in your final meme.**'
 					embed = await generate_embed('yellow', embed_title, embed_description, attachment=template_url)
 					# discord.errors.Forbidden triggers if u_channel.send() is stopped
 					try:
