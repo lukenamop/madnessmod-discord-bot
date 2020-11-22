@@ -448,30 +448,30 @@ async def cancelmatch(ctx):
 	print('match channel notified of cancellation')
 	return
 
-# 'clearlbpoints' command (#mod-spam)
-@client.command(name='clearlbpoints')
-@commands.has_any_role('Admin')
-@only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
-async def clearlbpoints(ctx):
-	# only run in the specified channel
-	if ctx.channel.id != config.MOD_SPAM_CHAN_ID:
-		return
+# # 'clearlbpoints' command (#mod-spam)
+# @client.command(name='clearlbpoints')
+# @commands.has_any_role('Admin')
+# @only_these_channels(allowed_channel_ids=[config.MOD_SPAM_CHAN_ID])
+# async def clearlbpoints(ctx):
+# 	# only run in the specified channel
+# 	if ctx.channel.id != config.MOD_SPAM_CHAN_ID:
+# 		return
 
-	# check to be sure only admin user uses command
-	if ctx.author.id in config.ADMIN_IDS:
-		# reset participant lb_points to default in database
-		query = 'UPDATE participants SET lb_points = DEFAULT, vote_streak = DEFAULT, last_vote_streak_time = DEFAULT, unvoted_match_start_time = DEFAULT'
-		await execute_sql(query)
-		connect.conn.commit()
+# 	# check to be sure only admin user uses command
+# 	if ctx.author.id in config.ADMIN_IDS:
+# 		# reset participant lb_points to default in database
+# 		query = 'UPDATE participants SET lb_points = DEFAULT, vote_streak = DEFAULT, last_vote_streak_time = DEFAULT, unvoted_match_start_time = DEFAULT'
+# 		await execute_sql(query)
+# 		connect.conn.commit()
 
-		# build clearlbpoints confirmation embed
-		embed_title = 'Leaderboard Points Reset'
-		embed_description = 'All participants\' leaderboard points were cleared from the database.'
-		embed = await generate_embed('green', embed_title, embed_description)
-		await ctx.send(embed=embed)
-		print('leaderboard points cleared by duel-mods')
-		return
-	return
+# 		# build clearlbpoints confirmation embed
+# 		embed_title = 'Leaderboard Points Reset'
+# 		embed_description = 'All participants\' leaderboard points were cleared from the database.'
+# 		embed = await generate_embed('green', embed_title, embed_description)
+# 		await ctx.send(embed=embed)
+# 		print('leaderboard points cleared by duel-mods')
+# 		return
+# 	return
 
 # 'clearmatches' command (#mod-spam)
 @client.command(name='clearmatches')
