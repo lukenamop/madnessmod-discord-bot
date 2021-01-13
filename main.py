@@ -1688,7 +1688,7 @@ async def splitmatch(ctx, member1:discord.Member=None, member2:discord.Member=No
 	# build random template embed
 	embed_title = f'Template for #{ctx.channel.name}'
 	template_author = template_entry['Provider Username']
-	embed_description = f'Here\'s a random template! This template was submitted by {template_author}'
+	embed_description = f'Here\'s a random template! This template was submitted by `{template_author}`'
 	embed = await generate_embed('green', embed_title, embed_description, attachment=template_entry['Raw Template Link'])
 	nonce = f'spltemp{channel_id}'
 	spltemp_message = await duelmods_chan.send(embed=embed, nonce=nonce)
@@ -1803,7 +1803,7 @@ async def startmatch(ctx, member1:discord.Member=None, member2:discord.Member=No
 	# build random template embed
 	embed_title = f'Template for #{ctx.channel.name}'
 	template_author = template_entry['Provider Username']
-	embed_description = f'Here\'s a random template! This template was submitted by {template_author}'
+	embed_description = f'Here\'s a random template! This template was submitted by `{template_author}`'
 	embed = await generate_embed('green', embed_title, embed_description, attachment=template_entry['Raw Template Link'])
 	nonce = f'tempcon{channel_id}'
 	await duelmods_chan.send(ctx.author.mention)
@@ -2094,7 +2094,9 @@ async def submit(ctx):
 	cancelled = result[10]
 	try:
 		template_author = client.get_guild(config.MM_GUILD_ID).get_member(template_author_id)
+		template_author_mention = template_author.mention
 	except:
+		template_author_mention = '`user not found`'
 		print('template_author was not a valid member')
 
 	# check to see if the match has been cancelled
@@ -2247,7 +2249,7 @@ async def submit(ctx):
 		if template_url is not None:
 			try:
 				embed_title = 'Match Template'
-				embed_description = f'Thanks to {template_author.mention} for the template!'
+				embed_description = f'Thanks to {template_author_mention} for the template!'
 				embed = await generate_embed('green', embed_title, embed_description, template_url)
 				await match_channel.send(embed=embed)
 				print('template sent to split match channel')
@@ -3625,7 +3627,6 @@ async def on_reaction_add(reaction, user):
 
 				template_url = match_template_entry['Raw Template Link']
 				# template_kapwing_link = match_template_entry['Kapwing Template Link']
-				template_author = message.guild.get_member(int(match_template_entry['Provider ID']))
 				try:
 					template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
 				except discord.errors.NotFound:
@@ -3652,7 +3653,7 @@ async def on_reaction_add(reaction, user):
 
 					# update match start_time and template_url in database
 					query = 'UPDATE matches SET template_message_id = NULL, template_url = %s, template_author_id = %s, template_kapwing_link = %s WHERE channel_id = %s AND start_time IS NULL AND template_message_id IS NOT NULL'
-					q_args = [template_url, template_author.id, None, match_channel.id]
+					q_args = [template_url, int(match_template_entry['Provider ID']), None, match_channel.id]
 					await execute_sql(query, q_args)
 					connect.conn.commit()
 					print('match template updated in database')
@@ -3741,7 +3742,10 @@ async def on_reaction_add(reaction, user):
 
 				template_url = match_template_entry['Raw Template Link']
 				# template_kapwing_link = match_template_entry['Kapwing Template Link']
-				template_author = message.guild.get_member(int(match_template_entry['Provider ID']))
+				try:
+					template_author_mention = message.guild.get_member(int(match_template_entry['Provider ID'])).mention
+				except:
+					template_author_mention = '`user not found`'
 				try:
 					template_message = await client.get_channel(config.TEMPLATE_CHAN_ID).fetch_message(template_message_id)
 				except discord.errors.NotFound:
@@ -3795,7 +3799,7 @@ async def on_reaction_add(reaction, user):
 					await match_channel.last_message.delete()
 					# send template to match channel
 					embed_title = 'Match Started'
-					embed_description = f'{member1.mention} and {member2.mention} have 30 minutes to hand in their final memes. Good luck! (Thanks to {template_author.mention} for the template!)'
+					embed_description = f'{member1.mention} and {member2.mention} have 30 minutes to hand in their final memes. Good luck! (Thanks to {template_author_mention} for the template!)'
 					embed = await generate_embed('green', embed_title, embed_description, attachment=template_url)
 					await match_channel.send(embed=embed)
 					print(f'match started between {member1.display_name} and {member2.display_name}')
